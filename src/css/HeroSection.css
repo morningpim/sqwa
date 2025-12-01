@@ -1,0 +1,97 @@
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: 800px;
+  background-image: url("/hero-land.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.4); /* 0.4 = ลดความชัดจนเหลือประมาณ 60% */
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-title {
+  font-family: "Kaisei Decol", serif;  
+  font-size: 64px;
+  font-weight: 700;
+  color: #07840B;
+  line-height: 1.1;
+  -webkit-text-stroke: 2px #FFFFFF50;
+}
+
+.hero-subtitle {
+  font-family: "Kaisei Decol", serif;  
+  font-size: 40px;
+  margin-top: 6px;
+  font-weight: 500;
+  color: #000000;
+}
+/* SUBTITLE — ฟอนต์ TH */
+.hero-subtitle:lang(th) {
+  font-family: "Mitr", sans-serif;
+}
+
+.hero-buttons {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+}
+
+/* หนึ่ง item = วงกลม + label */
+.hero-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* วงกลมขาว */
+.hero-circle-btn {
+  height: 200px;
+  width: 200px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: 0.2s;
+  border: none;
+}
+
+.hero-circle-btn:hover {
+  transform: scale(1.05);
+}
+
+/* ไอคอนด้านใน */
+.hero-img-icon {
+  width: 170px;
+  height: 170px;
+  object-fit: contain;
+}
+
+/* ข้อความใต้ไอคอน */
+.hero-btn-label {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: "Mitr", sans-serif;
+  margin-top: 12px;
+  color: #000000;
+}
+

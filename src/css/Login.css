@@ -1,0 +1,196 @@
+/* พื้นหลังเทาอ่อน + จัด card ให้อยู่กลางจอ */
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f3f4f6;
+}
+
+/* กล่องใหญ่สองฝั่งเหมือนใน Figma */
+.login-card {
+  width: 100%;
+  max-width: 1200px;
+  height: 90vh;
+  background: #ffffff;
+  display: flex;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+/* ฝั่งซ้าย */
+.login-left {
+  flex: 1;
+  padding: 56px 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* โลโก้ SQW ด้านบนซ้าย */
+.login-logo {
+  font-family: "Kaisei Decol", serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 48px;
+}
+
+/* กล่องฟอร์ม */
+.login-form-block {
+  max-width: 400px;
+}
+
+/* หัว Log in */
+.login-title {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+
+/* Label */
+.login-label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* ช่อง input */
+.login-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+  margin-bottom: 18px;
+  box-sizing: border-box;
+}
+
+/* เฉพาะช่อง password เพิ่ม padding ขวา */
+.login-input-password {
+  padding-right: 48px;
+}
+
+/* Wrapper สำหรับปุ่มตา */
+.password-wrapper {
+  position: relative;
+}
+
+/* ปุ่มแสดงรหัส 👁 */
+.show-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #6b7280;
+  line-height: 1;
+  padding: 0;
+}
+
+/* แถว remember + forgot */
+.login-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.forgot {
+  font-size: 13px;
+  color: #2563eb;
+}
+
+/* ปุ่ม Google */
+.google-btn {
+  width: 100%;
+  height: 56px;
+  padding: 0 24px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+
+/* ไอคอน google */
+.google-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+/* เส้น OR */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 24px 0;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.divider span {
+  padding: 0 12px;
+}
+
+/* ปุ่ม Sign in */
+.signin-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 999px;
+  background: #16a34a;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ฝั่งขวา: รูปเต็ม */
+.login-right {
+  flex: 1;
+}
+
+.login-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .login-card {
+    flex-direction: column;
+    max-width: 480px;
+    height: auto;
+  }
+
+  .login-right {
+    height: 260px;
+  }
+}

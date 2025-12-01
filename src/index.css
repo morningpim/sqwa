@@ -1,0 +1,22 @@
+/* ให้ root เต็มจอ ไม่บีบกว้าง */
+#root {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* กัน body มี margin ขาวรอบนอก */
+body {
+  margin: 0;
+}
+
+/* ฟอนต์หลักที่ใช้กับภาษาอังกฤษ */
+body {
+  font-family: "Kaisei Decol", serif;
+}
+
+/* ฟอนต์เฉพาะภาษาไทย */
+:lang(th) {
+  font-family: "Mitr", sans-serif !important;
+}

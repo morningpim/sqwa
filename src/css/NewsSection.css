@@ -1,0 +1,131 @@
+.news-section {
+  background: #ffffff;
+  padding: 60px 0 80px;
+}
+
+.news-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.news-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.news-title {
+  font-family: "Mitr", sans-serif;
+  font-size: 50px;
+  font-weight: 700;
+  color: #034833;
+}
+
+.news-all-btn {
+  padding: 10px 28px;
+  border-radius: 999px;
+  border: none;
+  background: #83CD20;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.news-layout {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr;
+  gap: 32px;
+}
+
+.news-main {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.news-main-image {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+.news-main-content {
+  padding: 24px 28px 28px;
+}
+
+.news-side {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.news-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+}
+
+.news-card-image {
+  width: 40%;
+  min-width: 140px;
+  object-fit: cover;
+}
+
+.news-card-content {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.news-item-title {
+  font-family: "Mitr", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #034833;
+}
+
+.news-item-text {
+  font-family: "Mitr", sans-serif;
+  font-size: 16px;
+  color: #4b5563;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.news-readmore {
+  font-family: "Mitr", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #16a34a;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  align-self: flex-start;
+}
+
+@media (max-width: 960px) {
+  .news-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .news-card {
+    flex-direction: column;
+  }
+
+  .news-card-image {
+    width: 100%;
+  }
+}
