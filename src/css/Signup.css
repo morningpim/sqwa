@@ -1,0 +1,376 @@
+.signup-wrapper {
+  min-height: 100vh;
+  background: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 40px 16px;
+}
+
+.signup-logo {
+  position: absolute;
+  top: 16px;
+  left: 32px;
+  font-family: "Kaisei Decol", serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 1120px;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 3px solid #11863b;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.25);
+  padding: 72px 80px 40px;
+  box-sizing: border-box;
+}
+
+.signup-steps {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 2px solid #22c55e;
+  background: #ffffff;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.step-item.active .step-circle {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.step-label {
+  font-family: "Mitr", sans-serif;
+  font-size: 12px;
+  color: #374151;
+}
+
+.step-line {
+  width: 96px;
+  height: 2px;
+  background: #22c55e;
+  margin: 0 16px;
+}
+
+.signup-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+
+.signup-form {
+  width: 100%;
+}
+
+.signup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 32px;
+}
+
+.field label {
+  display: block;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.field input {
+  width: 100%;
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f8fbfd;
+  padding: 0 16px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.password-group {
+  width: 100%;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  background: #f8fbfd;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.password-input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  outline: none;
+  padding: 0 16px;
+  background: transparent;
+  font-size: 14px;
+}
+
+.password-toggle {
+  width: 46px;
+  height: 100%;
+  border: none;
+  border-left: 1px solid #e5e7eb;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.signup-divider {
+  margin: 32px 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.signup-divider::before,
+.signup-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.signup-divider span {
+  padding: 0 12px;
+}
+
+.signup-google-btn {
+  width: 100%;
+  height: 52px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+.signup-google-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* bottom buttons */
+.signup-actions {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+}
+
+.btn-outline,
+.btn-primary {
+  min-width: 160px;
+  height: 46px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-outline {
+  background: #ffffff;
+  border: 2px solid #16a34a;
+  color: #16a34a;
+}
+
+.btn-primary {
+  background: #16a34a;
+  border: 2px solid #16a34a;
+  color: #ffffff;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .signup-card {
+    padding: 56px 24px 32px;
+  }
+
+  .signup-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .signup-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-outline,
+  .btn-primary {
+    width: 100%;
+  }
+}
+
+.verify-section {
+  margin-top: 8px;
+  margin-bottom: 32px;
+}
+
+.verify-heading {
+  font-family: "Mitr", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 18px;
+}
+
+.verify-row {
+  display: flex;
+  gap: 96px;
+  margin-bottom: 36px;
+}
+
+.verify-row.single {
+  max-width: 320px;
+}
+
+.upload-box {
+  flex: 1;
+  max-width: 280px;
+  height: 180px;
+  border-radius: 18px;
+  border: 2px dashed #d1d5db;
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.upload-box:hover {
+  border-color: #16a34a;
+  box-shadow: 0 12px 30px rgba(22, 163, 74, 0.18);
+  transform: translateY(-2px);
+}
+
+.upload-label {
+  font-family: "Mitr", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.upload-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  border: 2px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #4b5563;
+}
+
+.upload-hint {
+  font-family: "Mitr", sans-serif;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+@media (max-width: 900px) {
+  .verify-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .verify-row.single {
+    max-width: 100%;
+  }
+
+  .upload-box {
+    max-width: 100%;
+  }
+}
+
+/* ===== Popup สมัครสมาชิกสำเร็จ ===== */
+
+.signup-success-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+
+.signup-success-modal {
+  width: 360px;
+  max-width: 90%;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 3px solid #16a34a;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+  padding: 28px 32px 24px;
+  text-align: center;
+}
+
+.success-title {
+  font-family: "Mitr", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.success-text {
+  font-family: "Mitr", sans-serif;
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.success-btn {
+  min-width: 120px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}

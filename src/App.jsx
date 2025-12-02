@@ -5,20 +5,25 @@ import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import NewsSection from "./components/NewsSection";
 import FooterSection from "./components/FooterSection";
+
+// ✔ นำเข้าหน้าเพจจาก /pages
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 export default function App() {
   const location = useLocation();
 
-  // ถ้าอยู่หน้า /login ให้ไม่แสดง Navbar
-  const hideNavbar = location.pathname === "/login";
+  // ซ่อน Navbar เมื่ออยู่หน้า Login หรือ Signup
+  const hideNavbar =
+    location.pathname === "/login" ||
+    location.pathname === "/signup";
 
   return (
     <div className="min-h-screen bg-white">
-      {/* แสดง Navbar เฉพาะหน้าที่ไม่ใช่ /login */}
+      {/* แสดง Navbar เฉพาะหน้าที่ไม่ใช่ /login และ /signup */}
       {!hideNavbar && <Navbar />}
 
-      {/* ถ้ามี navbar ให้เผื่อ padding-top 16px เหมือนเดิม */}
+      {/* ถ้ามี navbar ให้มี padding-top */}
       <main className={hideNavbar ? "" : "pt-16"}>
         <Routes>
           <Route
@@ -32,7 +37,11 @@ export default function App() {
             }
           />
 
+          {/* Login */}
           <Route path="/login" element={<Login />} />
+
+          {/* Signup */}
+          <Route path="/signup" element={<Signup />} />
         </Routes>
       </main>
     </div>

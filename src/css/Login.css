@@ -22,7 +22,7 @@
 /* ฝั่งซ้าย */
 .login-left {
   flex: 1;
-  padding: 56px 72px;
+  padding: 20px 72px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -34,19 +34,21 @@
   font-size: 40px;
   font-weight: 700;
   color: #065f46;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
 }
 
-/* กล่องฟอร์ม */
+/* กล่องฟอร์ม – จัดให้อยู่กลางฝั่งซ้าย */
 .login-form-block {
-  max-width: 400px;
+  max-width: 450px;     /* เดิม 400 */
+  margin: 0 auto;       /* ให้ฟอร์มเกาะกลางฝั่งซ้าย */
 }
 
 /* หัว Log in */
 .login-title {
   font-size: 40px;
   font-weight: 700;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
+  margin-top: -20px;
 }
 
 /* Label */
@@ -57,40 +59,52 @@
   display: block;
 }
 
-/* ช่อง input */
+/* ช่อง input ทั่วไป (เช่น E-mail) */
 .login-input {
   width: 100%;
   padding: 14px 16px;
   border-radius: 10px;
   border: 1px solid #d1d5db;
   font-size: 15px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   box-sizing: border-box;
 }
 
-/* เฉพาะช่อง password เพิ่ม padding ขวา */
-.login-input-password {
-  padding-right: 48px;
+/* ==== PASSWORD แบบใหม่ (กล่องฟ้า + ปุ่มตา) ==== */
+.password-group {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
 }
 
-/* Wrapper สำหรับปุ่มตา */
-.password-wrapper {
-  position: relative;
-}
-
-/* ปุ่มแสดงรหัส 👁 */
-.show-btn {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+.password-input {
+  flex: 1;
+  height: 100%;
   border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 18px;
+  outline: none;
+  padding: 0 16px;
+  background: transparent;
+  font-size: 15px;
+}
+
+.password-toggle {
+  width: 48px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-left: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #6b7280;
-  line-height: 1;
-  padding: 0;
+  cursor: pointer;
+  font-size: 16px;
 }
 
 /* แถว remember + forgot */
@@ -115,6 +129,20 @@
   color: #2563eb;
 }
 
+/* ปุ่มเข้าสู่ระบบ (เหนือ Google) */
+.login-btn-secondary {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: 1px solid #16a34a;
+  background: #ffffff;
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 16px;  /* เว้นห่างจากปุ่ม Google */
+}
+
 /* ปุ่ม Google */
 .google-btn {
   width: 100%;
@@ -128,7 +156,7 @@
   justify-content: center;
   gap: 10px;
   cursor: pointer;
-  margin-bottom: 24px;
+  margin-bottom: 20px;   /* เว้นก่อน OR ให้จังหวะเท่ากัน */
 }
 
 /* ไอคอน google */
@@ -143,7 +171,7 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 24px 0;
+  margin: 16px 0 20px;
   color: #9ca3af;
   font-size: 12px;
 }
@@ -159,7 +187,7 @@
   padding: 0 12px;
 }
 
-/* ปุ่ม Sign in */
+/* ปุ่ม Sign in ล่างสุด */
 .signin-btn {
   width: 100%;
   padding: 14px;
@@ -192,5 +220,221 @@
 
   .login-right {
     height: 260px;
+  }
+
+  .login-form-block {
+    max-width: 100%;
+  }
+}
+
+/* ==== ส่วน modal ต่าง ๆ (เหมือนเดิม) ==== */
+
+.signup-row {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #6b7280;
+  display: flex;
+  gap: 6px;
+}
+
+.signup-link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: #16a34a;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.user-type-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.user-type-modal {
+  width: 520px;
+  max-width: 90%;
+  background: #ffffff;
+  border-radius: 32px;
+  border: 3px solid #059669;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
+  padding: 32px 40px 36px;
+  text-align: center;
+}
+
+.user-type-title {
+  font-family: "Mitr", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.user-type-subtitle {
+  font-family: "Mitr", sans-serif;
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.user-type-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+}
+
+.user-type-card {
+  width: 170px;
+  padding: 18px 16px 16px;
+  border-radius: 24px;
+  border: 2px solid #a7f3d0;
+  background: #ecfdf5;
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.user-type-card:hover {
+  transform: translateY(-4px);
+  border-color: #10b981;
+  box-shadow: 0 16px 40px rgba(5, 150, 105, 0.45);
+}
+
+.user-type-icon-circle {
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  border: 2px solid #10b981;
+  background: #d1fae5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-type-icon-img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.user-type-label {
+  font-family: "Mitr", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.terms-modal {
+  width: 640px;
+  max-width: 90%;
+  max-height: 80vh;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+  padding: 24px 28px 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+.terms-title {
+  font-family: "Mitr", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.terms-subtitle {
+  font-family: "Mitr", sans-serif;
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 16px;
+}
+
+.terms-body {
+  font-family: "Mitr", sans-serif;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.7;
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-bottom: 18px;
+}
+
+.terms-body ul {
+  padding-left: 20px;
+  margin: 8px 0 12px;
+}
+
+.terms-body li {
+  margin-bottom: 4px;
+}
+
+.terms-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.terms-btn {
+  min-width: 130px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-family: "Mitr", sans-serif;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.terms-btn.secondary {
+  border-color: #d1d5db;
+  background: #ffffff;
+  color: #374151;
+}
+
+.terms-btn.primary {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: #16a34a;
+}
+
+@media (max-width: 640px) {
+  .terms-modal {
+    padding: 20px 18px 18px;
+  }
+
+  .terms-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .terms-btn {
+    width: 100%;
+  }
+
+  .user-type-modal {
+    padding: 24px 20px 28px;
+  }
+
+  .user-type-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .user-type-card {
+    width: 100%;
+    max-width: 260px;
   }
 }
