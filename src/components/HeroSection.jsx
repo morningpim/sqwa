@@ -1,7 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";  
 import "../css/HeroSection.css";
 
 export default function HeroSection() {
+
+  const navigate = useNavigate();   
+
   return (
     <section className="hero-section">
       <div className="hero-overlay" />
@@ -28,9 +32,12 @@ export default function HeroSection() {
 
           {/* ซื้อขายที่ดิน */}
           <div className="hero-item">
-            <button className="hero-circle-btn">
+            <button
+              className="hero-circle-btn"
+              onClick={() => navigate("/map")}   
+            >
               <img
-                src="/buy-land.png"   
+                src="/buy-land.png"
                 alt="ซื้อขายที่ดิน"
                 className="hero-img-icon"
               />
