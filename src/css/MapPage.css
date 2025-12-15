@@ -3,7 +3,7 @@
 .map-wrapper {
   width: 100%;
   min-height: 100vh;
-  background: #ffffff; /* พื้นหลังสีขาว */
+  background: var(--bg-main); /* พื้นหลังสีขาว */
   padding: 40px 20px;
 }
 
@@ -18,15 +18,15 @@
 .map-search-box input {
   flex: 1;
   height: 48px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-strong);
   padding: 0 16px;
 }
 
 .map-search-box button {
   width: 120px;
-  border-radius: 10px;
-  background: #16a34a;
+  border-radius: var(--r-sm);
+  background: var(--primary);
   color: white;
   border: none;
 }
@@ -42,7 +42,7 @@
   width: 220px;
   padding: 20px;
   background: #fff;
-  border-radius: 16px;
-  border: 2px solid #16a34a;
+  border-radius: var(--r-md);
+  border: 2px solid var(--primary);
   text-align: center;
 }

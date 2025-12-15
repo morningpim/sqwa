@@ -1,7 +1,7 @@
 .footer-section {
-  background: #004b33;
+  background: var(--primary-dark);
   padding: 40px 0 50px;
-  color: #ffffff;
+  color: var(--bg-main);
 }
 
 .footer-inner {

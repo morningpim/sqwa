@@ -1,5 +1,5 @@
 .news-section {
-  background: #ffffff;
+  background: var(--bg-main);
   padding: 60px 0 80px;
 }
 
@@ -20,15 +20,15 @@
   font-family: "Mitr", sans-serif;
   font-size: 50px;
   font-weight: 700;
-  color: #034833;
+  color: var(--primary-dark);
 }
 
 .news-all-btn {
   padding: 10px 28px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   border: none;
-  background: #83CD20;
-  color: #ffffff;
+  background: var(--accent);
+  color: var(--bg-main);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -41,9 +41,9 @@
 }
 
 .news-main {
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  background: var(--bg-main);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-soft);
   overflow: hidden;
   max-width: 900px;
   margin: 0 auto;
@@ -67,9 +67,9 @@
 }
 
 .news-card {
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  background: var(--bg-main);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-soft);
   overflow: hidden;
   display: flex;
   flex-direction: row;
@@ -93,13 +93,13 @@
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: #034833;
+  color: var(--primary-dark);
 }
 
 .news-item-text {
   font-family: "Mitr", sans-serif;
   font-size: 16px;
-  color: #4b5563;
+  color: var(--text-sub);
   line-height: 1.5;
   margin-bottom: 10px;
 }
@@ -108,7 +108,7 @@
   font-family: "Mitr", sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #16a34a;
+  color: var(--primary);
   background: none;
   border: none;
   cursor: pointer;

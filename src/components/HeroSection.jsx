@@ -34,7 +34,7 @@ export default function HeroSection() {
           <div className="hero-item">
             <button
               className="hero-circle-btn"
-              onClick={() => navigate("/map")}   
+              onClick={() => navigate("/map?mode=buy")}
             >
               <img
                 src="/buy-land.png"

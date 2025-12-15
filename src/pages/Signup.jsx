@@ -1,46 +1,80 @@
 // src/pages/Signup.jsx
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import "../css/Signup.css";
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOW_TYPES = ["image/jpeg", "image/png", "image/jpg"];
 
 export default function Signup() {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // อ่าน ?type=general หรือ ?type=investor
-  const query = new URLSearchParams(location.search);
-  const userType = query.get("type") || "general";
-
-  const [step, setStep] = useState(1); // step 1 หรือ 2
+  // ----- step / ui -----
+  const [step, setStep] = useState(1);
+  const [userType] = useState("general"); // ถ้าคุณดึงจาก query ก็เปลี่ยนได้
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // ✅ state สำหรับ popup สำเร็จ
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // ----- upload states -----
+  const [idFront, setIdFront] = useState(null);
+  const [idBack, setIdBack] = useState(null);
+  const [selfie, setSelfie] = useState(null);
+  const [errors, setErrors] = useState({});
+
+  // ----- basic handlers -----
   const handleNextStep = (e) => {
     e.preventDefault();
-    setStep(2); // ไปหน้าอัปโหลดรูป
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("ยืนยันสมัครประเภท:", userType);
-    // TODO: call API สมัครสมาชิก + อัปโหลดไฟล์
-
-    // ✅ แสดง popup สมัครสำเร็จ
-    setShowSuccess(true);
+    setStep(2);
   };
 
   const handleCancel = () => {
-    navigate("/login");
+    window.history.back();
   };
 
-  // กดปุ่ม "ยืนยัน" บน popup แล้วพากลับไปหน้าแรก (หรือหน้า login ก็ได้)
   const handleSuccessConfirm = () => {
     setShowSuccess(false);
-    navigate("/login");
+    window.location.href = "/login";
+  };
+
+  // ----- upload logic + validation -----
+  const handleFileChange = (file, type) => {
+    if (!file) return;
+
+    // type validation
+    if (!ALLOW_TYPES.includes(file.type)) {
+      setErrors((prev) => ({ ...prev, [type]: "รองรับเฉพาะไฟล์ JPG / PNG" }));
+      return;
+    }
+
+    // size validation
+    if (file.size > MAX_FILE_SIZE) {
+      setErrors((prev) => ({ ...prev, [type]: "ขนาดไฟล์ต้องไม่เกิน 5MB" }));
+      return;
+    }
+
+    // clear error
+    setErrors((prev) => ({ ...prev, [type]: null }));
+
+    // save file
+    if (type === "front") setIdFront(file);
+    if (type === "back") setIdBack(file);
+    if (type === "selfie") setSelfie(file);
+  };
+
+  const canSubmit =
+    idFront && idBack && selfie && !errors.front && !errors.back && !errors.selfie;
+
+  const handleSubmit = () => {
+    if (!canSubmit) {
+      alert("กรุณาอัปโหลดเอกสารให้ครบถ้วน");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("id_front", idFront);
+    formData.append("id_back", idBack);
+    formData.append("selfie", selfie);
+
+    console.log("READY TO SUBMIT", formData);
+    // TODO: ส่ง API จริง (Django/Firebase)
   };
 
   return (
@@ -61,16 +95,18 @@ export default function Signup() {
           </div>
         </div>
 
-        {/* STEP 1 : ฟอร์มข้อมูลทั่วไป */}
+        {/* STEP 1 */}
         {step === 1 ? (
           <>
             <h1 className="signup-title">Sign in</h1>
+
             <form className="signup-form" onSubmit={handleNextStep}>
               <div className="signup-grid">
                 <div className="field">
                   <label>Name</label>
                   <input type="text" />
                 </div>
+
                 <div className="field">
                   <label>Lastname</label>
                   <input type="text" />
@@ -80,6 +116,7 @@ export default function Signup() {
                   <label>Phone</label>
                   <input type="tel" />
                 </div>
+
                 <div className="field">
                   <label>E-mail</label>
                   <input type="email" />
@@ -89,18 +126,19 @@ export default function Signup() {
                   <label>Line id</label>
                   <input type="text" />
                 </div>
+
                 <div className="field">
                   <label>Address</label>
                   <input type="text" />
                 </div>
 
-                {/* ฟิลด์พิเศษของ investor */}
                 {userType === "investor" && (
                   <>
                     <div className="field">
                       <label>Company / Investor Name</label>
                       <input type="text" />
                     </div>
+
                     <div className="field">
                       <label>Expected Investment Budget</label>
                       <input type="number" />
@@ -119,6 +157,7 @@ export default function Signup() {
                       type="button"
                       className="password-toggle"
                       onClick={() => setShowPassword((p) => !p)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? (
                         <AiOutlineEyeInvisible size={18} />
@@ -140,6 +179,9 @@ export default function Signup() {
                       type="button"
                       className="password-toggle"
                       onClick={() => setShowConfirmPassword((p) => !p)}
+                      aria-label={
+                        showConfirmPassword ? "Hide confirm password" : "Show confirm password"
+                      }
                     >
                       {showConfirmPassword ? (
                         <AiOutlineEyeInvisible size={18} />
@@ -165,11 +207,7 @@ export default function Signup() {
               </button>
 
               <div className="signup-actions">
-                <button
-                  type="button"
-                  className="btn-outline"
-                  onClick={handleCancel}
-                >
+                <button type="button" className="btn-outline" onClick={handleCancel}>
                   ยกเลิก
                 </button>
                 <button type="submit" className="btn-primary">
@@ -179,77 +217,126 @@ export default function Signup() {
             </form>
           </>
         ) : (
-          /* STEP 2 : อัปโหลดรูปบัตร ปชช. */
-          <form className="signup-form" onSubmit={handleSubmit}>
+          /* STEP 2 */
+          <form
+            className="signup-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+              if (canSubmit) setShowSuccess(true);
+            }}
+          >
             <div className="verify-section">
-              <p className="verify-heading">ถ่ายรูปบัตรปชช.</p>
+              <p className="verify-heading">ถ่ายรูปบัตรประชาชน</p>
 
               <div className="verify-row">
-                <div className="upload-box">
-                  <span className="upload-label">ด้านหน้า</span>
-                  <div className="upload-icon">📷</div>
-                  <span className="upload-hint">กดเพื่ออัปโหลดรูปด้านหน้า</span>
-                </div>
+                {/* FRONT */}
+                <label className="upload-box">
+                  {idFront ? (
+                    <img
+                      src={URL.createObjectURL(idFront)}
+                      alt="ID Front"
+                      className="upload-preview"
+                    />
+                  ) : (
+                    <>
+                      <div className="upload-icon">📷</div>
+                      <span className="upload-label">ด้านหน้า</span>
+                      <span className="upload-hint">กดเพื่ออัปโหลด</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e.target.files[0], "front")}
+                  />
+                </label>
 
-                <div className="upload-box">
-                  <span className="upload-label">ด้านหลัง</span>
-                  <div className="upload-icon">📷</div>
-                  <span className="upload-hint">กดเพื่ออัปโหลดรูปด้านหลัง</span>
-                </div>
+                {/* BACK */}
+                <label className="upload-box">
+                  {idBack ? (
+                    <img
+                      src={URL.createObjectURL(idBack)}
+                      alt="ID Back"
+                      className="upload-preview"
+                    />
+                  ) : (
+                    <>
+                      <div className="upload-icon">📷</div>
+                      <span className="upload-label">ด้านหลัง</span>
+                      <span className="upload-hint">กดเพื่ออัปโหลด</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e.target.files[0], "back")}
+                  />
+                </label>
               </div>
 
-              <p className="verify-heading">
-                ถ่ายหน้าตัวเองพร้อมกับรูปบัตรปชช.
-              </p>
+              <p className="verify-heading">ถ่ายหน้าตัวเองพร้อมกับบัตรประชาชน</p>
 
               <div className="verify-row single">
-                <div className="upload-box">
-                  <div className="upload-icon">📷</div>
-                  <span className="upload-hint">
-                    กดเพื่ออัปโหลดรูปหน้าตัวเองคู่กับบัตรปชช.
-                  </span>
-                </div>
+                <label className="upload-box">
+                  {selfie ? (
+                    <img
+                      src={URL.createObjectURL(selfie)}
+                      alt="Selfie"
+                      className="upload-preview"
+                    />
+                  ) : (
+                    <>
+                      <div className="upload-icon">🤳</div>
+                      <span className="upload-hint">กดเพื่ออัปโหลดรูปหน้าตัวเอง</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e.target.files[0], "selfie")}
+                  />
+                </label>
               </div>
+
+              {/* errors */}
+              {Object.values(errors).map(
+                (err, i) =>
+                  err && (
+                    <div key={i} className="upload-error">
+                      {err}
+                    </div>
+                  )
+              )}
             </div>
 
             <div className="signup-actions">
-              <button
-                type="button"
-                className="btn-outline"
-                onClick={() => setStep(1)}
-              >
-                ยกเลิก
+              <button type="button" className="btn-outline" onClick={() => setStep(1)}>
+                ย้อนกลับ
               </button>
-              <button type="submit" className="btn-primary">
-                sign in
+              <button type="submit" className="btn-primary" disabled={!canSubmit}>
+                ยืนยันข้อมูล
               </button>
             </div>
           </form>
         )}
       </div>
 
-      {/* ✅ POPUP สมัครสมาชิกเสร็จสิ้น */}
+      {/* POPUP สมัครสมาชิกเสร็จสิ้น */}
       {showSuccess && (
-        <div
-          className="signup-success-backdrop"
-          onClick={handleSuccessConfirm}
-        >
-          <div
-            className="signup-success-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="signup-success-backdrop" onClick={handleSuccessConfirm}>
+          <div className="signup-success-modal" onClick={(e) => e.stopPropagation()}>
             <h2 className="success-title">สมัครสมาชิกเสร็จสิ้น</h2>
             <p className="success-text">
               ท่านได้สมัครสมาชิกเสร็จสิ้นแล้ว
               <br />
-              ระบบจะพาไปหน้าแรกของระบบ
+              ระบบจะพาไปหน้าเข้าสู่ระบบ
             </p>
 
-            <button
-              type="button"
-              className="success-btn"
-              onClick={handleSuccessConfirm}
-            >
+            <button type="button" className="success-btn" onClick={handleSuccessConfirm}>
               ยืนยัน
             </button>
           </div>

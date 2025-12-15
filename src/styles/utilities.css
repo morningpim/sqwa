@@ -1,0 +1,8 @@
+/* small helpers */
+.text-sub { color: var(--text-sub); }
+.text-muted { color: var(--text-muted); }
+.text-primary { color: var(--primary-dark); }
+.bg-soft { background: var(--bg-soft); }
+.shadow-soft { box-shadow: var(--shadow-soft); }
+.round-md { border-radius: var(--r-md); }
+.round-lg { border-radius: var(--r-lg); }

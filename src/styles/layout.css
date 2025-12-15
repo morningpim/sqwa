@@ -1,0 +1,51 @@
+.ds-container{
+  max-width:1200px;
+  margin:0 auto;
+  padding:0 var(--s-8);
+}
+
+.ds-section{ padding: var(--s-16) 0; }
+
+.ds-row{ display:flex; align-items:center; }
+.ds-col{ display:flex; flex-direction:column; }
+
+.ds-gap-2{ gap: var(--s-2); }
+.ds-gap-4{ gap: var(--s-4); }
+.ds-gap-6{ gap: var(--s-6); }
+.ds-gap-8{ gap: var(--s-8); }
+
+.ds-center{ display:flex; align-items:center; justify-content:center; }
+.ds-between{ display:flex; align-items:center; justify-content:space-between; }
+
+.ds-grid-2{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: var(--s-6);
+}
+
+.auth-wrapper {
+  min-height: 100vh;
+  background: var(--bg-soft);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-2xl) var(--space-md);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 1200px;
+  background: var(--bg-main);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  padding:
+    var(--auth-card-padding-top)
+    var(--auth-card-padding-x)
+    var(--auth-card-padding-bottom);
+}
+
+@media (max-width: 960px){
+  .ds-container{ padding:0 var(--s-4); }
+  .ds-section{ padding: var(--s-12) 0; }
+  .ds-grid-2{ grid-template-columns: 1fr; }
+}

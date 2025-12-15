@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -9,7 +8,6 @@ export default function Login() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
 
-  // toggle password
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
@@ -23,13 +21,16 @@ export default function Login() {
   const handleAcceptTerms = () => {
     console.log("ยอมรับข้อกำหนด — สมัครประเภท:", selectedType);
     setShowTermsModal(false);
-
-    // ไปหน้า signup พร้อมประเภทผู้ใช้งาน
     navigate(`/signup?type=${selectedType || "general"}`);
   };
 
   const handleCancelTerms = () => {
     setShowTermsModal(false);
+  };
+
+  const handleForgotPassword = () => {
+    // TODO: เปลี่ยนเป็น route จริง เช่น navigate("/forgot-password")
+    alert("ยังไม่ได้ทำหน้า Forgot Password");
   };
 
   return (
@@ -57,6 +58,7 @@ export default function Login() {
               <button
                 className="password-toggle"
                 type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword((prev) => !prev)}
               >
                 {showPassword ? (
@@ -72,16 +74,21 @@ export default function Login() {
               <label className="remember">
                 <input type="checkbox" /> <span>Remember me</span>
               </label>
-              <a href="#" className="forgot">
+
+              <button
+                type="button"
+                className="forgot"
+                onClick={handleForgotPassword}
+              >
                 Forgot Password?
-              </a>
+              </button>
             </div>
 
-            {/* ✅ ปุ่มเข้าสู่ระบบ — อยู่เหนือ Google */}
+            {/* ปุ่มเข้าสู่ระบบ — ตัวอย่างให้ไปหน้า Map/Dashboard */}
             <button
               className="login-btn-secondary"
               type="button"
-              onClick={() => navigate("/login")} // ตอนนี้แค่เด้งอยู่หน้าเดิมไว้ก่อน
+              onClick={() => navigate("/map")}
             >
               เข้าสู่ระบบ
             </button>
@@ -128,10 +135,7 @@ export default function Login() {
           className="user-type-backdrop"
           onClick={() => setShowUserTypeModal(false)}
         >
-          <div
-            className="user-type-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="user-type-modal" onClick={(e) => e.stopPropagation()}>
             <h2 className="user-type-title">เลือกประเภทการใช้งาน</h2>
             <p className="user-type-subtitle">
               กรุณาเลือกให้ตรงกับคุณมากที่สุด

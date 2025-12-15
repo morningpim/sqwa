@@ -1,0 +1,52 @@
+.map-container {
+  position: relative;
+}
+
+/* กล่องปุ่มลอย */
+.map-controls {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 50;
+}
+
+.control-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--bg-main, #fff);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.control-btn:hover {
+  filter: brightness(0.98);
+}
+
+.p2p-btn {
+  position: relative;
+}
+
+.p2p-btn.has-new {
+  border-color: var(--primary, #16a34a);
+}
+
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 11px;
+  display: grid;
+  place-items: center;
+}

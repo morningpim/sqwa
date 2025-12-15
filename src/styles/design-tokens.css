@@ -1,0 +1,63 @@
+:root {
+  /* Brand */
+  --primary: #16a34a;
+  --primary-dark: #065f46;
+  --primary-700: #11863b;
+  --primary-light: #a7f3d0;
+
+  /* Accent */
+  --accent: #83CD20;
+
+  /* Text */
+  --text-main: #111827;
+  --text-sub: #4b5563;
+  --text-muted: #6b7280;
+
+  /* Background & Surface */
+  --bg-main: #ffffff;
+  --bg-soft: #f3f4f6;
+  --surface: #ffffff;
+  --surface-soft: #f8fbfd;
+
+  /* Border */
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+
+  /* Radius */
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  /* Shadow */
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.18);
+
+  /* Fonts */
+  --font-en: "Kaisei Decol", serif;
+  --font-th: "Mitr", sans-serif;
+
+  /* Spacing scale */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Auth layout (Login/Signup shared) */
+  --auth-card-max: 1200px;
+  --auth-card-minh: 680px;
+  --auth-pad-x: 72px;
+  --auth-pad-y: 48px;
+  --auth-pad-top: 56px;
+  --auth-pad-bottom: 40px;
+  --auth-input-h: 50px;
+  --auth-toggle-w: 48px;
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 4px rgba(22, 163, 74, 0.15);
+}

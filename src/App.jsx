@@ -18,7 +18,7 @@ export default function App() {
     location.pathname === "/signup";
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       {!hideNavbar && <Navbar />}
 
       <main className={hideNavbar ? "" : "pt-16"}>
@@ -37,7 +37,6 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* ⭐ เสริมหน้า Map UI */}
           <Route path="/map" element={<MapPage />} />
         </Routes>
       </main>
