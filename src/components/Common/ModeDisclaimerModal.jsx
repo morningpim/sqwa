@@ -1,5 +1,5 @@
 import React from "react";
-import "../../css/ModeDisclaimerModal.css";
+import "../../css/ModeDisclaimerModal.css"; 
 
 export default function ModeDisclaimerModal({ onClose }) {
   return (

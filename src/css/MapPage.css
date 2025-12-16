@@ -1,48 +1,270 @@
 /* src/css/MapPage.css */
+:root {
+  /* ปรับให้เท่าความสูง navbar จริง */
+  --nav-h: 72px;
+  --gap: 14px;
 
-.map-wrapper {
+  --brand: #118e44;
+  --panel-bg: #fff;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+}
+
+/* ✅ หน้ากลางของ map เต็มจอเสมอ */
+.map-shell {
+  position: relative;
   width: 100%;
-  min-height: 100vh;
-  background: var(--bg-main); /* พื้นหลังสีขาว */
-  padding: 40px 20px;
+  height: 100vh;              /* ✅ ตัดปัญหาแถบขาวล่าง */
+  overflow: hidden;
+  background: #f3f4f6;
 }
 
-.map-search-box {
-  width: 100%;
-  max-width: 700px;
-  margin: 0 auto 40px;
-  display: flex;
-  gap: 10px;
+/* ✅ แผนที่เริ่ม “ใต้ navbar” เสมอ */
+.map-canvas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--nav-h) - 10px);
+  bottom: 0;
 }
 
-.map-search-box input {
-  flex: 1;
-  height: 48px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border-strong);
-  padding: 0 16px;
-}
+/* ===== Top search (ไม่ทับ nav) ===== */
+.map-topbar{
+  position: absolute;
+  top: calc(var(--nav-h) + var(--gap));
+  left: 0;
+  right: 0;
+  z-index: 60;
 
-.map-search-box button {
-  width: 120px;
-  border-radius: var(--r-sm);
-  background: var(--primary);
-  color: white;
-  border: none;
-}
-
-.map-stats-row {
   display: flex;
   justify-content: center;
-  gap: 24px;
-  margin-top: 20px;
+
+  /* กันปุ่ม/แผนที่ด้านหลังคลิกไม่ได้เฉพาะแถบนี้ */
+  pointer-events: none;
 }
 
-.stat-box {
-  width: 220px;
-  padding: 20px;
+.map-search{
+  pointer-events: auto;
+
+  width: min(560px, calc(100% - 28px)); /* ปรับ 560 ให้เล็ก/ใหญ่ได้ */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: var(--panel-bg, #fff);
+  border: 2px solid var(--primary, #16a34a);
+  border-radius: 999px;
+  padding: 8px 10px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.12);
+}
+
+.map-search-input{
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  padding: 8px 10px;
+  background: transparent;
+}
+
+.map-search-btn{
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  background: var(--primary, #16a34a);
+  color: #fff;
+}
+
+
+/* ===== Right toolbar (ไม่ทับ nav) ===== */
+.map-right-stack {
+  position: absolute;
+  top: calc(var(--nav-h) + var(--gap));
+  right: var(--gap);
+  z-index: 70;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+/* dropdown layer */
+.map-layer-menu {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.map-layer-trigger {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 2px solid var(--brand);
+  background: var(--panel-bg);
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
+.map-layer-dropdown {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  background: #2b2b2b;
+  border-radius: 10px;
+  padding: 8px;
+  min-width: 140px;
+  box-shadow: var(--shadow);
+}
+
+.map-layer-item {
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
   background: #fff;
-  border-radius: var(--r-md);
-  border: 2px solid var(--primary);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.map-layer-item:last-child {
+  margin-bottom: 0;
+}
+.map-layer-item.active {
+  background: var(--brand);
+  color: #fff;
+}
+
+/* icon stack */
+.map-fab-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.map-fab {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: var(--brand);
+  color: #fff;
+  box-shadow: var(--shadow);
+  font-size: 18px;
+}
+
+/* zoom box */
+.map-zoom-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.map-zoom-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  border: 2px solid var(--brand);
+  background: var(--panel-bg);
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: var(--shadow);
+}
+
+/* MY location row */
+.map-locate-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.map-my-location {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 2px solid var(--brand);
+  background: var(--panel-bg);
+  cursor: pointer;
+  font-weight: 800;
+  color: var(--brand);
+  box-shadow: var(--shadow);
+}
+.map-target-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 2px solid var(--brand);
+  background: var(--panel-bg);
+  cursor: pointer;
+  font-size: 18px;
+  box-shadow: var(--shadow);
+}
+
+/* ===== Dashboard stats ===== */
+.map-stats {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 60;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(160px, 240px));
+  gap: 14px;
+}
+
+.stat-card {
+  background: var(--panel-bg);
+  border: 2px solid var(--brand);
+  border-radius: 18px;
+  padding: 14px 16px;
   text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.stat-title {
+  font-size: 13px;
+  font-weight: 800;
+}
+.stat-value {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--brand);
+  margin-top: 6px;
+}
+.stat-unit {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #444;
+}
+
+/* responsive */
+@media (max-width: 920px) {
+  .map-stats {
+    grid-template-columns: repeat(3, minmax(120px, 1fr));
+    width: calc(100% - 28px);
+  }
+}
+
+#map .ldmap_layerselector,
+#map .ldmap-layerselector,
+#map .ldmap_layer_control,
+#map .ldmap-layer-control,
+#map .longdo-layerselector,
+#map .longdo-layer-control,
+#map [class*="layerselector"],
+#map [class*="LayerSelector"] {
+  display: none !important;
 }

@@ -5,10 +5,11 @@ import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import NewsSection from "./components/NewsSection";
 import FooterSection from "./components/FooterSection";
+import MapPage from "./components/map/MapPage";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import MapPage from "./pages/MapPage";   // ⭐ เพิ่มหน้า Map
+
 
 export default function App() {
   const location = useLocation();
