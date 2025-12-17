@@ -6,6 +6,7 @@ import "../../css/MapPage.css";
 
 import SearchBar from "./SearchBar";
 import MapControls from "./MapControls";
+import FilterPanel from "../Panels/FilterPanel";
 
 export default function MapPage() {
   const [params] = useSearchParams();
@@ -21,10 +22,24 @@ export default function MapPage() {
   const mapRef = useRef(null);
   const mapInitedRef = useRef(false);
 
-  // ====== UI state ======
+  // ====== UI state (controls) ======
   const [openLayerMenu, setOpenLayerMenu] = useState(false);
   const [isSatellite, setIsSatellite] = useState(false);
   const [isTraffic, setIsTraffic] = useState(false);
+
+  // ====== filter (LEFT PANEL) ======
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterValue, setFilterValue] = useState({
+    province: "",
+    district: "",
+    type: "",
+    priceMin: "",
+    priceMax: "",
+    frontMin: "",
+    frontMax: "",
+    depthMin: "",
+    depthMax: "",
+  });
 
   const modeLabel = useMemo(() => {
     if (mode === "buy") return "โหมดซื้อขายที่ดิน";
@@ -54,7 +69,6 @@ export default function MapPage() {
   };
 
   const hideLongdoUi = (map) => {
-    // บางเวอร์ชันชื่อ Ui ไม่เหมือนกัน → เลยไล่เช็คทีละตัว
     const ui = map?.Ui;
     if (!ui) return;
 
@@ -65,23 +79,19 @@ export default function MapPage() {
       } catch {}
     };
 
-    // ตัวที่เจอบ่อย
     [
       "Scale",
       "Zoombar",
       "DPad",
       "Toolbar",
-      "LayerSelector",     // ✅ ตัวนี้มักเป็น “แผนที่/ดาวเทียม/จราจร”
-      "Layers",            // บางเวอร์ชันใช้ชื่อนี้
+      "LayerSelector",
+      "Layers",
       "FullScreen",
       "Geolocation",
       "Crosshair",
       "Compass",
       "MiniMap",
     ].forEach(tryHide);
-
-    // 🔎 ถ้าจะดูว่ามี Ui อะไรบ้าง ให้ปลดคอมเมนต์บรรทัดนี้
-    // console.log("Longdo Ui keys:", Object.keys(ui), ui);
   };
 
   // ====== layer handlers ======
@@ -90,10 +100,7 @@ export default function MapPage() {
     if (!map || !window.longdo) return;
 
     try {
-      // ลองหลายชื่อ เพราะแต่ละโปรเจกต์/เวอร์ชัน Layers ไม่เหมือนกัน
-      const normal =
-        pickFirstLayer("NORMAL", "ROAD", "BASE") || window.longdo.Layers?.NORMAL;
-
+      const normal = pickFirstLayer("NORMAL", "ROAD", "BASE") || window.longdo.Layers?.NORMAL;
       const satellite =
         pickFirstLayer("SATELLITE", "SAT", "GOOGLE_SATELLITE", "HYBRID", "SATELLITE_HYBRID") ||
         window.longdo.Layers?.SATELLITE;
@@ -104,13 +111,10 @@ export default function MapPage() {
         return;
       }
 
-      // setBase เป็นหลัก
       if (map.Layers && typeof map.Layers.setBase === "function") {
         map.Layers.setBase(baseLayer);
         return;
       }
-
-      // fallback เผื่อบางเวอร์ชัน
       if (map.Layers && typeof map.Layers.set === "function") {
         map.Layers.set(baseLayer);
       }
@@ -124,9 +128,7 @@ export default function MapPage() {
     if (!map || !window.longdo) return;
 
     try {
-      const traffic =
-        pickFirstLayer("TRAFFIC", "TRAFFIC_LAYER") || window.longdo.Layers?.TRAFFIC;
-
+      const traffic = pickFirstLayer("TRAFFIC", "TRAFFIC_LAYER") || window.longdo.Layers?.TRAFFIC;
       if (!traffic) {
         console.warn("No traffic layer found. longdo.Layers =", window.longdo?.Layers);
         return;
@@ -200,14 +202,11 @@ export default function MapPage() {
     const map = new window.longdo.Map({ placeholder: el });
     mapRef.current = map;
 
-    // ✅ ปิด UI longdo ที่ติดมากับแผนที่ (รวมแท็บด้านบนขวา)
     hideLongdoUi(map);
 
-    // default view
     map.location({ lon: 100.5018, lat: 13.7563 }, true);
     map.zoom(10, true);
 
-    // apply ตาม state เริ่มต้น
     applySatellite(isSatellite);
     applyTraffic(isTraffic);
   };
@@ -251,9 +250,31 @@ export default function MapPage() {
     <div className="map-shell">
       <div id="map" className="map-canvas" />
 
-      <SearchBar
-        placeholder="Search Here"
-        onSearch={(q) => console.log("search:", q)}
+      <SearchBar placeholder="Search Here" onSearch={(q) => console.log("search:", q)} />
+
+      {/* ✅ FilterPanel อยู่ใน MapPage -> ย้ายซ้ายได้จริง */}
+      <FilterPanel
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        value={filterValue}
+        onChange={setFilterValue}
+        onApply={() => {
+          setFilterOpen(false);
+          console.log("apply filter", filterValue);
+        }}
+        onClear={() =>
+          setFilterValue({
+            province: "",
+            district: "",
+            type: "",
+            priceMin: "",
+            priceMax: "",
+            frontMin: "",
+            frontMax: "",
+            depthMin: "",
+            depthMax: "",
+          })
+        }
       />
 
       <MapControls
@@ -266,8 +287,7 @@ export default function MapPage() {
         onZoomIn={zoomIn}
         onZoomOut={zoomOut}
         onLocate={locateMe}
-        onOpenLayers={() => alert("TODO: Layers panel")}
-        onOpenFilter={() => alert("TODO: Filter panel")}
+        onOpenFilter={() => setFilterOpen(true)}   // ✅ เปิด filter ซ้าย
         onOpenChat={() => alert("TODO: Chat")}
         onOpenTools={() => alert("TODO: Tools")}
       />

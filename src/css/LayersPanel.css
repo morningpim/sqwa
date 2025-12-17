@@ -1,0 +1,112 @@
+/* ให้ชิดขวาแบบในภาพ (ตอนนี้อยู่ซ้าย) */
+.layers-panel{
+  position: absolute;
+  top: calc(var(--nav-h) + var(--gap));
+  right: 335px;   
+  left: auto;
+  z-index: 90;
+
+  width: min(560px, calc(100% - 28px));
+  display: grid;
+  gap: 12px;
+}
+
+
+.layers-card{
+  background: #f3f3f3;             
+  border: 2px solid #bdbdbd;        
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.18);
+  padding: 12px;
+}
+
+.layers-header{
+  display: flex;
+  align-items: center;              /* ให้อยู่ระนาบเดียวกัน */
+  justify-content: space-between;   /* title ซ้าย / ✕ ขวา */
+  margin-bottom: 10px;
+}
+
+.layers-title{
+  font-size: 20px;
+  font-weight: 900;
+}
+
+/* ปุ่มปิดให้เหมือนวงกลมในมุมขวา */
+.layers-close{
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 2px solid #111;
+  background: #fff;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* tabs ให้เป็น pill แบบในภาพ */
+.layers-tabs{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.layers-tab{
+  border: 1px solid #cfcfcf;
+  border-radius: 12px;
+  padding: 10px 10px;
+  cursor: pointer;
+  background: #e8e8e8;
+  font-weight: 800;
+  white-space: pre-line; /* คุณมีอยู่แล้ว */
+  text-align: center;
+}
+
+.layers-tab.active{
+  background: var(--brand);
+  color: #fff;
+  border-color: rgba(0,0,0,.12);
+  box-shadow: 0 4px 10px rgba(0,0,0,.18);
+}
+
+/* แถว slider ให้เหมือนตัวอย่าง */
+.layers-row{
+  display: grid;
+  grid-template-columns: 90px 1fr 60px;
+  align-items: center;
+  gap: 10px;
+}
+
+.layers-value{
+  text-align: right;
+  font-weight: 900;
+}
+
+/* checkbox ให้เป็นช่องเขียวเล็กๆ เหมือนตัวอย่าง */
+.layers-checkmark{
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: #d9d9d9;
+  border: 1px solid #bdbdbd;
+  display: inline-block;
+}
+
+.layers-check input:checked + .layers-checkmark{
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+/* ใส่ span เช็คบ็อกซ์ให้คลิกง่าย */
+.layers-check{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.layers-check input{
+  display: none;
+}

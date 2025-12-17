@@ -1,52 +1,51 @@
 // src/components/map/MapControls.jsx
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import LayersPanel from "../Panels/LayersPanel";
 
-/**
- * MapControls
- * - แถบเครื่องมือด้านขวา (dropdown layer + fab + zoom + my location)
- * - MapPage เป็นคนถือ state/logic จริง (longdo mapRef) แล้วส่ง props ลงมา
- */
 export default function MapControls({
-  // layer menu state
   openLayerMenu,
   setOpenLayerMenu,
 
-  // layer toggles
   isSatellite,
   setIsSatellite,
   isTraffic,
   setIsTraffic,
 
-  // actions
   onZoomIn,
   onZoomOut,
   onLocate,
 
-  // fab actions (ทำเป็น placeholder / เปิด panel)
-  onOpenLayers,
   onOpenFilter,
   onOpenChat,
   onOpenTools,
 }) {
   const rootRef = useRef(null);
 
-  // ปิด dropdown เมื่อคลิกนอกกล่อง
+  // ===== Layers panel state =====
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [plan, setPlan] = useState("bkk2556");
+  const [baseOpacity, setBaseOpacity] = useState(1);
+  const [redRoadEnabled, setRedRoadEnabled] = useState(true);
+  const [redRoadOpacity, setRedRoadOpacity] = useState(0.45);
+
+  // ===== close dropdown when click outside =====
   useEffect(() => {
     const onDocClick = (e) => {
       if (!openLayerMenu) return;
       if (!rootRef.current) return;
-      if (!rootRef.current.contains(e.target)) setOpenLayerMenu(false);
+      if (!rootRef.current.contains(e.target)) {
+        setOpenLayerMenu(false);
+      }
     };
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [openLayerMenu, setOpenLayerMenu]);
 
-  // label บนปุ่ม dropdown
   const layerLabel = isSatellite ? "ดาวเทียม" : "แผนที่";
 
   return (
     <div className="map-right-stack" ref={rootRef}>
-      {/* Dropdown เลือกชั้นแผนที่ */}
+      {/* ===== Map / Satellite dropdown ===== */}
       <div className="map-layer-menu">
         <button
           className="map-layer-trigger"
@@ -67,7 +66,6 @@ export default function MapControls({
                 setIsSatellite(false);
                 setOpenLayerMenu(false);
               }}
-              role="menuitem"
             >
               แผนที่
             </button>
@@ -79,7 +77,6 @@ export default function MapControls({
                 setIsSatellite(true);
                 setOpenLayerMenu(false);
               }}
-              role="menuitem"
             >
               ดาวเทียม
             </button>
@@ -91,7 +88,6 @@ export default function MapControls({
                 setIsTraffic((v) => !v);
                 setOpenLayerMenu(false);
               }}
-              role="menuitem"
             >
               จราจร
             </button>
@@ -99,54 +95,109 @@ export default function MapControls({
         )}
       </div>
 
-      {/* ปุ่มวงกลม (fab stack) */}
+      {/* ===== Layers Panel ===== */}
+      <LayersPanel
+        open={layersOpen}
+        onClose={() => setLayersOpen(false)}
+        plan={plan}
+        setPlan={setPlan}
+        baseOpacity={baseOpacity}
+        setBaseOpacity={setBaseOpacity}
+        redRoadEnabled={redRoadEnabled}
+        setRedRoadEnabled={setRedRoadEnabled}
+        redRoadOpacity={redRoadOpacity}
+        setRedRoadOpacity={setRedRoadOpacity}
+      />
+
+      {/* ===== FAB buttons ===== */}
       <div className="map-fab-stack">
         <button
           className="map-fab"
           type="button"
           title="Layers"
-          onClick={onOpenLayers}
+          onClick={() => {
+            setLayersOpen(true);
+            setOpenLayerMenu(false);
+          }}
         >
-          🗺️
+          <span className="material-icon" aria-hidden="true">
+            layers
+          </span>
         </button>
+
         <button
           className="map-fab"
           type="button"
           title="Filter"
-          onClick={onOpenFilter}
+          onClick={() => {
+            onOpenFilter?.();
+            setOpenLayerMenu(false);
+          }}
         >
-          🔻
+          <span className="material-icon" aria-hidden="true">
+            filter_alt
+          </span>
         </button>
-        <button className="map-fab" type="button" title="Chat" onClick={onOpenChat}>
-          💬
+
+        <button
+          className="map-fab"
+          type="button"
+          title="Chat"
+          onClick={onOpenChat}
+        >
+          <span className="material-icon" aria-hidden="true">
+            chat
+          </span>
         </button>
+
         <button
           className="map-fab"
           type="button"
           title="Tools"
           onClick={onOpenTools}
         >
-          🛠️
+          <span className="material-icon" aria-hidden="true">
+            build
+          </span>
         </button>
       </div>
 
-      {/* Zoom box */}
+      {/* ===== Zoom controls ===== */}
       <div className="map-zoom-box">
-        <button className="map-zoom-btn" type="button" onClick={onZoomIn} title="Zoom in">
-          ＋
+        <button
+          className="map-zoom-btn"
+          type="button"
+          title="Zoom in"
+          onClick={onZoomIn}
+        >
+          <span className="material-icon" aria-hidden="true">
+            add
+          </span>
         </button>
-        <button className="map-zoom-btn" type="button" onClick={onZoomOut} title="Zoom out">
-          －
+
+        <button
+          className="map-zoom-btn"
+          type="button"
+          title="Zoom out"
+          onClick={onZoomOut}
+        >
+          <span className="material-icon" aria-hidden="true">
+            remove
+          </span>
         </button>
       </div>
 
-      {/* My location */}
+      {/* ===== Locate ===== */}
       <div className="map-locate-row">
-        <button className="map-my-location" type="button" onClick={onLocate}>
-          MY location
-        </button>
-        <button className="map-target-btn" type="button" onClick={onLocate} title="Locate">
-          ⌖
+        <button
+          className="map-target-btn"
+          type="button"
+          title="Locate"
+          onClick={onLocate}
+        >
+          <span className="material-icon" aria-hidden="true">
+            my_location
+          </span>
         </button>
       </div>
     </div>

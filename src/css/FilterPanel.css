@@ -1,0 +1,94 @@
+.filter-panel{
+  position: absolute;
+  top: calc(var(--nav-h) + var(--gap) + 64px);
+  left: 18px;          /* ✅ ชิดซ้าย */
+  right: auto;         /* ✅ ปิดค่าเดิม */
+  z-index: 95;
+  width: 280px;
+}
+
+.filter-card{
+  background: #fff;
+  border: 2px solid rgba(17,142,68,.35);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 12px;
+}
+
+.filter-header{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.filter-title{
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.filter-close{
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 2px solid #111;
+  background: #fff;
+  cursor: pointer;
+  line-height: 1;
+  font-size: 18px;
+}
+
+.filter-body{
+  display: grid;
+  gap: 10px;
+}
+
+.filter-label{
+  display:block;
+  font-weight: 800;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.filter-select,
+.filter-input{
+  width: 100%;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 0 10px;
+  outline: none;
+  font-size: 13px;
+  background: #fff;
+}
+
+.filter-grid-2{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.filter-actions{
+  display:flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.filter-btn{
+  flex: 1;
+  height: 34px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+  border: 2px solid var(--brand);
+}
+
+.filter-btn.primary{
+  background: var(--brand);
+  color: #fff;
+}
+
+.filter-btn.ghost{
+  background: #fff;
+  color: var(--brand);
+}

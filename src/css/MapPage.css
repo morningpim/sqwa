@@ -1,6 +1,5 @@
 /* src/css/MapPage.css */
 :root {
-  /* ปรับให้เท่าความสูง navbar จริง */
   --nav-h: 72px;
   --gap: 14px;
 
@@ -22,7 +21,7 @@ body {
 .map-shell {
   position: relative;
   width: 100%;
-  height: 100vh;              /* ✅ ตัดปัญหาแถบขาวล่าง */
+  height: 100vh;
   overflow: hidden;
   background: #f3f4f6;
 }
@@ -36,25 +35,21 @@ body {
   bottom: 0;
 }
 
-/* ===== Top search (ไม่ทับ nav) ===== */
+/* ===== Top search ===== */
 .map-topbar{
   position: absolute;
   top: calc(var(--nav-h) + var(--gap));
   left: 0;
   right: 0;
   z-index: 60;
-
   display: flex;
   justify-content: center;
-
-  /* กันปุ่ม/แผนที่ด้านหลังคลิกไม่ได้เฉพาะแถบนี้ */
   pointer-events: none;
 }
 
 .map-search{
   pointer-events: auto;
-
-  width: min(560px, calc(100% - 28px)); /* ปรับ 560 ให้เล็ก/ใหญ่ได้ */
+  width: min(560px, calc(100% - 28px));
   display: flex;
   align-items: center;
   gap: 10px;
@@ -85,8 +80,7 @@ body {
   color: #fff;
 }
 
-
-/* ===== Right toolbar (ไม่ทับ nav) ===== */
+/* ===== Right toolbar ===== */
 .map-right-stack {
   position: absolute;
   top: calc(var(--nav-h) + var(--gap));
@@ -140,9 +134,7 @@ body {
   margin-bottom: 8px;
   font-weight: 700;
 }
-.map-layer-item:last-child {
-  margin-bottom: 0;
-}
+.map-layer-item:last-child { margin-bottom: 0; }
 .map-layer-item.active {
   background: var(--brand);
   color: #fff;
@@ -150,28 +142,36 @@ body {
 
 /* icon stack */
 .map-fab-stack {
+  margin-top: 64px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
+
 .map-fab {
   width: 46px;
   height: 46px;
   border-radius: 999px;
-  border: none;
-  cursor: pointer;
+
   background: var(--brand);
-  color: #fff;
+  border: none;
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
   box-shadow: var(--shadow);
-  font-size: 18px;
+  color: #fff; /* ✅ ทำให้ Material icon เป็นสีขาว */
 }
 
 /* zoom box */
 .map-zoom-box {
+  margin-top: 152px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
+
 .map-zoom-btn {
   width: 46px;
   height: 46px;
@@ -179,9 +179,9 @@ body {
   border: 2px solid var(--brand);
   background: var(--panel-bg);
   cursor: pointer;
-  font-size: 18px;
   font-weight: 800;
   box-shadow: var(--shadow);
+  color: var(--brand); /* ✅ Material icon เป็นสีเขียว */
 }
 
 /* MY location row */
@@ -190,6 +190,7 @@ body {
   align-items: center;
   gap: 10px;
 }
+
 .map-my-location {
   height: 40px;
   padding: 0 14px;
@@ -201,6 +202,7 @@ body {
   color: var(--brand);
   box-shadow: var(--shadow);
 }
+
 .map-target-btn {
   width: 46px;
   height: 46px;
@@ -208,8 +210,8 @@ body {
   border: 2px solid var(--brand);
   background: var(--panel-bg);
   cursor: pointer;
-  font-size: 18px;
   box-shadow: var(--shadow);
+  color: var(--brand); /* ✅ icon สีเขียวบนพื้นขาว */
 }
 
 /* ===== Dashboard stats ===== */
@@ -234,21 +236,14 @@ body {
   box-shadow: var(--shadow);
 }
 
-.stat-title {
-  font-size: 13px;
-  font-weight: 800;
-}
+.stat-title { font-size: 13px; font-weight: 800; }
 .stat-value {
   font-size: 28px;
   font-weight: 900;
   color: var(--brand);
   margin-top: 6px;
 }
-.stat-unit {
-  margin-top: 4px;
-  font-size: 12px;
-  color: #444;
-}
+.stat-unit { margin-top: 4px; font-size: 12px; color: #444; }
 
 /* responsive */
 @media (max-width: 920px) {
@@ -258,6 +253,7 @@ body {
   }
 }
 
+/* hide longdo layer selector ui */
 #map .ldmap_layerselector,
 #map .ldmap-layerselector,
 #map .ldmap_layer_control,
