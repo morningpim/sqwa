@@ -1,0 +1,111 @@
+.land-detail-panel {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.18);
+  padding: 14px 14px 12px;
+  width: 360px;
+  max-width: calc(100vw - 24px);
+}
+
+.land-detail-panel.is-side{
+  position: fixed;
+  right: 18px;
+  top: 120px;
+  z-index: 100000;
+}
+
+.land-detail-panel.is-popup{
+  /* position/left/top ถูกส่งมาจาก inline style ใน JSX */
+}
+
+.land-detail-arrow{
+  position: absolute;
+  left: 22px;
+  bottom: -10px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  transform: rotate(45deg);
+  box-shadow: 6px 6px 18px rgba(0,0,0,.08);
+  border-radius: 4px;
+}
+
+.land-detail-close{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.land-detail-date{ font-size: 12px; opacity: .65; }
+.land-detail-title{ font-size: 18px; font-weight: 900; margin-top: 4px; }
+
+.land-detail-grid{
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.land-detail-card{
+  background: #f7f8fb;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.muted{ opacity: .65; font-size: 12px; }
+.strong{ font-weight: 900; }
+
+.land-detail-divider{
+  height: 1px;
+  background: rgba(0,0,0,.08);
+  margin: 12px 0;
+}
+
+.land-detail-price-row{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+}
+
+.land-detail-total{
+  margin-top: 6px;
+  font-size: 34px;
+  font-weight: 1000;
+}
+
+.land-detail-contact{ margin-top: 10px; }
+
+.land-detail-actions{
+  margin-top: 12px;
+  display:flex;
+  gap: 10px;
+}
+
+.btn-primary{
+  flex:1;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 900;
+  cursor:pointer;
+}
+
+.btn-outline{
+  flex:1;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.14);
+  background: #fff;
+  font-weight: 900;
+  cursor:pointer;
+}

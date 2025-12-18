@@ -1,5 +1,4 @@
-// src/components/map/MapPage.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import ModeDisclaimerModal from "../Common/ModeDisclaimerModal";
 import "../../css/MapPage.css";
@@ -8,26 +7,34 @@ import SearchBar from "./SearchBar";
 import MapControls from "./MapControls";
 import FilterPanel from "../Panels/FilterPanel";
 
+import { useLongdoMap } from "./hooks/useLongdoMap";
+import LandMarkers from "./LandMarkers";
+import LandDetailPanel from "./LandDetailPanel";
+import { mockLands } from "./lands/mockLands";
+
+function parseLatLng(text) {
+  // รองรับ "13.7563, 100.5018" หรือ "13.7563 100.5018"
+  if (!text) return null;
+  const s = String(text).trim().replace(/\s+/g, " ");
+  const m = s.match(/^(-?\d+(\.\d+)?)[,\s]+(-?\d+(\.\d+)?)$/);
+  if (!m) return null;
+  const lat = Number(m[1]);
+  const lon = Number(m[3]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  return { lat, lon };
+}
+
 export default function MapPage() {
   const [params] = useSearchParams();
-  const mode = params.get("mode") || "buy"; // buy | sell
+  const mode = params.get("mode") || "buy";
 
-  // ====== modal ======
   const storageKey = `sqw_disclaimer_ok_${mode}`;
-  const [showDisclaimer, setShowDisclaimer] = useState(() => {
-    return sessionStorage.getItem(storageKey) !== "1";
-  });
+  const [showDisclaimer, setShowDisclaimer] = useState(() => sessionStorage.getItem(storageKey) !== "1");
 
-  // ====== longdo map ======
-  const mapRef = useRef(null);
-  const mapInitedRef = useRef(false);
-
-  // ====== UI state (controls) ======
   const [openLayerMenu, setOpenLayerMenu] = useState(false);
   const [isSatellite, setIsSatellite] = useState(false);
   const [isTraffic, setIsTraffic] = useState(false);
 
-  // ====== filter (LEFT PANEL) ======
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterValue, setFilterValue] = useState({
     province: "",
@@ -47,179 +54,26 @@ export default function MapPage() {
     return "";
   }, [mode]);
 
-  // ====== utils ======
-  const waitForLongdo = () =>
-    new Promise((resolve, reject) => {
-      const start = Date.now();
-      const tick = () => {
-        if (window.longdo && window.longdo.Map) return resolve(true);
-        if (Date.now() - start > 12000) return reject(new Error("Longdo script not loaded"));
-        requestAnimationFrame(tick);
-      };
-      tick();
-    });
+  // ✅ lands
+  const [lands] = useState(mockLands);
 
-  const pickFirstLayer = (...keys) => {
-    const L = window.longdo?.Layers;
-    if (!L) return null;
-    for (const k of keys) {
-      if (L[k]) return L[k];
-    }
-    return null;
-  };
+  // ✅ selection + popup position
+  const [selectedLand, setSelectedLand] = useState(null);
+  const [popupPos, setPopupPos] = useState(null);
+  const selectedLocRef = useRef(null);
 
-  const hideLongdoUi = (map) => {
-    const ui = map?.Ui;
-    if (!ui) return;
+  // ✅ longdo hook
+  const { mapRef, initMap, applySatellite, applyTraffic, zoomIn, zoomOut, locateMe } = useLongdoMap({
+    isSatellite,
+    isTraffic,
+  });
 
-    const tryHide = (key) => {
-      try {
-        const obj = ui[key];
-        if (obj && typeof obj.visible === "function") obj.visible(false);
-      } catch {}
-    };
-
-    [
-      "Scale",
-      "Zoombar",
-      "DPad",
-      "Toolbar",
-      "LayerSelector",
-      "Layers",
-      "FullScreen",
-      "Geolocation",
-      "Crosshair",
-      "Compass",
-      "MiniMap",
-    ].forEach(tryHide);
-  };
-
-  // ====== layer handlers ======
-  const applySatellite = (on) => {
-    const map = mapRef.current;
-    if (!map || !window.longdo) return;
-
-    try {
-      const normal = pickFirstLayer("NORMAL", "ROAD", "BASE") || window.longdo.Layers?.NORMAL;
-      const satellite =
-        pickFirstLayer("SATELLITE", "SAT", "GOOGLE_SATELLITE", "HYBRID", "SATELLITE_HYBRID") ||
-        window.longdo.Layers?.SATELLITE;
-
-      const baseLayer = on ? satellite : normal;
-      if (!baseLayer) {
-        console.warn("No base layer found. longdo.Layers =", window.longdo?.Layers);
-        return;
-      }
-
-      if (map.Layers && typeof map.Layers.setBase === "function") {
-        map.Layers.setBase(baseLayer);
-        return;
-      }
-      if (map.Layers && typeof map.Layers.set === "function") {
-        map.Layers.set(baseLayer);
-      }
-    } catch (e) {
-      console.warn("applySatellite failed:", e);
-    }
-  };
-
-  const applyTraffic = (on) => {
-    const map = mapRef.current;
-    if (!map || !window.longdo) return;
-
-    try {
-      const traffic = pickFirstLayer("TRAFFIC", "TRAFFIC_LAYER") || window.longdo.Layers?.TRAFFIC;
-      if (!traffic) {
-        console.warn("No traffic layer found. longdo.Layers =", window.longdo?.Layers);
-        return;
-      }
-
-      if (on) map.Layers?.add?.(traffic);
-      else map.Layers?.remove?.(traffic);
-    } catch (e) {
-      console.warn("applyTraffic failed:", e);
-    }
-  };
-
-  // ====== map actions ======
-  const zoomIn = () => {
-    const map = mapRef.current;
-    if (!map) return;
-    try {
-      map.zoom(map.zoom() + 1, true);
-    } catch {}
-  };
-
-  const zoomOut = () => {
-    const map = mapRef.current;
-    if (!map) return;
-    try {
-      map.zoom(map.zoom() - 1, true);
-    } catch {}
-  };
-
-  const locateMe = () => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (!navigator.geolocation) {
-      alert("เบราว์เซอร์ไม่รองรับ Geolocation");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-
-        try {
-          map.location({ lon: longitude, lat: latitude }, true);
-          map.zoom(14, true);
-
-          try {
-            const mk = new window.longdo.Marker(
-              { lon: longitude, lat: latitude },
-              { title: "My location" }
-            );
-            map.Overlays?.add?.(mk);
-          } catch {}
-        } catch {}
-      },
-      () => alert("ไม่สามารถเข้าถึงตำแหน่งได้ (ตรวจ permission)"),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
-
-  // ====== init map ======
-  const initMap = async () => {
-    if (mapInitedRef.current) return;
-    mapInitedRef.current = true;
-
-    await waitForLongdo();
-
-    const el = document.getElementById("map");
-    if (!el) throw new Error("Missing #map");
-
-    const map = new window.longdo.Map({ placeholder: el });
-    mapRef.current = map;
-
-    hideLongdoUi(map);
-
-    map.location({ lon: 100.5018, lat: 13.7563 }, true);
-    map.zoom(10, true);
-
-    applySatellite(isSatellite);
-    applyTraffic(isTraffic);
-  };
-
-  // ====== effects ======
   useEffect(() => {
     const ok = sessionStorage.getItem(`sqw_disclaimer_ok_${mode}`) === "1";
     setShowDisclaimer(!ok);
   }, [mode]);
 
-  useEffect(() => {
-    setOpenLayerMenu(false);
-  }, [mode, showDisclaimer]);
+  useEffect(() => setOpenLayerMenu(false), [mode, showDisclaimer]);
 
   useEffect(() => {
     if (!showDisclaimer) {
@@ -228,105 +82,111 @@ export default function MapPage() {
         alert("โหลดแผนที่ไม่สำเร็จ: กรุณาเช็ค script longdo");
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showDisclaimer]);
+  }, [showDisclaimer, initMap]);
 
   useEffect(() => {
     if (mapRef.current) applySatellite(isSatellite);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSatellite]);
+  }, [isSatellite, applySatellite, mapRef]);
 
   useEffect(() => {
     if (mapRef.current) applyTraffic(isTraffic);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTraffic]);
+  }, [isTraffic, applyTraffic, mapRef]);
 
   const handleAcceptDisclaimer = () => {
     sessionStorage.setItem(storageKey, "1");
     setShowDisclaimer(false);
   };
 
-  const parseLatLng = (text) => {
-    const t = (text || "").trim();
-
-    // รองรับ: "13.7563,100.5018" หรือ "13.7563 100.5018"
-    const m = t.match(/(-?\d+(\.\d+)?)\s*[,\s]\s*(-?\d+(\.\d+)?)/);
-    if (!m) return null;
-
-    const lat = Number(m[1]);
-    const lon = Number(m[3]);
-    if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
-    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
-
-    return { lat, lon };
-  };
-
-  const geocodePlace = async (q) => {
-    const url =
-      "https://nominatim.openstreetmap.org/search?" +
-      new URLSearchParams({
-        q,
-        format: "json",
-        limit: "1",
-        countrycodes: "th",
-      });
-
-    const res = await fetch(url, {
-      headers: {
-        "Accept-Language": "th",
-        "Accept": "application/json",
-      },
-    });
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      console.error("GEOCODE FAIL:", res.status, text);
-      throw new Error(`Geocode HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) return null;
-
-    return {
-      lat: Number(data[0].lat),
-      lon: Number(data[0].lon),
-    };
-  };
-
-  const handleSearch = async (q) => {
+  const updatePopupFromLoc = useCallback((loc) => {
     const map = mapRef.current;
-    if (!map) return;
-
-    const text = (q || "").trim();
-
-    // ✅ ปล่อยว่าง = ใช้ GPS
-    if (!text) {
-      locateMe();
-      return;
-    }
-
-    // ✅ พิกัด lat,lng
-    const ll = parseLatLng(text);
-    if (ll) {
-      map.location({ lon: ll.lon, lat: ll.lat }, true);
-      map.zoom(14, true);
-      return;
-    }
-
-    // ✅ ชื่อสถานที่ -> geocode
+    if (!map || !loc) return;
     try {
-      const hit = await geocodePlace(text);
-      if (!hit) {
-        alert("ไม่พบสถานที่ ลองพิมพ์ใหม่อีกครั้ง");
+      const pt = map.locationToPoint(loc);
+      if (pt && typeof pt.x === "number" && typeof pt.y === "number") {
+        setPopupPos({ x: pt.x, y: pt.y });
+      }
+    } catch (e) {}
+  }, [mapRef]);
+
+  // ✅ คลิกหมุด/โพลิกอน -> เลือก land + เก็บ loc เพื่อผูก popup
+  const handleSelectLand = useCallback(
+    (land, loc) => {
+      setSelectedLand(land || null);
+
+      if (loc) {
+        selectedLocRef.current = loc;
+        updatePopupFromLoc(loc);
+      } else {
+        // ถ้าไม่ได้ส่ง loc มา ลอง fallback จาก land.location
+        const fallback = land?.location;
+        if (fallback?.lon != null && fallback?.lat != null) {
+          selectedLocRef.current = fallback;
+          updatePopupFromLoc(fallback);
+        }
+      }
+    },
+    [updatePopupFromLoc]
+  );
+
+  // ✅ เวลาเลื่อน/ซูมแผนที่ -> ขยับ popup ตามหมุด
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !window.longdo) return;
+
+    const L = window.longdo;
+
+    const recalc = () => {
+      if (selectedLocRef.current) updatePopupFromLoc(selectedLocRef.current);
+    };
+
+    try {
+      L.Event.bind(map, "move", recalc);
+      L.Event.bind(map, "zoom", recalc);
+    } catch (e) {
+      // ถ้า event name ไม่ตรงก็ยังอย่างน้อยจะคำนวณตอนคลิกได้
+    }
+
+    return () => {
+      try {
+        L.Event.unbind(map, "move", recalc);
+        L.Event.unbind(map, "zoom", recalc);
+      } catch (e) {}
+    };
+  }, [mapRef, updatePopupFromLoc]);
+
+  // ✅ Search: รองรับ lat,lng และ search ชื่อสถานที่ด้วย longdo.Util.locationSearch
+  const handleSearch = useCallback(
+    async (q) => {
+      const map = mapRef.current;
+      if (!map) return;
+
+      const text = (q ?? "").trim();
+      if (!text) return;
+
+      // 1) lat,lng
+      const ll = parseLatLng(text);
+      if (ll) {
+        map.location({ lon: ll.lon, lat: ll.lat }, true);
+        map.zoom(16, true);
         return;
       }
-      map.location({ lon: hit.lon, lat: hit.lat }, true);
-      map.zoom(13, true);
-    } catch (e) {
-      console.error(e);
-      alert("ค้นหาไม่สำเร็จ (ตรวจอินเทอร์เน็ต/การเรียก API)");
-    }
-  };
+
+      // 2) place search
+      try {
+        const L = window.longdo;
+        if (L?.Util?.locationSearch) {
+          const res = await L.Util.locationSearch(text);
+          if (Array.isArray(res) && res[0]?.location) {
+            map.location(res[0].location, true);
+            map.zoom(16, true);
+          }
+        }
+      } catch (e) {
+        console.warn("search failed:", e);
+      }
+    },
+    [mapRef]
+  );
 
   return (
     <div className="map-shell">
@@ -334,16 +194,36 @@ export default function MapPage() {
 
       <SearchBar onSearch={handleSearch} />
 
-      {/* ✅ FilterPanel อยู่ใน MapPage -> ย้ายซ้ายได้จริง */}
+      {/* ✅ MARKERS + POLYGONS */}
+      {mapRef.current && (
+        <LandMarkers
+            map={mapRef.current}
+            lands={lands}
+            selectedLand={selectedLand}
+            onSelect={handleSelectLand}
+          />
+      )}
+
+      {/* ✅ POPUP ใกล้หมุด (แทนการ fixed ชิดขวา) */}
+      {selectedLand && popupPos && (
+        <LandDetailPanel
+          land={selectedLand}
+          mode="popup"
+          pos={popupPos}
+          onClose={() => {
+            setSelectedLand(null);
+            setPopupPos(null);
+            selectedLocRef.current = null;
+          }}
+        />
+      )}
+
       <FilterPanel
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
         value={filterValue}
         onChange={setFilterValue}
-        onApply={() => {
-          setFilterOpen(false);
-          console.log("apply filter", filterValue);
-        }}
+        onApply={() => setFilterOpen(false)}
         onClear={() =>
           setFilterValue({
             province: "",
@@ -369,32 +249,12 @@ export default function MapPage() {
         onZoomIn={zoomIn}
         onZoomOut={zoomOut}
         onLocate={locateMe}
-        onOpenFilter={() => setFilterOpen(true)}   // ✅ เปิด filter ซ้าย
+        onOpenFilter={() => setFilterOpen(true)}
         onOpenChat={() => alert("TODO: Chat")}
         onOpenTools={() => alert("TODO: Tools")}
       />
 
-      <div className="map-stats">
-        <div className="stat-card">
-          <div className="stat-title">ที่ดินทั้งหมด</div>
-          <div className="stat-value">550</div>
-          <div className="stat-unit">ประกาศ</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-title">จำนวนรวม</div>
-          <div className="stat-value">4,007.43</div>
-          <div className="stat-unit">ไร่</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-title">มูลค่าที่ดินรวม</div>
-          <div className="stat-value">161,166</div>
-          <div className="stat-unit">บาท</div>
-        </div>
-      </div>
-
-      {showDisclaimer && (
-        <ModeDisclaimerModal modeLabel={modeLabel} onClose={handleAcceptDisclaimer} />
-      )}
+      {showDisclaimer && <ModeDisclaimerModal modeLabel={modeLabel} onClose={handleAcceptDisclaimer} />}
     </div>
   );
 }
