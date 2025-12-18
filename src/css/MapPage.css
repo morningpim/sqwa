@@ -47,37 +47,39 @@ body {
   pointer-events: none;
 }
 
-.map-search{
-  pointer-events: auto;
-  width: min(560px, calc(100% - 28px));
+.map-search {
   display: flex;
   align-items: center;
-  gap: 10px;
-
-  background: var(--panel-bg, #fff);
-  border: 2px solid var(--primary, #16a34a);
+  background: #fff;
   border-radius: 999px;
-  padding: 8px 10px;
-  box-shadow: 0 10px 22px rgba(0,0,0,.12);
+  border: 2px solid #22c55e;
+  padding: 6px 10px;
+  width: 420px;
+  pointer-events: auto;
 }
 
-.map-search-input{
-  flex: 1;
+.map-search-input {
   border: none;
   outline: none;
-  font-size: 14px;
+  flex: 1;
+  font-size: 16px;
   padding: 8px 10px;
-  background: transparent;
 }
 
-.map-search-btn{
-  width: 40px;
-  height: 40px;
+.map-search-btn {
+  background: #22c55e;
   border: none;
   border-radius: 999px;
+  padding: 10px 16px;
   cursor: pointer;
-  background: var(--primary, #16a34a);
-  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-search-btn span {
+  color: #ffffff;
+  font-size: 22px;
 }
 
 /* ===== Right toolbar ===== */
@@ -263,4 +265,19 @@ body {
 #map [class*="layerselector"],
 #map [class*="LayerSelector"] {
   display: none !important;
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined" !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
 }

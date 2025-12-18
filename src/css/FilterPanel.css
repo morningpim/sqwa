@@ -1,24 +1,29 @@
+/* ✅ FIX: ต้องมี . นำหน้า */
 .filter-panel{
   position: absolute;
-  top: calc(var(--nav-h) + var(--gap) + 64px);
-  left: 18px;          /* ✅ ชิดซ้าย */
-  right: auto;         /* ✅ ปิดค่าเดิม */
+  top: calc(var(--nav-h) + var(--gap));
+  left: 18px;
+  right: auto;
   z-index: 95;
   width: 280px;
 }
 
+/* กล่อง */
 .filter-card{
   background: #fff;
-  border: 2px solid rgba(17,142,68,.35);
+  border: 2px solid rgba(17,142,68,0.35);
   border-radius: 14px;
   box-shadow: var(--shadow);
   padding: 12px;
+  overflow-x: hidden;
 }
 
+/* หัวข้อ + กากบาท */
 .filter-header{
   display:flex;
   align-items:center;
   justify-content: space-between;
+  position: relative;
   margin-bottom: 8px;
 }
 
@@ -28,21 +33,38 @@
 }
 
 .filter-close{
+  position: absolute;
+  top: 0;
+  right: 0;
+
   width: 30px;
   height: 30px;
   border-radius: 999px;
   border: 2px solid #111;
   background: #fff;
   cursor: pointer;
+
   line-height: 1;
   font-size: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.filter-close:hover{ background: #f3f4f6; }
+
+/* ✅ ทำให้เนื้อหาด้านในเลื่อนได้ ไม่ทับ nav */
 .filter-body{
   display: grid;
   gap: 10px;
+
+  max-height: calc(100vh - (var(--nav-h) + var(--gap) + 24px + 46px));
+  overflow: auto;
+  padding-right: 6px;
 }
 
+/* label/input */
 .filter-label{
   display:block;
   font-weight: 800;
@@ -50,7 +72,6 @@
   margin-bottom: 6px;
 }
 
-.filter-select,
 .filter-input{
   width: 100%;
   height: 34px;
@@ -68,6 +89,13 @@
   gap: 10px;
 }
 
+.filter-group-title{
+  font-weight: 800;
+  font-size: 12px;
+  margin: 2px 0 6px;
+}
+
+/* ปุ่มล่าง */
 .filter-actions{
   display:flex;
   gap: 10px;
@@ -91,4 +119,32 @@
 .filter-btn.ghost{
   background: #fff;
   color: var(--brand);
+}
+
+/* แถวคู่: ต่ำสุด | สูงสุด */
+.pair-row{
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.pair-row .filter-input{
+  width: 100% !important;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.filter-footer{
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;        /* ✅ ขยับลง */
+  align-items: center;     /* ✅ ให้อยู่กึ่งกลางแนวตั้ง */
+  justify-content: center; /* ✅ ไม่ชิดซ้าย */
+}
+
+.filter-footer .btn-outline,
+.filter-footer .btn-primary{
+  width: 120px;   /* ปรับได้ */
+  flex: 0 0 auto; /* ไม่ให้ยืดเต็ม */
 }

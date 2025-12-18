@@ -246,11 +246,93 @@ export default function MapPage() {
     setShowDisclaimer(false);
   };
 
+  const parseLatLng = (text) => {
+    const t = (text || "").trim();
+
+    // รองรับ: "13.7563,100.5018" หรือ "13.7563 100.5018"
+    const m = t.match(/(-?\d+(\.\d+)?)\s*[,\s]\s*(-?\d+(\.\d+)?)/);
+    if (!m) return null;
+
+    const lat = Number(m[1]);
+    const lon = Number(m[3]);
+    if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
+
+    return { lat, lon };
+  };
+
+  const geocodePlace = async (q) => {
+    const url =
+      "https://nominatim.openstreetmap.org/search?" +
+      new URLSearchParams({
+        q,
+        format: "json",
+        limit: "1",
+        countrycodes: "th",
+      });
+
+    const res = await fetch(url, {
+      headers: {
+        "Accept-Language": "th",
+        "Accept": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error("GEOCODE FAIL:", res.status, text);
+      throw new Error(`Geocode HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return null;
+
+    return {
+      lat: Number(data[0].lat),
+      lon: Number(data[0].lon),
+    };
+  };
+
+  const handleSearch = async (q) => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const text = (q || "").trim();
+
+    // ✅ ปล่อยว่าง = ใช้ GPS
+    if (!text) {
+      locateMe();
+      return;
+    }
+
+    // ✅ พิกัด lat,lng
+    const ll = parseLatLng(text);
+    if (ll) {
+      map.location({ lon: ll.lon, lat: ll.lat }, true);
+      map.zoom(14, true);
+      return;
+    }
+
+    // ✅ ชื่อสถานที่ -> geocode
+    try {
+      const hit = await geocodePlace(text);
+      if (!hit) {
+        alert("ไม่พบสถานที่ ลองพิมพ์ใหม่อีกครั้ง");
+        return;
+      }
+      map.location({ lon: hit.lon, lat: hit.lat }, true);
+      map.zoom(13, true);
+    } catch (e) {
+      console.error(e);
+      alert("ค้นหาไม่สำเร็จ (ตรวจอินเทอร์เน็ต/การเรียก API)");
+    }
+  };
+
   return (
     <div className="map-shell">
       <div id="map" className="map-canvas" />
 
-      <SearchBar placeholder="Search Here" onSearch={(q) => console.log("search:", q)} />
+      <SearchBar onSearch={handleSearch} />
 
       {/* ✅ FilterPanel อยู่ใน MapPage -> ย้ายซ้ายได้จริง */}
       <FilterPanel

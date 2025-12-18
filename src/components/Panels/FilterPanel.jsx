@@ -4,7 +4,7 @@ import "../../css/FilterPanel.css";
 export default function FilterPanel({
   open,
   onClose,
-  value,
+  value = {},
   onChange,
   onApply,
   onClear,
@@ -16,129 +16,181 @@ export default function FilterPanel({
   return (
     <div className="filter-panel" role="dialog" aria-label="ตัวกรอง">
       <div className="filter-card">
+        {/* Header */}
         <div className="filter-header">
           <div className="filter-title">ตัวกรอง</div>
-          <button className="filter-close" type="button" onClick={onClose} aria-label="Close">
+
+          <button
+            className="filter-close"
+            type="button"
+            onClick={onClose}
+            aria-label="close"
+          >
             ×
           </button>
         </div>
 
+        {/* Body (scroll) */}
         <div className="filter-body">
           {/* จังหวัด */}
-          <div className="filter-field">
+          <div className="filter-field span-2">
             <label className="filter-label">จังหวัด</label>
             <select
-              className="filter-select"
-              value={value.province}
+              className="filter-input"
+              value={value.province || ""}
               onChange={(e) => update({ province: e.target.value })}
             >
               <option value="">ทั้งหมด</option>
-              <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
-              <option value="นนทบุรี">นนทบุรี</option>
-              <option value="ปทุมธานี">ปทุมธานี</option>
+              <option value="bangkok">กรุงเทพมหานคร</option>
+              <option value="chiangmai">เชียงใหม่</option>
+              <option value="chonburi">ชลบุรี</option>
+              <option value="phuket">ภูเก็ต</option>
             </select>
           </div>
 
-          {/* อำเภอ */}
-          <div className="filter-field">
-            <label className="filter-label">อำเภอ</label>
+          {/* ประเภทที่ดิน */}
+          <div className="filter-field span-2">
+            <label className="filter-label">ประเภทที่ดิน</label>
             <select
-              className="filter-select"
-              value={value.district}
-              onChange={(e) => update({ district: e.target.value })}
+              className="filter-input"
+              value={value.landType || ""}
+              onChange={(e) => update({ landType: e.target.value })}
             >
               <option value="">ทั้งหมด</option>
-              <option value="อำเภอ 1">อำเภอ 1</option>
-              <option value="อำเภอ 2">อำเภอ 2</option>
+              <option value="chanote">โฉนด</option>
+              <option value="nor_sor_3">นส.3 / นส.3ก</option>
             </select>
           </div>
 
-          {/* ประเภท */}
-          <div className="filter-field">
-            <label className="filter-label">ประเภท</label>
+          {/* ขนาดถนน */}
+          <div className="filter-field span-2">
+            <label className="filter-label">ขนาดถนน</label>
             <select
-              className="filter-select"
-              value={value.type}
-              onChange={(e) => update({ type: e.target.value })}
+              className="filter-input"
+              value={value.roadSize || ""}
+              onChange={(e) => update({ roadSize: e.target.value })}
             >
               <option value="">ทั้งหมด</option>
-              <option value="ซื้อ">ซื้อ</option>
-              <option value="เช่า">เช่า</option>
+              <option value="4">4 เมตร</option>
+              <option value="6">6 เมตร</option>
+              <option value="8">8 เมตร</option>
+              <option value="10">10 เมตรขึ้นไป</option>
             </select>
           </div>
 
-          {/* ราคาต่ำสุด/สูงสุด */}
-          <div className="filter-grid-2">
-            <div className="filter-field">
-              <label className="filter-label">ช่วงราคา (รวมทั้งหมด)</label>
+          {/* ขนาดพื้นที่ (ตร.วา) */}
+          <div className="filter-field span-2">
+            <label className="filter-label">ขนาดพื้นที่ (ตร.วา)</label>
+            <div className="pair-row">
               <input
+                type="number"
                 className="filter-input"
                 placeholder="ต่ำสุด"
-                value={value.priceMin}
-                onChange={(e) => update({ priceMin: e.target.value })}
+                value={value.areaSqwMin || ""}
+                onChange={(e) => update({ areaSqwMin: e.target.value })}
               />
-            </div>
-            <div className="filter-field">
-              <label className="filter-label">&nbsp;</label>
               <input
+                type="number"
                 className="filter-input"
                 placeholder="สูงสุด"
-                value={value.priceMax}
-                onChange={(e) => update({ priceMax: e.target.value })}
+                value={value.areaSqwMax || ""}
+                onChange={(e) => update({ areaSqwMax: e.target.value })}
               />
             </div>
           </div>
 
-          {/* หน้ากว้าง/ลึก */}
-          <div className="filter-grid-2">
-            <div className="filter-field">
-              <label className="filter-label">หน้ากว้างที่ดิน (เมตร)</label>
+          {/* ขนาดพื้นที่ (ไร่) */}
+          <div className="filter-field span-2">
+            <label className="filter-label">ขนาดพื้นที่ (ไร่)</label>
+            <div className="pair-row">
               <input
+                type="number"
                 className="filter-input"
                 placeholder="ต่ำสุด"
-                value={value.frontMin}
+                value={value.areaRaiMin || ""}
+                onChange={(e) => update({ areaRaiMin: e.target.value })}
+              />
+              <input
+                type="number"
+                className="filter-input"
+                placeholder="สูงสุด"
+                value={value.areaRaiMax || ""}
+                onChange={(e) => update({ areaRaiMax: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* ช่วงราคา (บาท : ตร.วา) */}
+          <div className="filter-field span-2">
+            <label className="filter-label">ช่วงราคา (บาท : ตร.วา)</label>
+            <div className="pair-row">
+              <input
+                type="number"
+                className="filter-input"
+                placeholder="ต่ำสุด"
+                value={value.priceSqwMin || ""}
+                onChange={(e) => update({ priceSqwMin: e.target.value })}
+              />
+              <input
+                type="number"
+                className="filter-input"
+                placeholder="สูงสุด"
+                value={value.priceSqwMax || ""}
+                onChange={(e) => update({ priceSqwMax: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* ช่วงราคา (รวมทั้งแปลง) */}
+          <div className="filter-field span-2">
+            <label className="filter-label">ช่วงราคา (รวมทั้งแปลง)</label>
+            <div className="pair-row">
+              <input
+                type="number"
+                className="filter-input"
+                placeholder="ต่ำสุด"
+                value={value.totalMin || ""}
+                onChange={(e) => update({ totalMin: e.target.value })}
+              />
+              <input
+                type="number"
+                className="filter-input"
+                placeholder="สูงสุด"
+                value={value.totalMax || ""}
+                onChange={(e) => update({ totalMax: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* หน้ากว้างที่ดิน (เมตร) */}
+          <div className="filter-field span-2">
+            <label className="filter-label">หน้ากว้างที่ดิน (เมตร)</label>
+            <div className="pair-row">
+              <input
+                type="number"
+                className="filter-input"
+                placeholder="ต่ำสุด"
+                value={value.frontMin || ""}
                 onChange={(e) => update({ frontMin: e.target.value })}
               />
-            </div>
-            <div className="filter-field">
-              <label className="filter-label">&nbsp;</label>
               <input
+                type="number"
                 className="filter-input"
                 placeholder="สูงสุด"
-                value={value.frontMax}
+                value={value.frontMax || ""}
                 onChange={(e) => update({ frontMax: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="filter-grid-2">
-            <div className="filter-field">
-              <label className="filter-label">ความลึกที่ดิน (เมตร)</label>
-              <input
-                className="filter-input"
-                placeholder="ต่ำสุด"
-                value={value.depthMin}
-                onChange={(e) => update({ depthMin: e.target.value })}
-              />
-            </div>
-            <div className="filter-field">
-              <label className="filter-label">&nbsp;</label>
-              <input
-                className="filter-input"
-                placeholder="สูงสุด"
-                value={value.depthMax}
-                onChange={(e) => update({ depthMax: e.target.value })}
               />
             </div>
           </div>
         </div>
 
-        <div className="filter-actions">
-          <button className="filter-btn primary" type="button" onClick={onApply}>
-            ใช้ตัวกรอง
-          </button>
-          <button className="filter-btn ghost" type="button" onClick={onClear}>
+        {/* Footer (ไม่เลื่อน) */}
+        <div className="filter-footer">
+          <button className="btn-outline" type="button" onClick={onClear}>
             ล้าง
+          </button>
+          <button className="btn-primary" type="button" onClick={onApply}>
+            ใช้ตัวกรอง
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
 
 export default function Navbar() {
   const location = useLocation();
@@ -51,6 +52,12 @@ export default function Navbar() {
             เข้าสู่ระบบ
           </button>
         </Link>
+        
+        <Link to="/cart" className="cart-btn">
+          <ShoppingCart size={20} />
+          <span className="cart-badge">2</span>
+        </Link>
+        
       </div>
     </header>
   );
