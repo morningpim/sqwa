@@ -1,82 +1,74 @@
 import React from "react";
-import "../../css/LandDetailPanel.css";
+import "../../css/land-popup.css";
 
-export default function LandDetailPanel({ land, mode = "side", pos, onClose }) {
-  if (!land) return null;
+export default function buildLandPopupHtml(land = {}) {
+  return `
+  <div id="sqw-popup-root" class="sqw-popup">
+    <div class="sqw-head">
+      <div class="sqw-pill">
+        ${land.owner || "คุณปาลิส (นายหน้า)"}
+      </div>
+      <button id="sqwa-close-btn" class="sqw-x">×</button>
+    </div>
 
-  const isPopup = mode === "popup";
+    <div class="sqw-meta">
+      🕒 วันที่ลงข้อมูล ${land.updatedAt || "05/11/2025"}
+    </div>
 
-  // ถ้าเป็น popup แต่ไม่มีตำแหน่ง → ยังไม่ต้อง render
-  if (isPopup && (!pos || typeof pos.x !== "number" || typeof pos.y !== "number")) {
-    return null;
-  }
-
-  return (
-    <div
-      className={`land-detail-panel ${isPopup ? "is-popup" : "is-side"}`}
-      style={
-        isPopup
-          ? {
-              position: "absolute",
-              left: pos.x + 14,   // ขยับออกจากหมุด
-              top: pos.y - 22,    // ยกขึ้นนิดหน่อย
-              transform: "translateY(-100%)", // ให้อยู่ “เหนือ” หมุด
-              zIndex: 100000,
-            }
-          : undefined
-      }
-    >
-      {isPopup && <div className="land-detail-arrow" />}
-
-      <button className="land-detail-close" onClick={onClose} aria-label="close">
-        ×
-      </button>
-
-      <div className="land-detail-date">วันที่ลงข้อมูล {land.updatedAt || "-"}</div>
-      <div className="land-detail-title">{land.brokerName || "-"} (นายหน้า)</div>
-
-      <div className="land-detail-grid">
-        <InfoCard label="ขนาดที่ดิน" value={`${(land.areaSqWa ?? 0).toLocaleString()} ตร.วา`} />
-        <InfoCard label="ไร่/งาน/วา" value={`${land.rai ?? 0} - ${land.ngan ?? 0} - ${land.wa ?? 0}`} />
-        <InfoCard label="หน้ากว้างติดถนน" value={`${land.frontage ?? "-"} ม.`} />
-        <InfoCard label="ขนาดถนน" value={`${land.roadWidth ?? "-"} ม.`} />
+    <div class="sqw-grid">
+      <div class="sqw-box">
+        <div class="sqw-box-k">ขนาดที่ดิน</div>
+        <div class="sqw-box-v">${land.area || "429"} ตร.วา</div>
       </div>
 
-      <div className="land-detail-divider" />
-
-      <div className="land-detail-price-row">
-        <div className="muted">ราคา/ตร.วา</div>
-        <div className="strong">{(land.pricePerWa ?? 0).toLocaleString()} บ.</div>
+      <div class="sqw-box">
+        <div class="sqw-box-k">ไร่-งาน-วา</div>
+        <div class="sqw-box-v">${land.raw || "1-0-/-29"}</div>
       </div>
 
-      <div className="land-detail-total">{(land.totalPrice ?? 0).toLocaleString()} บ.</div>
-
-      <div className="land-detail-contact">
-        <div className="muted">ข้อมูลติดต่อ</div>
-        <div>โทร: {land.phone || "-"}</div>
-        <div>LINE: {land.line || "-"}</div>
+      <div class="sqw-box">
+        <div class="sqw-box-k">หน้ากว้างติดถนน</div>
+        <div class="sqw-box-v">${land.frontage || "34"} ม.</div>
       </div>
 
-      <div className="land-detail-actions">
-        <button className="btn-primary" onClick={() => alert("TODO: Chat")}>
-          แชทผู้ขาย
-        </button>
-        <button
-          className="btn-outline"
-          onClick={() => navigator.clipboard?.writeText(JSON.stringify(land, null, 2))}
-        >
-          คัดลอกข้อมูล
-        </button>
+      <div class="sqw-box">
+        <div class="sqw-box-k">ขนาดถนน</div>
+        <div class="sqw-box-v">${land.roadWidth || "18"} ม.</div>
       </div>
     </div>
-  );
-}
 
-function InfoCard({ label, value }) {
-  return (
-    <div className="land-detail-card">
-      <div className="muted">{label}</div>
-      <div className="strong">{value}</div>
+    <div class="sqw-divider"></div>
+
+    <div class="sqw-row">
+      <span>ราคา/ตร.วา</span>
+      <span class="sqw-row-v">${land.pricePerWa || "17,000"} บ.</span>
     </div>
-  );
+
+    <div class="sqw-row">
+      <span>ราคารวม</span>
+      <span class="sqw-row-v">${land.totalPrice || "7,293,000"} บ.</span>
+    </div>
+
+    <div class="sqw-divider"></div>
+
+    <div class="sqw-h">ข้อมูลติดต่อ</div>
+
+    <div class="sqw-contact-row">
+      <span>เจ้าของ</span><span>🏢</span><span>${land.owner || "-"}</span>
+    </div>
+
+    <div class="sqw-contact-row">
+      <span>โทร</span><span>📞</span><span>${land.phone || "**********"}</span>
+    </div>
+
+    <div class="sqw-contact-row">
+      <span>LINE ID</span><span>💬</span><span>${land.line || "**********"}</span>
+    </div>
+
+    <div class="sqw-actions">
+      <button class="sqw-btn sqw-btn-solid">แชทกับผู้ขาย</button>
+      <button class="sqw-btn sqw-btn-solid">คลิกเพื่อปลดล็อคข้อมูล</button>
+    </div>
+  </div>
+  `;
 }

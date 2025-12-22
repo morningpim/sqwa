@@ -1,0 +1,179 @@
+/* ===============================
+   SQW Land Popup – FINAL (Figma)
+   =============================== */
+
+.sqw-popup {
+  width: 310px;
+  height: 560px;
+  height: auto; 
+  background: #ffffff;
+  border: 3px solid #1a8f2c;
+  border-radius: 28px;
+  padding: 18px 16px 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+  font-family: "Mitr", system-ui, sans-serif;
+}
+
+/* ================= Header ================= */
+.sqw-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sqw-pill {
+  background: #1a8f2c;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 999px;
+}
+
+.sqw-x {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #000;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* ================= Date ================= */
+.sqw-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 14px;
+  font-size: 13px;
+  color: #555;
+}
+
+/* ================= Grid ================= */
+.sqw-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.sqw-box {
+  border: 2px solid #1a8f2c;
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+}
+
+.sqw-box-k {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.sqw-box-v {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a8f2c;
+}
+
+/* ================= Divider ================= */
+.sqw-divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 14px 0;
+}
+
+/* ================= Price ================= */
+.sqw-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.sqw-row-v {
+  font-weight: 700;
+}
+
+/* ================= Contact ================= */
+.sqw-h {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 12px 0 8px;
+}
+
+.sqw-contact-row {
+  display: grid;
+  grid-template-columns: 70px 28px 1fr;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.sqw-c-ico {
+  display: flex;
+  justify-content: center;
+  color: #1a8f2c;
+}
+
+/* ================= Actions ================= */
+.sqw-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.sqw-btn {
+  flex: 1;
+  height: 44px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sqw-btn-solid {
+  background: #1a8f2c;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 0 #0f6b1f;
+}
+
+/* ===== FORCE: No scrollbars anywhere inside popup ===== */
+#sqw-popup-root,
+#sqw-popup-root * {
+  overflow: visible;
+}
+
+/* ตัวที่ทำให้เลื่อนในไฟล์คุณ: ปิดทิ้ง */
+.sqw-popup-scroll {
+  max-height: none !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
+
+/* ปิดการเลื่อนในกล่องหลักทั้งหมด */
+.sqw-popup,
+.sqw-popup-body,
+.sqw-popup-content {
+  max-height: none !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
+
+/* ซ่อน scrollbar ทุก browser (กันหลุด) */
+.sqw-popup,
+.sqw-popup * {
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE/Edge เก่า */
+}
+.sqw-popup::-webkit-scrollbar,
+.sqw-popup *::-webkit-scrollbar {
+  width: 0 !important;         /* Chrome/Safari */
+  height: 0 !important;
+}
+
+.longdo-popup, .longdo-popup * {
+  overflow: visible !important;
+}

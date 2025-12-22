@@ -22,7 +22,7 @@ body {
   position: relative;
   width: 100%;
   height: 100vh;
-  overflow: hidden;
+  overflow: visible; 
   background: #f3f4f6;
 }
 
@@ -34,6 +34,7 @@ body {
   top: calc(var(--nav-h) - 10px);
   bottom: 0;
   z-index: 1;
+  overflow: hidden;
 }
 
 /* ===== Top search ===== */

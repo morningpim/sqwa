@@ -9,11 +9,12 @@ import FilterPanel from "../Panels/FilterPanel";
 
 import { useLongdoMap } from "./hooks/useLongdoMap";
 import LandMarkers from "./LandMarkers";
-import LandDetailPanel from "./LandDetailPanel";
 import { mockLands } from "./lands/mockLands";
 
+// ✅ HTML generator ของ popup (Longdo Popup)
+import buildLandPopupHtml from "./LandDetailPanel";
+
 function parseLatLng(text) {
-  // รองรับ "13.7563, 100.5018" หรือ "13.7563 100.5018"
   if (!text) return null;
   const s = String(text).trim().replace(/\s+/g, " ");
   const m = s.match(/^(-?\d+(\.\d+)?)[,\s]+(-?\d+(\.\d+)?)$/);
@@ -29,7 +30,9 @@ export default function MapPage() {
   const mode = params.get("mode") || "buy";
 
   const storageKey = `sqw_disclaimer_ok_${mode}`;
-  const [showDisclaimer, setShowDisclaimer] = useState(() => sessionStorage.getItem(storageKey) !== "1");
+  const [showDisclaimer, setShowDisclaimer] = useState(
+    () => sessionStorage.getItem(storageKey) !== "1"
+  );
 
   const [openLayerMenu, setOpenLayerMenu] = useState(false);
   const [isSatellite, setIsSatellite] = useState(false);
@@ -57,17 +60,28 @@ export default function MapPage() {
   // ✅ lands
   const [lands] = useState(mockLands);
 
-  // ✅ selection + popup position
+  // ✅ selection
   const [selectedLand, setSelectedLand] = useState(null);
-  const [popupPos, setPopupPos] = useState(null);
   const selectedLocRef = useRef(null);
 
   // ✅ longdo hook
-  const { mapRef, initMap, applySatellite, applyTraffic, zoomIn, zoomOut, locateMe } = useLongdoMap({
-    isSatellite,
-    isTraffic,
-  });
+  const {
+    mapRef,
+    initMap,
+    applySatellite,
+    applyTraffic,
+    zoomIn,
+    zoomOut,
+    locateMe,
+  } = useLongdoMap({ isSatellite, isTraffic });
 
+  // ✅ map instance state
+  const [mapObj, setMapObj] = useState(null);
+
+  // ✅ popup ล่าสุด
+  const popupRef = useRef(null);
+
+  // ---- disclaimer ----
   useEffect(() => {
     const ok = sessionStorage.getItem(`sqw_disclaimer_ok_${mode}`) === "1";
     setShowDisclaimer(!ok);
@@ -75,95 +89,183 @@ export default function MapPage() {
 
   useEffect(() => setOpenLayerMenu(false), [mode, showDisclaimer]);
 
-  useEffect(() => {
-    if (!showDisclaimer) {
-      initMap().catch((e) => {
-        console.error(e);
-        alert("โหลดแผนที่ไม่สำเร็จ: กรุณาเช็ค script longdo");
-      });
-    }
-  }, [showDisclaimer, initMap]);
-
-  useEffect(() => {
-    if (mapRef.current) applySatellite(isSatellite);
-  }, [isSatellite, applySatellite, mapRef]);
-
-  useEffect(() => {
-    if (mapRef.current) applyTraffic(isTraffic);
-  }, [isTraffic, applyTraffic, mapRef]);
-
-  const handleAcceptDisclaimer = () => {
+  const handleAcceptDisclaimer = useCallback(() => {
     sessionStorage.setItem(storageKey, "1");
     setShowDisclaimer(false);
-  };
+  }, [storageKey]);
 
-  const updatePopupFromLoc = useCallback((loc) => {
-    const map = mapRef.current;
-    if (!map || !loc) return;
+  // ✅ init map
+  useEffect(() => {
+    if (!showDisclaimer) {
+      initMap()
+        .then(() => setMapObj(mapRef.current || null))
+        .catch((e) => {
+          console.error(e);
+          alert("โหลดแผนที่ไม่สำเร็จ: กรุณาเช็ค script longdo");
+        });
+    } else {
+      setMapObj(null);
+    }
+  }, [showDisclaimer, initMap, mapRef]);
+
+  // ✅ apply layers
+  useEffect(() => {
+    if (mapObj) applySatellite(isSatellite);
+  }, [isSatellite, applySatellite, mapObj]);
+
+  useEffect(() => {
+    if (mapObj) applyTraffic(isTraffic);
+  }, [isTraffic, applyTraffic, mapObj]);
+
+  // =========================
+  // ✅ Popup helpers
+  // =========================
+  const closeLongdoPopup = useCallback(() => {
+    const map = mapObj;
+    if (!map || !popupRef.current) return;
     try {
-      const pt = map.locationToPoint(loc);
-      if (pt && typeof pt.x === "number" && typeof pt.y === "number") {
-        setPopupPos({ x: pt.x, y: pt.y });
-      }
-    } catch (e) {}
-  }, [mapRef]);
+      map.Overlays.remove(popupRef.current);
+    } catch {}
+    popupRef.current = null;
+  }, [mapObj]);
 
-  // ✅ คลิกหมุด/โพลิกอน -> เลือก land + เก็บ loc เพื่อผูก popup
-  const handleSelectLand = useCallback(
+  // (optional) ล้าง chrome ของ Longdo ถ้าต้องการลดกรอบ/เงา
+  const stripLongdoChrome = useCallback((root) => {
+    if (!root) return;
+
+    const kill = (el) => {
+      if (!el || !el.style) return;
+      el.style.background = "transparent";
+      el.style.border = "0";
+      el.style.boxShadow = "none";
+      el.style.padding = "0";
+      el.style.margin = "0";
+      el.style.borderRadius = "0";
+      el.style.outline = "none";
+      el.style.overflow = "visible";
+      el.style.maxHeight = "none";
+      el.style.height = "auto";
+    };
+
+    // ไล่จาก root → parent หลายชั้น
+    let el = root;
+    for (let i = 0; i < 18 && el; i++) {
+      kill(el);
+      el = el.parentElement;
+    }
+    root.querySelectorAll("*").forEach(kill);
+  }, []);
+
+  const openLongdoPopup = useCallback(
     (land, loc) => {
-      setSelectedLand(land || null);
+      const map = mapObj;
+      if (!map || !window.longdo || !land || !loc) return;
 
-      if (loc) {
-        selectedLocRef.current = loc;
-        updatePopupFromLoc(loc);
-      } else {
-        // ถ้าไม่ได้ส่ง loc มา ลอง fallback จาก land.location
-        const fallback = land?.location;
-        if (fallback?.lon != null && fallback?.lat != null) {
-          selectedLocRef.current = fallback;
-          updatePopupFromLoc(fallback);
-        }
-      }
+      closeLongdoPopup();
+
+      const html = buildLandPopupHtml(land);
+
+      // ✅ ขนาดคงที่ (อยากเล็ก/ใหญ่ปรับ 2 ค่านี้)
+      const popupWidth = 320;
+      const popupHeight = 420;
+
+      const popup = new window.longdo.Popup(loc, {
+        title: "",
+        detail: html,
+        size: { width: popupWidth, height: popupHeight },
+        // ถ้า lib รองรับ จะช่วยลดปุ่ม/ลาก
+        closable: false,
+        draggable: false,
+        // จัดให้ชี้หมุด (ถ้า overlay อยู่กลาง ๆ)
+        offset: { x: -(popupWidth / 2), y: -18 },
+      });
+
+      popupRef.current = popup;
+      map.Overlays.add(popup);
+
+      // bind ปุ่มปิดของเรา + strip chrome
+      setTimeout(() => {
+        const root = document.getElementById("sqw-popup-root");
+        if (root) stripLongdoChrome(root);
+
+        const btnClose = document.getElementById("sqwa-close-btn");
+        if (btnClose) btnClose.onclick = () => closeLongdoPopup();
+      }, 0);
     },
-    [updatePopupFromLoc]
+    [mapObj, closeLongdoPopup, stripLongdoChrome]
   );
 
-  // ✅ เวลาเลื่อน/ซูมแผนที่ -> ขยับ popup ตามหมุด
+  // ✅ คลิกหมุด/โพลิกอน -> เลือก land + เปิด popup ชี้หมุด
+  const handleSelectLand = useCallback(
+    (land, loc) => {
+      if (!land) return;
+
+      setSelectedLand(land);
+
+      const finalLoc =
+        loc ??
+        (land?.location?.lon != null && land?.location?.lat != null
+          ? land.location
+          : land?.lat != null && land?.lon != null
+          ? { lat: land.lat, lon: land.lon }
+          : null);
+
+      if (finalLoc) {
+        selectedLocRef.current = finalLoc;
+        openLongdoPopup(land, finalLoc);
+      }
+    },
+    [openLongdoPopup]
+  );
+
+  // ✅ ref กัน closure (ใช้กับ event bind)
+  const handleSelectLandRef = useRef(handleSelectLand);
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !window.longdo) return;
+    handleSelectLandRef.current = handleSelectLand;
+  }, [handleSelectLand]);
 
-    const L = window.longdo;
+  // ✅ จับคลิก overlay ที่ระดับ map (กรณี overlay ส่ง __land/__loc)
+  useEffect(() => {
+    const map = mapObj;
+    if (!map) return;
 
-    const recalc = () => {
-      if (selectedLocRef.current) updatePopupFromLoc(selectedLocRef.current);
+    const onOverlayClick = (overlay) => {
+      const land = overlay?.__land;
+      const loc = overlay?.__loc;
+      if (land && handleSelectLandRef.current) {
+        handleSelectLandRef.current(land, loc);
+      }
     };
 
     try {
-      L.Event.bind(map, "move", recalc);
-      L.Event.bind(map, "zoom", recalc);
+      map.Event.bind("overlayClick", onOverlayClick);
     } catch (e) {
-      // ถ้า event name ไม่ตรงก็ยังอย่างน้อยจะคำนวณตอนคลิกได้
+      console.warn("bind overlayClick failed", e);
     }
 
     return () => {
       try {
-        L.Event.unbind(map, "move", recalc);
-        L.Event.unbind(map, "zoom", recalc);
-      } catch (e) {}
+        map.Event.unbind("overlayClick", onOverlayClick);
+      } catch {}
     };
-  }, [mapRef, updatePopupFromLoc]);
+  }, [mapObj]);
 
-  // ✅ Search: รองรับ lat,lng และ search ชื่อสถานที่ด้วย longdo.Util.locationSearch
+  // ✅ ปิด popup เมื่อเปลี่ยน mode หรือปิด disclaimer
+  useEffect(() => {
+    closeLongdoPopup();
+    setSelectedLand(null);
+    selectedLocRef.current = null;
+  }, [mode, showDisclaimer, closeLongdoPopup]);
+
+  // ✅ Search
   const handleSearch = useCallback(
     async (q) => {
-      const map = mapRef.current;
+      const map = mapObj;
       if (!map) return;
 
       const text = (q ?? "").trim();
       if (!text) return;
 
-      // 1) lat,lng
       const ll = parseLatLng(text);
       if (ll) {
         map.location({ lon: ll.lon, lat: ll.lat }, true);
@@ -171,7 +273,6 @@ export default function MapPage() {
         return;
       }
 
-      // 2) place search
       try {
         const L = window.longdo;
         if (L?.Util?.locationSearch) {
@@ -185,7 +286,7 @@ export default function MapPage() {
         console.warn("search failed:", e);
       }
     },
-    [mapRef]
+    [mapObj]
   );
 
   return (
@@ -195,28 +296,12 @@ export default function MapPage() {
       <SearchBar onSearch={handleSearch} />
 
       {/* ✅ MARKERS + POLYGONS */}
-      {mapRef.current && (
-        <LandMarkers
-            map={mapRef.current}
-            lands={lands}
-            selectedLand={selectedLand}
-            onSelect={handleSelectLand}
-          />
-      )}
-
-      {/* ✅ POPUP ใกล้หมุด (แทนการ fixed ชิดขวา) */}
-      {selectedLand && popupPos && (
-        <LandDetailPanel
-          land={selectedLand}
-          mode="popup"
-          pos={popupPos}
-          onClose={() => {
-            setSelectedLand(null);
-            setPopupPos(null);
-            selectedLocRef.current = null;
-          }}
-        />
-      )}
+      <LandMarkers
+        map={mapObj}
+        lands={lands}
+        selectedLand={selectedLand}
+        onSelect={handleSelectLand} // ✅ คลิกแล้วเปิด popup ชี้หมุด
+      />
 
       <FilterPanel
         open={filterOpen}
@@ -254,7 +339,9 @@ export default function MapPage() {
         onOpenTools={() => alert("TODO: Tools")}
       />
 
-      {showDisclaimer && <ModeDisclaimerModal modeLabel={modeLabel} onClose={handleAcceptDisclaimer} />}
+      {showDisclaimer && (
+        <ModeDisclaimerModal modeLabel={modeLabel} onClose={handleAcceptDisclaimer} />
+      )}
     </div>
   );
 }
