@@ -1,179 +1,293 @@
-/* ===============================
-   SQW Land Popup – FINAL (Figma)
-   =============================== */
+/* =========================
+   SQW LAND POPUP (FINAL)
+   - เหมือนรูปที่ 2
+   - ไม่มี scrollbar
+   - หดพอดี (ไม่มีพื้นที่ขาวล่าง)
+   - ฆ่ากรอบขาว/เงาชั้นนอกของ Longdo
+   ========================= */
 
-.sqw-popup {
+:root{
+  --sqw-green: #1a8f3a;
+  --sqw-text: #111827;
+  --sqw-muted: #6b7280;
+  --sqw-line: #e5e7eb;
+}
+
+/* ---------- ฆ่ากรอบขาว/เงา/พื้นหลังของ Longdo wrapper ---------- */
+.ldpopupshell,
+.ldpopup,
+.ldpopupbody,
+.ldpopupcontent,
+.ld-popup,
+.ld-popup-container,
+.ld-popup-window,
+.ld-popup-frame,
+.longdo-popup,
+.longdo-popup-wrapper,
+.longdo-popup-container,
+.longdo-popup-window,
+.longdo-popup-frame,
+#map .ldpopupshell,
+#map .ldpopup,
+#map .ldpopupbody,
+#map .ldpopupcontent{
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* กันกรณีมี div เปล่าชั้นนอกสุดที่ใส่ bg/shadow */
+.ldpopupshell > div,
+.ldpopup > div,
+.longdo-popup > div,
+.longdo-popup-container > div,
+.longdo-popup-wrapper > div{
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* root wrapper ของเรา: ต้องโปร่งใส + หดตามเนื้อหา */
+#sqw-popup-root{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-block !important;
+  width: fit-content !important;
+  height: fit-content !important;
+}
+
+/* =========================
+   CARD ตามรูปที่ 2
+   ========================= */
+.sqw-popup{
   width: 310px;
-  height: 560px;
-  height: auto; 
-  background: #ffffff;
-  border: 3px solid #1a8f2c;
-  border-radius: 28px;
-  padding: 18px 16px 20px;
-  box-sizing: border-box;
-  overflow: hidden;
-  font-family: "Mitr", system-ui, sans-serif;
-}
-
-/* ================= Header ================= */
-.sqw-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.sqw-pill {
-  background: #1a8f2c;
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 600;
-  padding: 6px 16px;
-  border-radius: 999px;
-}
-
-.sqw-x {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
   background: #fff;
-  border: 2px solid #000;
-  font-size: 18px;
-  cursor: pointer;
+  border: 2px solid var(--sqw-green);
+  border-radius: 22px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.18);
+  padding: 14px 14px 16px;
+  box-sizing: border-box;
+
+  /* ✅ ไม่มี scrollbar ภายใน */
+  overflow: hidden !important;
+
+  /* ✅ หดตามเนื้อหา */
+  height: auto !important;
+  min-height: 0 !important;
 }
 
-/* ================= Date ================= */
-.sqw-meta {
+/* header */
+.sqw-head{
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin: 10px 0 14px;
-  font-size: 13px;
-  color: #555;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
-/* ================= Grid ================= */
-.sqw-grid {
+.sqw-pill{
+  background: var(--sqw-green);
+  color: #fff;
+  border-radius: 999px;
+  padding: 10px 12px;
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1;
+  max-width: 230px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sqw-x{
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 2px solid #111;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+/* meta date */
+.sqw-meta{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sqw-muted);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+/* grid metrics */
+.sqw-grid{
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  margin-bottom: 12px;
 }
 
-.sqw-box {
-  border: 2px solid #1a8f2c;
+.sqw-box{
+  border: 2px solid var(--sqw-green);
   border-radius: 14px;
-  padding: 12px 8px;
+  padding: 10px 10px;
   text-align: center;
+  background: #fff;
 }
 
-.sqw-box-k {
+.sqw-box-k{
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 800;
+  color: #111;
   margin-bottom: 6px;
 }
 
-.sqw-box-v {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1a8f2c;
+.sqw-box-v{
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--sqw-green);
 }
 
-/* ================= Divider ================= */
-.sqw-divider {
+/* divider + rows */
+.sqw-divider{
   height: 1px;
-  background: #e0e0e0;
-  margin: 14px 0;
+  background: var(--sqw-line);
+  margin: 10px 0;
 }
 
-/* ================= Price ================= */
-.sqw-row {
+.sqw-row{
   display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-.sqw-row-v {
-  font-weight: 700;
-}
-
-/* ================= Contact ================= */
-.sqw-h {
-  font-size: 14px;
-  font-weight: 700;
-  margin: 12px 0 8px;
-}
-
-.sqw-contact-row {
-  display: grid;
-  grid-template-columns: 70px 28px 1fr;
   align-items: center;
-  font-size: 13px;
-  margin-bottom: 6px;
-}
-
-.sqw-c-ico {
-  display: flex;
-  justify-content: center;
-  color: #1a8f2c;
-}
-
-/* ================= Actions ================= */
-.sqw-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.sqw-btn {
-  flex: 1;
-  height: 44px;
-  border-radius: 14px;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 6px 0;
+  color: var(--sqw-text);
   font-size: 14px;
   font-weight: 700;
+}
+
+.sqw-row-v{
+  font-weight: 900;
+}
+
+/* section title */
+.sqw-h{
+  font-size: 16px;
+  font-weight: 900;
+  margin: 10px 0 8px;
+  color: #111;
+}
+
+/* contact rows: label / icon / value */
+.sqw-contact-row{
+  display: grid;
+  grid-template-columns: 70px 22px 1fr;
+  justify-content: space-between; 
+  gap: 6px 10px;
+  font-size: 14px;
+  color: #111;
+  margin: 6px 0;
+}
+
+.sqw-contact-row span:nth-child(1){
+  color: #111;
+  font-weight: 800;
+}
+
+.sqw-contact-row span:nth-child(3){
+  justify-self: end;      /* ดันไปชิดขวาในกริด */
+  text-align: right;      /* จัดข้อความชิดขวา */
+  white-space: nowrap;    /* ห้ามขึ้นบรรทัดใหม่ */
+  word-break: keep-all;   /* ไม่ตัดคำ/ไม่ตัดตรงขีด */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* buttons */
+.sqw-actions{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.sqw-btn{
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 10px;
+  font-weight: 900;
   cursor: pointer;
+  background: var(--sqw-green);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(0,0,0,.16);
 }
 
-.sqw-btn-solid {
-  background: #1a8f2c;
-  color: #ffffff;
-  border: none;
-  box-shadow: 0 4px 0 #0f6b1f;
+.sqw-btn:active{
+  transform: translateY(1px);
 }
 
-/* ===== FORCE: No scrollbars anywhere inside popup ===== */
-#sqw-popup-root,
-#sqw-popup-root * {
-  overflow: visible;
-}
-
-/* ตัวที่ทำให้เลื่อนในไฟล์คุณ: ปิดทิ้ง */
-.sqw-popup-scroll {
+.ldpopupshell:has(#sqw-popup-root),
+.ldpopup:has(#sqw-popup-root),
+.ldpopupbody:has(#sqw-popup-root),
+.ldpopupcontent:has(#sqw-popup-root),
+.longdo-popup-wrapper:has(#sqw-popup-root),
+.longdo-popup-container:has(#sqw-popup-root),
+.longdo-popup-window:has(#sqw-popup-root),
+.longdo-popup-frame:has(#sqw-popup-root) {
+  width: fit-content !important;
+  height: fit-content !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
   max-height: none !important;
-  height: auto !important;
-  overflow: hidden !important;
-}
-
-/* ปิดการเลื่อนในกล่องหลักทั้งหมด */
-.sqw-popup,
-.sqw-popup-body,
-.sqw-popup-content {
-  max-height: none !important;
-  height: auto !important;
-  overflow: hidden !important;
-}
-
-/* ซ่อน scrollbar ทุก browser (กันหลุด) */
-.sqw-popup,
-.sqw-popup * {
-  scrollbar-width: none;       /* Firefox */
-  -ms-overflow-style: none;    /* IE/Edge เก่า */
-}
-.sqw-popup::-webkit-scrollbar,
-.sqw-popup *::-webkit-scrollbar {
-  width: 0 !important;         /* Chrome/Safari */
-  height: 0 !important;
-}
-
-.longdo-popup, .longdo-popup * {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
   overflow: visible !important;
+}
+
+/* KEY-VALUE CONTACT LIST (2 คอลัมน์) */
+.sqw-kv{
+  margin-top: 6px;
+  display: grid;
+  grid-template-columns: 120px 1fr; /* ซ้าย: คีย์ / ขวา: ค่า */
+  row-gap: 8px;
+  column-gap: 10px;
+  font-size: 14px;
+  color: #111;
+}
+
+.sqw-kv .k{
+  font-weight: 800;
+}
+
+.sqw-kv .v{
+  text-align: right;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

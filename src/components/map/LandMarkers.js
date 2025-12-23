@@ -1,177 +1,104 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
-/** -------- helpers -------- */
+/**
+ * LandMarkers (FINAL)
+ * - ✅ แก้หมุดซ้อน 2 อัน (React StrictMode) ด้วย cleanup ตอน unmount
+ * - ใส่ __land และ __loc ไว้บน overlay เพื่อให้ MapPage รับ overlayClick แล้วเปิด popup ได้
+ */
 
-function getLandId(land) {
-  // ต้อง “นิ่ง” เพื่อไม่ให้ overlay ถูกมองว่าเป็นตัวใหม่
-  return (
-    land?.id ??
-    land?._id ??
-    land?.code ??
-    land?.key ??
-    land?.title ??
-    // fallback (กันพัง แต่ไม่แนะนำให้ใช้ระยะยาว)
-    JSON.stringify({
-      lat: land?.lat,
-      lon: land?.lon,
-      location: land?.location,
-      geometry: land?.geometry,
-    })
-  );
+const DEFAULT_COLOR = "#E11D48"; // red-600
+
+function safeId(v, i) {
+  if (v == null) return `land_${i}`;
+  return String(v);
 }
 
-function locFromLand(land) {
-  // รองรับ land.location
-  if (land?.location?.lon != null && land?.location?.lat != null) {
-    return { lon: Number(land.location.lon), lat: Number(land.location.lat) };
-  }
-  // รองรับ land.lon/lat
-  if (land?.lon != null && land?.lat != null) {
-    return { lon: Number(land.lon), lat: Number(land.lat) };
-  }
-  return null;
+function svgToDataUri(svg) {
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 }
 
-function centroidOfRing(ring) {
-  // ring: [[lon,lat], ...]
-  if (!Array.isArray(ring) || ring.length < 3) return null;
-
-  let area = 0,
-    cx = 0,
-    cy = 0;
-
-  for (let i = 0; i < ring.length; i++) {
-    const [x1, y1] = ring[i];
-    const [x2, y2] = ring[(i + 1) % ring.length];
-    const f = x1 * y2 - x2 * y1;
-    area += f;
-    cx += (x1 + x2) * f;
-    cy += (y1 + y2) * f;
-  }
-
-  area *= 0.5;
-  if (!area) {
-    const [lon, lat] = ring[0];
-    return { lon, lat };
-  }
-  return { lon: cx / (6 * area), lat: cy / (6 * area) };
+function makePinSvg({ color = DEFAULT_COLOR } = {}) {
+  return `
+  <svg xmlns="http://www.w3.org/2000/svg" width="34" height="44" viewBox="0 0 34 44">
+    <defs>
+      <filter id="s" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,.25)"/>
+      </filter>
+    </defs>
+    <path filter="url(#s)"
+      d="M17 1C9.82 1 4 6.82 4 14c0 9.75 13 28 13 28s13-18.25 13-28C30 6.82 24.18 1 17 1z"
+      fill="${color}"/>
+    <circle cx="17" cy="14" r="5.6" fill="#fff"/>
+  </svg>`;
 }
 
-function ringFromPolygon(geometry) {
-  // รองรับ Polygon แบบ:
-  // 1) [[lon,lat],...] หรือ
-  // 2) [[[lon,lat],...]] (มี outer ring)
-  if (!geometry || geometry.type !== "Polygon" || !Array.isArray(geometry.coordinates)) return null;
-  const raw = geometry.coordinates;
-  // ถ้ามี 2 ชั้น -> ใช้ outer ring ชั้นแรก
-  const ring = Array.isArray(raw[0]?.[0]) ? raw[0] : raw;
-  return Array.isArray(ring) ? ring : null;
+function getLoc(land) {
+  const lat = land?.location?.lat ?? land?.lat;
+  const lon = land?.location?.lon ?? land?.lon;
+  if (lat == null || lon == null) return null;
+  const la = Number(lat);
+  const lo = Number(lon);
+  if (!Number.isFinite(la) || !Number.isFinite(lo)) return null;
+  return { lat: la, lon: lo };
 }
 
-function makePinSvg() {
-  return (
-    "data:image/svg+xml;utf8," +
-    encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-        <path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 5.4 10.58 7.2 12.19a1.2 1.2 0 0 0 1.6 0C14.6 20.58 20 15.25 20 10c0-4.42-3.58-8-8-8z"
-          fill="rgba(255,255,255,0.92)" stroke="#9ca3af" stroke-width="1"/>
-        <circle cx="12" cy="10" r="3" fill="#ef4444"/>
-      </svg>
-    `)
-  );
-}
+export default function LandMarkers({ map, lands = [], onSelect }) {
+  const markerMapRef = useRef(new Map()); // id -> overlay
+  const polygonMapRef = useRef(new Map()); // id -> overlay
 
-/** -------- component -------- */
-
-export default function LandMarkers({ map, lands = [], selectedLand, onSelect }) {
-  // เก็บ overlay เพื่อ “ไม่ต้องล้างทุกครั้ง”
-  const markerMapRef = useRef(new Map()); // id -> Marker
-  const polyMapRef = useRef(new Map()); // id -> Polygon
-  const onSelectRef = useRef(onSelect);
-  onSelectRef.current = onSelect;
-
-  /**
-   * ✅ 1) สร้าง marker + polygon ตาม lands (ถาวร)
-   *    - เพิ่มเฉพาะที่ยังไม่มี
-   *    - ลบเฉพาะที่หายไปจาก lands จริงๆ
-   */
+  // -------------------------
+  // Markers
+  // -------------------------
   useEffect(() => {
-    if (!map || !window.longdo) return;
-
     const L = window.longdo;
+    if (!map || !L) return;
 
-    const keepIds = new Set();
+    const idsNow = new Set();
 
-    (Array.isArray(lands) ? lands : []).forEach((land) => {
-      const id = getLandId(land);
-      keepIds.add(id);
+    lands.forEach((land, i) => {
+      const id = safeId(land?.id ?? land?.code ?? land?.uid, i);
+      const loc = getLoc(land);
+      if (!loc) return;
 
-      // --- หา loc: polygon centroid > location/latlon ---
-      let loc = null;
-      const ring = ringFromPolygon(land?.geometry);
-      if (ring) loc = centroidOfRing(ring);
-      if (!loc) loc = locFromLand(land);
+      idsNow.add(id);
 
-      // --- Marker ---
-      if (loc && !markerMapRef.current.has(id)) {
-        const marker = new L.Marker(loc, {
-          title: land?.brokerName || land?.owner || "แปลงที่ดิน",
-          icon: {
-            url: makePinSvg(),
-            size: { width: 28, height: 28 },
-            offset: { x: 14, y: 28 },
-          },
-          // ✅ อย่าตั้ง min zoom สูง ไม่งั้นซูมออกแล้วหมุดหาย
-          visibleRange: { min: 1, max: 20 },
-        });
+      let marker = markerMapRef.current.get(id);
 
-        marker.__id = id;
+      if (!marker) {
+        marker = new L.Marker(
+          { lon: loc.lon, lat: loc.lat },
+          {
+            icon: {
+              url: svgToDataUri(makePinSvg({ color: DEFAULT_COLOR })),
+              offset: { x: 17, y: 42 },
+              size: { width: 34, height: 44 },
+            },
+            clickable: true,
+          }
+        );
+
         marker.__land = land;
-        marker.__loc = loc;
+        marker.__loc = { lon: loc.lon, lat: loc.lat };
+        marker.__onSelect = () => onSelect?.(land, { lon: loc.lon, lat: loc.lat });
 
-        // ✅ สำคัญสุด: ต้องส่ง loc กลับไป MapPage เพื่อคำนวณ popupPos
-        const clickHandler = () => onSelectRef.current?.(land, loc);
-
-        // longdo event
         try {
-          L.Event.bind(marker, "click", clickHandler);
-        } catch {
-          marker.onclick = clickHandler;
+          map.Overlays.add(marker);
+        } catch (e) {
+          console.warn("Overlays.add marker failed:", e);
         }
 
-        map.Overlays.add(marker);
         markerMapRef.current.set(id, marker);
-      }
-
-      // --- Polygon (ถ้ามี) ---
-      if (ring && ring.length >= 3 && !polyMapRef.current.has(id)) {
-        const pts = ring.map(([lon, lat]) => ({ lon, lat }));
-        const poly = new L.Polygon(pts, {
-          lineWidth: 2,
-          lineColor: "rgba(255,215,0,0.90)",
-          fillColor: "rgba(255,215,0,0.25)",
-        });
-
-        poly.__id = id;
-        poly.__land = land;
-        poly.__loc = loc || centroidOfRing(ring);
-
-        const clickHandler = () => onSelectRef.current?.(land, poly.__loc || loc);
-
+      } else {
         try {
-          L.Event.bind(poly, "click", clickHandler);
-        } catch {
-          poly.onclick = clickHandler;
-        }
-
-        map.Overlays.add(poly);
-        polyMapRef.current.set(id, poly);
+          marker.location({ lon: loc.lon, lat: loc.lat });
+        } catch {}
+        marker.__land = land;
+        marker.__loc = { lon: loc.lon, lat: loc.lat };
       }
     });
 
-    // ลบ marker ที่ไม่อยู่ใน lands แล้ว
     for (const [id, marker] of markerMapRef.current.entries()) {
-      if (!keepIds.has(id)) {
+      if (!idsNow.has(id)) {
         try {
           map.Overlays.remove(marker);
         } catch {}
@@ -179,67 +106,99 @@ export default function LandMarkers({ map, lands = [], selectedLand, onSelect })
       }
     }
 
-    // ลบ polygon ที่ไม่อยู่ใน lands แล้ว
-    for (const [id, poly] of polyMapRef.current.entries()) {
-      if (!keepIds.has(id)) {
-        try {
-          map.Overlays.remove(poly);
-        } catch {}
-        polyMapRef.current.delete(id);
+    // ✅ Cleanup กันหมุดซ้อน (StrictMode mount/unmount)
+    return () => {
+      try {
+        for (const marker of markerMapRef.current.values()) {
+          try {
+            map.Overlays.remove(marker);
+          } catch {}
+        }
+      } finally {
+        markerMapRef.current.clear();
       }
-    }
-  }, [map, lands]);
+    };
+  }, [map, lands, onSelect]);
 
-  /**
-   * ✅ 2) Highlight polygon เมื่อเลือก land
-   *    - เพื่อความชัวร์ เรา rebuild เฉพาะ polygon (marker ไม่ยุ่ง)
-   */
+  // -------------------------
+  // Polygons (optional)
+  // -------------------------
   useEffect(() => {
-    if (!map || !window.longdo) return;
     const L = window.longdo;
+    if (!map || !L) return;
 
-    // ลบ polygon เดิมทั้งหมดก่อน (เฉพาะ polygon)
-    for (const [, poly] of polyMapRef.current.entries()) {
-      try {
-        map.Overlays.remove(poly);
-      } catch {}
-    }
-    polyMapRef.current.clear();
+    const idsNow = new Set();
 
-    const selectedId = selectedLand ? getLandId(selectedLand) : null;
+    lands.forEach((land, i) => {
+      const id = safeId(land?.id ?? land?.code ?? land?.uid, i);
+      const poly = land?.polygon;
+      if (!poly || !Array.isArray(poly) || poly.length < 3) return;
 
-    (Array.isArray(lands) ? lands : []).forEach((land) => {
-      const ring = ringFromPolygon(land?.geometry);
-      if (!ring || ring.length < 3) return;
+      idsNow.add(id);
 
-      const id = getLandId(land);
-      const isSelected = selectedId && selectedId === id;
+      let overlay = polygonMapRef.current.get(id);
 
-      const pts = ring.map(([lon, lat]) => ({ lon, lat }));
-      const loc = centroidOfRing(ring) || locFromLand(land);
+      const pts = poly
+        .map((p) => {
+          const lon = Number(p?.lon ?? p?.lng ?? p?.x);
+          const lat = Number(p?.lat ?? p?.y);
+          if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+          return { lon, lat };
+        })
+        .filter(Boolean);
 
-      const poly = new L.Polygon(pts, {
-        lineWidth: isSelected ? 4 : 2,
-        lineColor: isSelected ? "rgba(59,130,246,0.95)" : "rgba(255,215,0,0.90)",
-        fillColor: isSelected ? "rgba(59,130,246,0.25)" : "rgba(255,215,0,0.25)",
-      });
+      if (pts.length < 3) return;
 
-      poly.__id = id;
-      poly.__land = land;
-      poly.__loc = loc;
+      if (!overlay) {
+        try {
+          overlay = new L.Polygon(pts, {
+            lineWidth: 2,
+            lineColor: "rgba(16,185,129,1)",
+            fillColor: "rgba(16,185,129,0.18)",
+            clickable: true,
+          });
 
-      const clickHandler = () => onSelectRef.current?.(land, loc);
+          overlay.__land = land;
+          const c = pts.reduce(
+            (acc, p) => ({ lon: acc.lon + p.lon, lat: acc.lat + p.lat }),
+            { lon: 0, lat: 0 }
+          );
+          overlay.__loc = { lon: c.lon / pts.length, lat: c.lat / pts.length };
 
-      try {
-        L.Event.bind(poly, "click", clickHandler);
-      } catch {
-        poly.onclick = clickHandler;
+          map.Overlays.add(overlay);
+          polygonMapRef.current.set(id, overlay);
+        } catch (e) {
+          console.warn("add polygon failed:", e);
+        }
+      } else {
+        try {
+          overlay.location(pts);
+        } catch {}
+        overlay.__land = land;
       }
-
-      map.Overlays.add(poly);
-      polyMapRef.current.set(id, poly);
     });
-  }, [map, lands, selectedLand]);
+
+    for (const [id, overlay] of polygonMapRef.current.entries()) {
+      if (!idsNow.has(id)) {
+        try {
+          map.Overlays.remove(overlay);
+        } catch {}
+        polygonMapRef.current.delete(id);
+      }
+    }
+
+    return () => {
+      try {
+        for (const overlay of polygonMapRef.current.values()) {
+          try {
+            map.Overlays.remove(overlay);
+          } catch {}
+        }
+      } finally {
+        polygonMapRef.current.clear();
+      }
+    };
+  }, [map, lands]);
 
   return null;
 }

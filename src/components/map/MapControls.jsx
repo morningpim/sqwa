@@ -1,6 +1,6 @@
-// src/components/map/MapControls.jsx
 import React, { useEffect, useRef, useState } from "react";
 import LayersPanel from "../Panels/LayersPanel";
+import SearchPanel from "../Panels/SearchPanel";
 
 export default function MapControls({
   openLayerMenu,
@@ -18,6 +18,7 @@ export default function MapControls({
   onOpenFilter,
   onOpenChat,
   onOpenTools,
+  onSearch,
 }) {
   const rootRef = useRef(null);
 
@@ -27,6 +28,7 @@ export default function MapControls({
   const [baseOpacity, setBaseOpacity] = useState(1);
   const [redRoadEnabled, setRedRoadEnabled] = useState(true);
   const [redRoadOpacity, setRedRoadOpacity] = useState(0.45);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // ===== close dropdown when click outside =====
   useEffect(() => {
@@ -45,7 +47,6 @@ export default function MapControls({
 
   return (
     <div className="map-right-stack" ref={rootRef}>
-      {/* ===== Map / Satellite dropdown ===== */}
       <div className="map-layer-menu">
         <button
           className="map-layer-trigger"
@@ -110,7 +111,28 @@ export default function MapControls({
       />
 
       {/* ===== FAB buttons ===== */}
+      
       <div className="map-fab-stack">
+          <div className={`search-pop-wrap ${searchOpen ? "open" : ""}`}>
+            <button
+              className="map-fab"
+              type="button"
+              title="Search"
+              onClick={() => setSearchOpen((v) => !v)}
+            >
+              <span className="material-icon" aria-hidden="true">search</span>
+            </button>
+
+            <SearchPanel
+              open={searchOpen}
+              onClose={() => setSearchOpen(false)}
+              onSearch={(text) => {
+                onSearch?.(text);
+                setSearchOpen(false);
+              }}
+            />
+          </div>
+
         <button
           className="map-fab"
           type="button"
