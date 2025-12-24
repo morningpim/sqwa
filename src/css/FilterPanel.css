@@ -1,12 +1,23 @@
 /* ✅ FIX: ต้องมี . นำหน้า */
-.filter-panel{
-  position: absolute;
-  top: calc(var(--nav-h) + var(--gap));
-  left: 18px;
-  right: auto;
-  z-index: 95;
-  width: 280px;
+:root{
+  --filter-offset-y: -56px; /* ค่าเป็นลบ = ขยับขึ้น */
 }
+
+.filter-panel {
+  position: absolute;
+  top: calc(var(--nav-h) + 24px + var(--filter-offset-y));
+  right: 86px;
+  left: auto;
+  z-index: 120;
+
+  width: 360px;
+
+  /* ⭐ ให้ panel กินพื้นที่แนวตั้งได้เต็ม แต่ไม่ล้น */
+  max-height: calc(100vh - (var(--nav-h) + 40px));
+  display: flex;
+  flex-direction: column;
+}
+
 
 /* กล่อง */
 .filter-card{

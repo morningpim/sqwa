@@ -6,9 +6,9 @@ import ModeDisclaimerModal from "../Common/ModeDisclaimerModal";
 import "../../css/MapPage.css";
 import "../../css/land-popup.css";
 
-import SearchBar from "../Panels/SearchPanel";
 import MapControls from "./MapControls";
 import FilterPanel from "../Panels/FilterPanel";
+import PayModal from "./Payments/PayModal";
 
 import { useLongdoMap } from "./hooks/useLongdoMap";
 import LandMarkers from "./LandMarkers";
@@ -55,18 +55,117 @@ function normalizePoint(pt) {
 }
 
 // -------------------------
+// ✅ Unlock Picker Modal
+// -------------------------
+function UnlockPickerModal({ open, onClose, selected, setSelected, onConfirm }) {
+  if (!open) return null;
+
+  const items = [
+    { k: "contactOwner", label: "เจ้าของ" },
+    { k: "broker", label: "นายหน้า" },
+    { k: "phone", label: "โทร" },
+    { k: "line", label: "LINE ID" },
+    { k: "frame", label: "กรอบที่ดิน" },
+    { k: "chanote", label: "ข้อมูลโฉนด/ระวาง" },
+  ];
+
+  const toggle = (k) => {
+    setSelected((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));
+  };
+
+  return createPortal(
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,.35)",
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          width: "min(520px, 95vw)",
+          background: "#fff",
+          borderRadius: 16,
+          border: "2px solid #118e44",
+          boxShadow: "0 20px 60px rgba(0,0,0,.25)",
+          overflow: "hidden",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontWeight: 800, fontSize: 20, color: "#118e44" }}>เลือกข้อมูลที่ต้องการปลดล็อก</div>
+          <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 18, border: "1px solid #ccc" }}>
+            ✕
+          </button>
+        </div>
+
+        <div style={{ padding: "0 16px 16px", display: "grid", gap: 10 }}>
+          {items.map((it) => (
+            <label
+              key={it.k}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                border: "2px solid #118e44",
+                borderRadius: 12,
+                padding: "10px 12px",
+                cursor: "pointer",
+              }}
+            >
+              <input type="checkbox" checked={selected.includes(it.k)} onChange={() => toggle(it.k)} />
+              <span style={{ fontWeight: 700 }}>{it.label}</span>
+            </label>
+          ))}
+        </div>
+
+        <div style={{ padding: 16, display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid #ccc", background: "#fff" }}
+          >
+            ยกเลิก
+          </button>
+
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={selected.length === 0}
+            style={{
+              padding: "10px 14px",
+              borderRadius: 12,
+              border: 0,
+              background: selected.length ? "#118e44" : "#9bd3b0",
+              color: "#fff",
+              fontWeight: 800,
+              cursor: selected.length ? "pointer" : "not-allowed",
+            }}
+          >
+            ไปหน้าชำระเงิน
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+// -------------------------
 // MAIN
 // -------------------------
 export default function MapPage() {
   const [params] = useSearchParams();
   const mode = params.get("mode") || "buy";
 
-  // ✅ PATCH: ให้ขึ้น Disclaimer "ทุกครั้งเมื่อเปลี่ยนโหมด"
-  // - ไม่ใช้ sessionStorage แล้ว (เพราะต้องการให้แจ้งเตือนทุกครั้ง)
   const [showDisclaimer, setShowDisclaimer] = useState(true);
-  useEffect(() => {
-    setShowDisclaimer(true);
-  }, [mode]);
+  useEffect(() => setShowDisclaimer(true), [mode]);
 
   const [openLayerMenu, setOpenLayerMenu] = useState(false);
   const [isSatellite, setIsSatellite] = useState(false);
@@ -87,12 +186,50 @@ export default function MapPage() {
 
   const [lands] = useState(mockLands);
 
+  // -------------------------
+  // ✅ Access / Quota (FRONTEND MOCK)
+  // -------------------------
+  const ACCESS_KEY = "sqw_access_v1";
+  const todayKeyTH = () => new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
+
+  const loadAccess = () => {
+    try {
+      const raw = localStorage.getItem(ACCESS_KEY);
+      const data = raw ? JSON.parse(raw) : null;
+
+      const dateKey = todayKeyTH();
+      const savedDate = data?.dateKey ?? dateKey;
+      const quotaUsed = savedDate === dateKey ? (data?.quotaUsed ?? 0) : 0;
+
+      return {
+        dateKey,
+        isMember: !!data?.isMember,
+        quotaUsed,
+        unlockedFields: data?.unlockedFields ?? {}, // { [landId]: ["phone","line"] }
+      };
+    } catch {
+      return { dateKey: todayKeyTH(), isMember: false, quotaUsed: 0, unlockedFields: {} };
+    }
+  };
+
+  const saveAccess = (next) => localStorage.setItem(ACCESS_KEY, JSON.stringify(next));
+  const [access, setAccess] = useState(() => loadAccess());
+
+  // -------------------------
+  // ✅ Pay + Unlock Picker
+  // -------------------------
+  const [payOpen, setPayOpen] = useState(false);
+  const [payDraft, setPayDraft] = useState(null); // { landId, fields }
+
+  const [unlockOpen, setUnlockOpen] = useState(false);
+  const [unlockLandId, setUnlockLandId] = useState("");
+  const [unlockSelected, setUnlockSelected] = useState([]);
+
   const { mapRef, initMap, applySatellite, applyTraffic, zoomIn, zoomOut, locateMe } =
     useLongdoMap({ isSatellite, isTraffic });
 
   const [mapObj, setMapObj] = useState(null);
 
-  // target DOM
   const [mapEl, setMapEl] = useState(null);
   const [overlayEl, setOverlayEl] = useState(null);
   useEffect(() => {
@@ -100,12 +237,13 @@ export default function MapPage() {
     setOverlayEl(document.getElementById("map-overlay"));
   }, []);
 
-  // ✅ safeTop: ระยะจากบน overlay ที่ห้าม popup ทับ (Navbar + SearchBar)
+  // safe areas
   const [safeTop, setSafeTop] = useState(0);
+  const [safeRight, setSafeRight] = useState(0);
   const [overlaySize, setOverlaySize] = useState({ w: 0, h: 0 });
 
-  // ✅ วัดขนาด popup จริง (ใช้ clamp ให้ไม่เกินขอบ + วางขวาหมุด)
   const [popupSize, setPopupSize] = useState({ w: 360, h: 360 });
+
   const popupBoxRef = useCallback((node) => {
     if (!node) return;
     const r = node.getBoundingClientRect?.();
@@ -117,7 +255,7 @@ export default function MapPage() {
     }
   }, []);
 
-  const computeSafeTop = useCallback(() => {
+  const computeSafeAreas = useCallback(() => {
     if (!overlayEl) return;
     const overlayRect = overlayEl.getBoundingClientRect?.();
     if (!overlayRect) return;
@@ -150,22 +288,24 @@ export default function MapPage() {
       maxBottom = overlayRect.top + navH + gap + searchH;
     }
 
-    const GAP = 12;
-    const localSafe = Math.max(0, maxBottom - overlayRect.top);
-    setSafeTop(localSafe + GAP);
+    const TOP_GAP = 12;
+    const localSafeTop = Math.max(0, maxBottom - overlayRect.top);
+    setSafeTop(localSafeTop + TOP_GAP);
+
+    const rightStack = document.querySelector(".map-right-stack") || document.querySelector("#map-right-stack");
+    if (rightStack?.getBoundingClientRect) {
+      const rr = rightStack.getBoundingClientRect();
+      const RIGHT_GAP = 12;
+      const blockWidth = Math.max(0, overlayRect.right - rr.left);
+      setSafeRight(blockWidth + RIGHT_GAP);
+    } else {
+      setSafeRight(110);
+    }
   }, [overlayEl]);
 
-  // -------------------------
-  // Disclaimer close
-  // -------------------------
-  // ✅ PATCH: กดรับทราบแล้วค่อยให้โหลดแผนที่/ข้อมูลต่อ
-  const handleAcceptDisclaimer = useCallback(() => {
-    setShowDisclaimer(false);
-  }, []);
+  const handleAcceptDisclaimer = useCallback(() => setShowDisclaimer(false), []);
 
-  // -------------------------
-  // Init Map
-  // -------------------------
+  // init map
   useEffect(() => {
     if (showDisclaimer) {
       setMapObj(null);
@@ -173,7 +313,15 @@ export default function MapPage() {
     }
 
     initMap()
-      .then(() => setMapObj(mapRef.current || null))
+      .then(() => {
+        const m = mapRef.current || null;
+        setMapObj(m);
+        setTimeout(() => {
+          try {
+            m?.resize?.();
+          } catch {}
+        }, 0);
+      })
       .catch((e) => {
         console.error(e);
         alert("โหลดแผนที่ไม่สำเร็จ: กรุณาเช็ค longdo script/key");
@@ -189,17 +337,15 @@ export default function MapPage() {
   }, [isTraffic, applyTraffic, mapObj]);
 
   useEffect(() => {
-    computeSafeTop();
-    window.addEventListener("resize", computeSafeTop);
-    return () => window.removeEventListener("resize", computeSafeTop);
-  }, [computeSafeTop]);
+    computeSafeAreas();
+    window.addEventListener("resize", computeSafeAreas);
+    return () => window.removeEventListener("resize", computeSafeAreas);
+  }, [computeSafeAreas]);
 
-  // -------------------------
-  // Popup State
-  // -------------------------
+  // popup state
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedLand, setSelectedLand] = useState(null);
-  const [popupPos, setPopupPos] = useState(null); // local to overlay
+  const [popupPos, setPopupPos] = useState(null);
   const selectedLocRef = useRef(null);
   const lastPopupOpenAtRef = useRef(0);
 
@@ -220,21 +366,15 @@ export default function MapPage() {
 
       let pt = null;
 
-      // 1) ดีสุด: locationToScreen
       try {
-        if (typeof mapObj.locationToScreen === "function") {
-          pt = normalizePoint(mapObj.locationToScreen(loc));
-        }
+        if (typeof mapObj.locationToScreen === "function") pt = normalizePoint(mapObj.locationToScreen(loc));
       } catch {}
 
-      // 2) fallback: locationToPoint
       if (!pt) {
         try {
-          if (typeof mapObj.locationToPoint === "function") {
-            pt = normalizePoint(mapObj.locationToPoint(loc));
-          } else if (mapObj.Projection && typeof mapObj.Projection.locationToPoint === "function") {
+          if (typeof mapObj.locationToPoint === "function") pt = normalizePoint(mapObj.locationToPoint(loc));
+          else if (mapObj.Projection && typeof mapObj.Projection.locationToPoint === "function")
             pt = normalizePoint(mapObj.Projection.locationToPoint(loc));
-          }
         } catch {}
       }
 
@@ -243,9 +383,7 @@ export default function MapPage() {
         return;
       }
 
-      // Detect pt เป็น map-local หรือ viewport
-      const isMapLocal =
-        pt.x >= -2 && pt.y >= -2 && pt.x <= mapRect.width + 2 && pt.y <= mapRect.height + 2;
+      const isMapLocal = pt.x >= -2 && pt.y >= -2 && pt.x <= mapRect.width + 2 && pt.y <= mapRect.height + 2;
 
       const x = isMapLocal ? pt.x + (mapRect.left - overlayRect.left) : pt.x - overlayRect.left;
       const y = isMapLocal ? pt.y + (mapRect.top - overlayRect.top) : pt.y - overlayRect.top;
@@ -266,9 +404,10 @@ export default function MapPage() {
       setPopupOpen(true);
       lastPopupOpenAtRef.current = Date.now();
       setPopupPosFromLoc(loc);
-      computeSafeTop();
+      computeSafeAreas();
+      setAccess(loadAccess());
     },
-    [setPopupPosFromLoc, computeSafeTop]
+    [setPopupPosFromLoc, computeSafeAreas]
   );
 
   const handleSelectLand = useCallback(
@@ -298,7 +437,7 @@ export default function MapPage() {
     handleSelectLandRef.current?.(land, loc);
   }, []);
 
-  // ✅ overlayClick (ชัวร์สุด)
+  // overlayClick / markerClick
   useEffect(() => {
     const map = mapObj;
     if (!map) return;
@@ -320,8 +459,28 @@ export default function MapPage() {
     };
   }, [mapObj, openPopupFor]);
 
-  // ✅ ทำให้ popup “ตามหมุดแน่นอน” แม้ event ของ map บางตัวไม่ยิง
-  // ใช้ RAF loop เบา ๆ (ประมาณ 30fps)
+  useEffect(() => {
+    const map = mapObj;
+    if (!map) return;
+
+    const onMarkerClick = (overlay) => {
+      const land = overlay?.__land;
+      const loc = overlay?.__loc;
+      if (land && loc) openPopupFor(land, loc);
+    };
+
+    try {
+      map.Event.bind("markerClick", onMarkerClick);
+    } catch {}
+
+    return () => {
+      try {
+        map.Event.unbind("markerClick", onMarkerClick);
+      } catch {}
+    };
+  }, [mapObj, openPopupFor]);
+
+  // popup follow marker
   useEffect(() => {
     if (!popupOpen) return;
 
@@ -331,22 +490,20 @@ export default function MapPage() {
     const loop = (t) => {
       raf = requestAnimationFrame(loop);
       if (!popupOpen) return;
-      if (t - last < 33) return; // ~30fps
+      if (t - last < 33) return;
       last = t;
 
       const loc = selectedLocRef.current;
       if (!loc) return;
       setPopupPosFromLoc(loc);
-      computeSafeTop();
+      computeSafeAreas();
     };
 
     raf = requestAnimationFrame(loop);
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [popupOpen, setPopupPosFromLoc, computeSafeTop]);
+    return () => raf && cancelAnimationFrame(raf);
+  }, [popupOpen, setPopupPosFromLoc, computeSafeAreas]);
 
-  // click map -> close popup (กันปิดทันทีหลังคลิกหมุด)
+  // click map -> close popup
   useEffect(() => {
     const map = mapObj;
     if (!map) return;
@@ -368,14 +525,11 @@ export default function MapPage() {
     };
   }, [mapObj, closePopup]);
 
-  // ✅ โหมดเปลี่ยน หรือกลับไปขึ้น disclaimer -> ปิด popup ทันที
   useEffect(() => {
     closePopup();
   }, [mode, showDisclaimer, closePopup]);
 
-  // -------------------------
-  // Search
-  // -------------------------
+  // search
   const handleSearch = useCallback(
     async (q) => {
       const map = mapObj;
@@ -405,19 +559,29 @@ export default function MapPage() {
     [mapObj]
   );
 
-  // -------------------------
-  // Popup HTML & style
-  // -------------------------
+  // popup HTML
   const popupHtml = useMemo(() => {
     if (!selectedLand) return "";
-    return buildLandPopupHtml(selectedLand);
-  }, [selectedLand]);
 
-  // ✅ วาง “ด้านขวาหมุด” ก่อน (ไม่ทับหมุด) ถ้าไม่พอค่อยไปซ้าย
-  const GAP_X = 14;
+    const landId = selectedLand?.id ?? selectedLand?.landId ?? "";
+    const unlocked = access?.unlockedFields?.[landId] ?? [];
+
+    return buildLandPopupHtml(selectedLand, {
+      isMember: access?.isMember ?? false,
+      quota: { limit: 10, used: access?.quotaUsed ?? 0 },
+      unlockedFields: unlocked,
+    });
+  }, [selectedLand, access]);
+
+  // popup layout
+  const GAP_X = 8;
   const GAP_Y = 0;
+
   const SAFE_BOTTOM = 16;
   const SAFE_SIDE = 12;
+
+  const ARROW_SIZE = 14;
+  const ARROW_GAP = 4;
 
   const popupSide = useMemo(() => {
     const x = popupPos?.x ?? 0;
@@ -425,13 +589,13 @@ export default function MapPage() {
     const OW = overlaySize.w || 0;
     if (!OW) return "right";
 
-    const canRight = x + GAP_X + W <= OW - SAFE_SIDE;
+    const canRight = x + GAP_X + W <= OW - SAFE_SIDE - safeRight;
     const canLeft = x - GAP_X - W >= SAFE_SIDE;
 
     if (canRight) return "right";
     if (canLeft) return "left";
-    return "right";
-  }, [popupPos, popupSize.w, overlaySize.w]);
+    return "left";
+  }, [popupPos, popupSize.w, overlaySize.w, safeRight]);
 
   const popupStyle = useMemo(() => {
     const x = popupPos?.x ?? 0;
@@ -443,10 +607,15 @@ export default function MapPage() {
     const W = popupSize.w;
     const H = popupSize.h;
 
-    let left = popupSide === "right" ? x + GAP_X : x - GAP_X - W;
     let top = y - H / 2 + GAP_Y;
+    let left = popupSide === "right" ? x + GAP_X : x - GAP_X - W;
 
-    if (OW) left = Math.max(SAFE_SIDE, Math.min(OW - SAFE_SIDE - W, left));
+    left = Math.max(SAFE_SIDE, left);
+
+    if (OW) {
+      const rightLimit = OW - W - SAFE_SIDE - safeRight;
+      left = Math.min(rightLimit, left);
+    }
 
     const minTop = safeTop;
     const maxTop = OH ? OH - SAFE_BOTTOM - H : top;
@@ -460,29 +629,98 @@ export default function MapPage() {
       pointerEvents: "none",
       background: "transparent",
     };
-  }, [popupPos, popupSide, safeTop, overlaySize.w, overlaySize.h, popupSize.w, popupSize.h]);
+  }, [popupPos, popupSide, safeTop, safeRight, overlaySize.w, overlaySize.h, popupSize.w, popupSize.h]);
 
-  // ✅ กากบาทปิดได้ (แม้เป็น dangerouslySetInnerHTML)
+  const arrowStyle = useMemo(() => {
+    const base = {
+      position: "absolute",
+      width: `${ARROW_SIZE}px`,
+      height: `${ARROW_SIZE}px`,
+      transform: "rotate(45deg)",
+      background: "#fff",
+      boxShadow: "0 10px 30px rgba(0,0,0,.14)",
+      border: "2px solid #118e44",
+      zIndex: 1,
+      top: "50%",
+      marginTop: `${-ARROW_SIZE / 2}px`,
+      pointerEvents: "none",
+    };
+
+    if (popupSide === "right") return { ...base, left: `${-ARROW_SIZE / 2 - ARROW_GAP}px` };
+    return { ...base, right: `${-ARROW_SIZE / 2 - ARROW_GAP}px` };
+  }, [popupSide]);
+
+  // ✅ Click inside popup
   const handlePopupClick = useCallback(
     (e) => {
+      // ✅ กัน map ปิด popup ตอนคลิกใน popup
+      lastPopupOpenAtRef.current = Date.now();
+
+      // close
       const closeBtn = e.target?.closest?.('[data-sqw-close="1"]');
       if (closeBtn) {
         e.preventDefault();
         e.stopPropagation();
         closePopup();
+        return;
+      }
+
+      const landId = selectedLand?.id ?? selectedLand?.landId ?? "";
+      if (!landId) return;
+
+      // member: unlock all
+      const unlockAllBtn = e.target?.closest?.('[data-action="unlock-all"]');
+      if (unlockAllBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const cur = loadAccess();
+        if (!cur.isMember) return;
+
+        if (cur.quotaUsed >= 10) {
+          alert("โควตาการดูข้อมูลวันนี้ครบ 10 ครั้งแล้ว");
+          return;
+        }
+
+        const used = cur.quotaUsed + 1;
+        const allFields = ["contactOwner", "broker", "phone", "line", "frame", "chanote"];
+
+        const unlockedFields = { ...(cur.unlockedFields ?? {}) };
+        unlockedFields[landId] = allFields;
+
+        const saved = {
+          dateKey: todayKeyTH(),
+          isMember: true,
+          quotaUsed: used,
+          unlockedFields,
+        };
+
+        saveAccess(saved);
+        setAccess(saved);
+        return;
+      }
+
+      // ✅ non-member: open picker modal
+      const openPickerBtn = e.target?.closest?.('[data-action="open-unlock-picker"]');
+      if (openPickerBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        setUnlockLandId(landId);
+        setUnlockSelected([]);
+        setUnlockOpen(true);
+        return;
       }
     },
-    [closePopup]
+    [closePopup, selectedLand]
   );
 
-  // -------------------------
   // Render
-  // -------------------------
   return (
-    <div className="map-page">
-      {showDisclaimer && <ModeDisclaimerModal onClose={handleAcceptDisclaimer} />}
+    <div className="map-shell">
+      <div id="map" className="map-canvas" />
 
-      {/*<SearchBar onSearch={handleSearch} />*/}
+      {showDisclaimer && <ModeDisclaimerModal onClose={handleAcceptDisclaimer} />}
 
       <FilterPanel
         open={filterOpen}
@@ -505,53 +743,90 @@ export default function MapPage() {
         }
       />
 
-      <div className="map-shell" style={{ position: "relative", zIndex: 0 }}>
-        <div id="map" className="map-canvas" />
+      <div
+        id="map-overlay"
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 1,
+        }}
+      />
 
-        {/* overlay ของเราเอง */}
-        <div
-          id="map-overlay"
-          style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            zIndex: 1,
-          }}
-        />
+      {!!mapObj && <LandMarkers map={mapObj} lands={lands} onSelect={handleSelectLandSafe} />}
 
-        {!!mapObj && <LandMarkers map={mapObj} lands={lands} onSelect={handleSelectLandSafe} />}
+      <MapControls
+        onSearch={handleSearch}
+        openLayerMenu={openLayerMenu}
+        setOpenLayerMenu={setOpenLayerMenu}
+        isSatellite={isSatellite}
+        setIsSatellite={setIsSatellite}
+        isTraffic={isTraffic}
+        setIsTraffic={setIsTraffic}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        onLocate={locateMe}
+        onOpenFilter={() => setFilterOpen(true)}
+        onOpenChat={() => alert("TODO: open chat")}
+      />
 
-        <MapControls
-          onSearch={handleSearch}
-          openLayerMenu={openLayerMenu}
-          setOpenLayerMenu={setOpenLayerMenu}
-          isSatellite={isSatellite}
-          setIsSatellite={setIsSatellite}
-          isTraffic={isTraffic}
-          setIsTraffic={setIsTraffic}
-          onZoomIn={zoomIn}
-          onZoomOut={zoomOut}
-          onLocate={locateMe}
-          onOpenFilter={() => setFilterOpen(true)}
-          onOpenChat={() => alert("TODO: open chat")}
-        />
-
-        {/* popup portal เข้า overlay */}
-        {popupOpen && popupPos && overlayEl
-          ? createPortal(
-              <div style={popupStyle}>
+      {/* popup */}
+      {popupOpen && popupPos && overlayEl
+        ? createPortal(
+            <div style={popupStyle}>
+              <div ref={popupBoxRef} style={{ position: "relative", pointerEvents: "auto" }} onClick={handlePopupClick}>
+                <div style={arrowStyle} />
                 <div
                   className="land-popup-shell"
-                  ref={popupBoxRef}
-                  style={{ pointerEvents: "auto" }}
-                  onClick={handlePopupClick}
+                  style={{ position: "relative", zIndex: 2, pointerEvents: "auto" }}
                   dangerouslySetInnerHTML={{ __html: popupHtml }}
                 />
-              </div>,
-              overlayEl
-            )
-          : null}
-      </div>
+              </div>
+            </div>,
+            overlayEl
+          )
+        : null}
+
+      {/* ✅ modal เลือกข้อมูลที่จะปลดล็อก */}
+      <UnlockPickerModal
+        open={unlockOpen}
+        selected={unlockSelected}
+        setSelected={setUnlockSelected}
+        onClose={() => setUnlockOpen(false)}
+        onConfirm={() => {
+          if (!unlockLandId || unlockSelected.length === 0) return;
+          setPayDraft({ landId: unlockLandId, fields: unlockSelected });
+          setUnlockOpen(false);
+          setPayOpen(true);
+        }}
+      />
+
+      {/* modal จ่ายเงิน (mock) */}
+      <PayModal
+        open={payOpen}
+        draft={payDraft}
+        onClose={() => setPayOpen(false)}
+        onConfirm={() => {
+          if (!payDraft?.landId || !Array.isArray(payDraft.fields)) return;
+
+          const cur = loadAccess();
+          const unlockedFields = { ...(cur.unlockedFields ?? {}) };
+          const prev = unlockedFields[payDraft.landId] ?? [];
+          unlockedFields[payDraft.landId] = Array.from(new Set([...prev, ...payDraft.fields]));
+
+          const saved = {
+            dateKey: todayKeyTH(),
+            isMember: cur.isMember,
+            quotaUsed: cur.quotaUsed,
+            unlockedFields,
+          };
+
+          saveAccess(saved);
+          setAccess(saved);
+          setPayOpen(false);
+          alert("ชำระเงินสำเร็จ (mock) ✅");
+        }}
+      />
     </div>
   );
 }

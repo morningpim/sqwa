@@ -1,41 +1,48 @@
-/* src/css/MapPage.css */
 :root {
-  --nav-h: 72px;
+  --nav-h: 64px; /* ✅ ให้ตรง navbar จริง */
   --gap: 14px;
 
   --brand: #118e44;
   --panel-bg: #fff;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+  --right-toolbar-offset: -72px;
 }
 
-html,
-body,
-#root {
+html, body, #root {
   height: 100%;
 }
 body {
   margin: 0;
+  overflow: hidden; /* ✅ กัน scrollbar ของหน้า */
 }
 
-/* ✅ หน้ากลางของ map เต็มจอเสมอ */
-.map-shell {
-  position: relative;
+/* ✅ หน้า map เต็ม viewport */
+.map-page {
   width: 100%;
   height: 100vh;
-  overflow: visible; 
-  background: #f3f4f6;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
 }
 
-/* ✅ แผนที่เริ่ม “ใต้ navbar” เสมอ */
-.map-canvas {
-  position: absolute;
+/* ✅ แผนที่เป็น background เต็มจอ “ใต้ navbar” */
+.map-shell {
+  position: fixed;
+  top: var(--nav-h);
   left: 0;
   right: 0;
-  top: calc(var(--nav-h) - 10px);
   bottom: 0;
-  z-index: 1;
+  background: transparent;
   overflow: hidden;
 }
+
+/* ✅ แผนที่ Longdo เกาะเต็มพื้นที่ */
+.map-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
 
 /* ===== Top search ===== */
 .map-topbar{
@@ -85,9 +92,9 @@ body {
 }
 
 /* ===== Right toolbar ===== */
-.map-right-stack {
+.map-right-stack{
   position: absolute;
-  top: calc(var(--nav-h) + var(--gap));
+  top: calc(var(--nav-h) + var(--gap) + var(--right-toolbar-offset));
   right: var(--gap);
   z-index: 70;
 
@@ -170,7 +177,7 @@ body {
 
 /* zoom box */
 .map-zoom-box {
-  margin-top: 152px;
+  margin-top: 112px;
   display: flex;
   flex-direction: column;
   gap: 10px;

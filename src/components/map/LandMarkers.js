@@ -33,12 +33,16 @@ function makePinSvg({ color = DEFAULT_COLOR } = {}) {
 }
 
 function getLoc(land) {
-  const lat = land?.location?.lat ?? land?.lat;
-  const lon = land?.location?.lon ?? land?.lon;
+  const l = land?.location ?? land ?? {};
+  const lat = l.lat ?? l.latitude;
+  const lon = l.lon ?? l.lng ?? l.long ?? l.longitude;
+
   if (lat == null || lon == null) return null;
+
   const la = Number(lat);
   const lo = Number(lon);
   if (!Number.isFinite(la) || !Number.isFinite(lo)) return null;
+
   return { lat: la, lon: lo };
 }
 
