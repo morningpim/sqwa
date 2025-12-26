@@ -1,6 +1,9 @@
 import "../../css/land-popup.css";
+import { QUOTA_LIMIT } from "./constants/unlock";
 
-// ✅ แปลงวันที่ให้เป็นรูปแบบไทย รองรับ string / Date / Firestore Timestamp / {seconds}
+// -------------------------
+// utils เดิม (ใช้ต่อได้)
+// -------------------------
 const normalizeDate = (v) => {
   if (!v) return null;
 
@@ -41,7 +44,9 @@ function normalizeLand(input = {}) {
   const fmt = (v, digits = null) => {
     const n = toNumber(v);
     if (n == null) return null;
-    if (typeof digits === "number") return n.toLocaleString("en-US", { maximumFractionDigits: digits });
+    if (typeof digits === "number") {
+      return n.toLocaleString("en-US", { maximumFractionDigits: digits });
+    }
     return n.toLocaleString("en-US");
   };
 
@@ -117,15 +122,12 @@ function normalizeLand(input = {}) {
     id,
     owner,
     updatedAt,
-
     area: fmt(areaSqw) ?? (areaSqw != null ? String(areaSqw) : "-"),
     raw,
     frontage: fmt(frontage) ?? (frontage != null ? String(frontage) : "-"),
     roadWidth: fmt(roadWidth) ?? (roadWidth != null ? String(roadWidth) : "-"),
-
     pricePerWa: fmt(pricePerWa, 2) ?? (pricePerWa != null ? String(pricePerWa) : "-"),
     totalPrice: fmt(totalPrice) ?? (totalPrice != null ? String(totalPrice) : "-"),
-
     contactOwner,
     broker,
     phone,
@@ -135,122 +137,106 @@ function normalizeLand(input = {}) {
   };
 }
 
-/**
- * buildLandPopupHtml(land, access)
- * access:
- *  - isMember: boolean
- *  - quota: { limit:number, used:number }
- *  - unlockedFields: string[]  // fields ที่ปลดล็อกของ land นี้
- */
-export default function buildLandPopupHtml(
-  land = {},
-  access = { isMember: false, quota: { limit: 10, used: 0 }, unlockedFields: [] }
-) {
+// -------------------------
+// React Component
+// -------------------------
+export default function LandDetailPanel({
+  land,
+  isMember,
+  quotaUsed,
+  unlockedFields = [],
+  onClose,
+  onOpenUnlockPicker,
+  onUnlockAll,
+}) {
   const L = normalizeLand(land);
+  const unlockedSet = new Set(unlockedFields);
 
-  const isMember = !!access?.isMember;
-  const quotaLimit = Number(access?.quota?.limit ?? 10);
-  const quotaUsed = Number(access?.quota?.used ?? 0);
-
-  const unlockedSet = new Set(Array.isArray(access?.unlockedFields) ? access.unlockedFields : []);
   const canSeeAllForThisLand = isMember && unlockedSet.size > 0;
+  const canReveal = (key) => canSeeAllForThisLand || unlockedSet.has(key);
 
-  const canReveal = (fieldKey) => canSeeAllForThisLand || unlockedSet.has(fieldKey);
-  const showValue = (fieldKey, realValue, masked) => (canReveal(fieldKey) ? (realValue || "-") : masked);
+  const showValue = (key, value, masked) => (canReveal(key) ? value || "-" : masked);
 
-    const memberUI = `
-    <div class="sqw-divider"></div>
-
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <div class="sqw-h" style="margin:0;">สิทธิ์สมาชิก</div>
-      <div style="font-size:12px; opacity:.8;">
-        โควตาวันนี้: <b>${quotaUsed}</b> / ${quotaLimit}
-      </div>
-    </div>
-
-    <div style="font-size:12px; opacity:.75; margin-top:6px;">
-      * กด “ดูข้อมูลทั้งหมด” จะใช้โควตา 1 ครั้ง และปลดล็อกข้อมูลติดต่อทั้งหมดของแปลงนี้
-    </div>
-
-    <div class="sqw-actions" style="margin-top:10px;">
-      <button class="sqw-btn" type="button">แชทกับผู้ขาย</button>
-
-      <button
-        class="sqw-btn sqw-pay-btn"
-        type="button"
-        data-action="unlock-all"
-        data-land-id="${L.id ?? ""}"
-        ${quotaUsed >= quotaLimit ? "disabled" : ""}
-        style="${quotaUsed >= quotaLimit ? "opacity:.5; cursor:not-allowed;" : ""}"
-      >
-        ดูข้อมูลทั้งหมด (ใช้ 1 ครั้ง)
-      </button>
-    </div>
-  `;
-
-  // ✅ non-member: กดปุ่มแล้วไปเด้ง UnlockPickerModal ใน MapPage
-  const nonMemberUI = `
-    <div class="sqw-divider"></div>
-    <div class="sqw-actions" style="margin-top:10px;">
-      <button class="sqw-btn" type="button">แชทกับผู้ขาย</button>
-
-      <button
-        class="sqw-btn sqw-pay-btn"
-        type="button"
-        data-action="open-unlock-picker"
-        data-land-id="${L.id ?? ""}"
-      >
-        คลิกเพื่อปลดล็อคข้อมูล
-      </button>
-    </div>
-  `;
-
-
-  return `
+  return (
     <div id="sqw-popup-root">
-      <div class="sqw-popup">
-
-        <div class="sqw-head">
-          <div class="sqw-pill">${L.owner || "คุณปาลิส (นายหน้า)"}</div>
-
-          <button
-            class="sqw-x"
-            type="button"
-            data-sqw-close="1"
-            aria-label="close"
-          >×</button>
+      <div className="sqw-popup">
+        {/* header */}
+        <div className="sqw-head">
+          <div className="sqw-pill">{L.owner || "คุณปาลิส (นายหน้า)"}</div>
+          <button className="sqw-x" type="button" aria-label="close" onClick={onClose}>
+            ×
+          </button>
         </div>
 
-        <div class="sqw-meta">🕒 วันที่ลงข้อมูล ${L.updatedAt || "-"}</div>
+        <div className="sqw-meta">🕒 วันที่ลงข้อมูล {L.updatedAt || "-"}</div>
 
-        <div class="sqw-grid">
-          <div class="sqw-box"><div class="sqw-box-k">ขนาดที่ดิน</div><div class="sqw-box-v">${L.area ?? "-"} ตร.วา</div></div>
-          <div class="sqw-box"><div class="sqw-box-k">ไร่-งาน-วา</div><div class="sqw-box-v">${L.raw ?? "-"}</div></div>
-          <div class="sqw-box"><div class="sqw-box-k">หน้ากว้างติดถนน</div><div class="sqw-box-v">${L.frontage ?? "-"} ม.</div></div>
-          <div class="sqw-box"><div class="sqw-box-k">ขนาดถนน</div><div class="sqw-box-v">${L.roadWidth ?? "-"} ม.</div></div>
+        <div className="sqw-grid">
+          <div className="sqw-box"><div className="sqw-box-k">ขนาดที่ดิน</div><div className="sqw-box-v">{L.area} ตร.วา</div></div>
+          <div className="sqw-box"><div className="sqw-box-k">ไร่-งาน-วา</div><div className="sqw-box-v">{L.raw}</div></div>
+          <div className="sqw-box"><div className="sqw-box-k">หน้ากว้างติดถนน</div><div className="sqw-box-v">{L.frontage} ม.</div></div>
+          <div className="sqw-box"><div className="sqw-box-k">ขนาดถนน</div><div className="sqw-box-v">{L.roadWidth} ม.</div></div>
         </div>
 
-        <div class="sqw-divider"></div>
+        <div className="sqw-divider" />
 
-        <div class="sqw-row"><span>ราคา/ตร.วา</span><span class="sqw-row-v">${L.pricePerWa ?? "-"} บ.</span></div>
-        <div class="sqw-row"><span>ราคารวม</span><span class="sqw-row-v">${L.totalPrice ?? "-"} บ.</span></div>
+        <div className="sqw-row"><span>ราคา/ตร.วา</span><span className="sqw-row-v">{L.pricePerWa} บ.</span></div>
+        <div className="sqw-row"><span>ราคารวม</span><span className="sqw-row-v">{L.totalPrice} บ.</span></div>
 
-        <div class="sqw-divider"></div>
+        <div className="sqw-divider" />
 
-        <div class="sqw-h">ข้อมูลติดต่อ</div>
+        <div className="sqw-h">ข้อมูลติดต่อ</div>
 
-        <div class="sqw-kv">
-          <div class="k">เจ้าของ</div>          <div class="v">${showValue("contactOwner", L.contactOwner, "-----")}</div>
-          <div class="k">นายหน้า</div>          <div class="v">${showValue("broker", L.broker, "-----")}</div>
-          <div class="k">โทร</div>              <div class="v">${showValue("phone", L.phone, "**********")}</div>
-          <div class="k">LINE ID</div>          <div class="v">${showValue("line", L.line, "**********")}</div>
-          <div class="k">กรอบที่ดิน</div>       <div class="v">${showValue("frame", L.frame, "-----")}</div>
-          <div class="k">ข้อมูลโฉนด/ระวาง</div> <div class="v">${showValue("chanote", L.chanote, "-----")}</div>
+        <div className="sqw-kv">
+          <div className="k">เจ้าของ</div><div className="v">{showValue("contactOwner", L.contactOwner, "-----")}</div>
+          <div className="k">นายหน้า</div><div className="v">{showValue("broker", L.broker, "-----")}</div>
+          <div className="k">โทร</div><div className="v">{showValue("phone", L.phone, "**********")}</div>
+          <div className="k">LINE ID</div><div className="v">{showValue("line", L.line, "**********")}</div>
+          <div className="k">กรอบที่ดิน</div><div className="v">{showValue("frame", L.frame, "-----")}</div>
+          <div className="k">ข้อมูลโฉนด/ระวาง</div><div className="v">{showValue("chanote", L.chanote, "-----")}</div>
         </div>
 
-        ${isMember ? memberUI : nonMemberUI}
+        <div className="sqw-divider" />
 
+        {isMember ? (
+          <>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div className="sqw-h" style={{ margin: 0 }}>สิทธิ์สมาชิก</div>
+              <div style={{ fontSize: 12, opacity: 0.8 }}>
+                โควตาวันนี้: <b>{quotaUsed}</b> / {QUOTA_LIMIT}
+              </div>
+            </div>
+
+            <div style={{ fontSize: 12, opacity: 0.75, marginTop: 6 }}>
+              * กด “ดูข้อมูลทั้งหมด” จะใช้โควตา 1 ครั้ง และปลดล็อกข้อมูลติดต่อทั้งหมดของแปลงนี้
+            </div>
+
+            <div className="sqw-actions" style={{ marginTop: 10 }}>
+              <button className="sqw-btn" type="button">แชทกับผู้ขาย</button>
+              <button
+                className="sqw-btn sqw-pay-btn"
+                type="button"
+                disabled={quotaUsed >= QUOTA_LIMIT}
+                onClick={() => onUnlockAll?.(L.id)}
+              >
+                ดูข้อมูลทั้งหมด (ใช้ 1 ครั้ง)
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="sqw-actions" style={{ marginTop: 10 }}>
+              <button className="sqw-btn" type="button">แชทกับผู้ขาย</button>
+              <button
+                className="sqw-btn sqw-pay-btn"
+                type="button"
+                onClick={() => onOpenUnlockPicker?.(L.id)}
+              >
+                คลิกเพื่อปลดล็อคข้อมูล
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
-  `;
+  );
 }

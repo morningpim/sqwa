@@ -1,213 +1,148 @@
+// ...imports เดิม
 import React, { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { confirmUnlockContactMock } from "./paymentMock";
+import "../../../css/PayModal.css";
 
-/**
- * PayModal
- * draft:
- *  - landId: string
- *  - selectedFields: string[]  // ex. ["phone","line","broker"]
- *
- * props:
- *  - dock: "center" | "left"   // ✅ เพิ่ม: เวลา dock=left จะไม่บัง popup ขวา
- */
-export default function PayModal({
-  open,
-  draft, // { landId, selectedFields }
-  onClose,
-  onPaid,
-  dock = "center",
-}) {
+import { LABEL, PAYMENT_METHODS, PRICE } from "./constants";
+import { buildPromptPayMockQr, todayKeyTH } from "./utils";
+import PaymentMethodDropdown from "./components/PaymentMethodDropdown";
+import PromptPayQrModal from "./components/PromptPayQrModal";
+
+export default function PayModal({ open, draft, onClose, onPaid, dock = "center" }) {
   const [loading, setLoading] = useState(false);
+
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [qrOpen, setQrOpen] = useState(false);
+  const [qrData, setQrData] = useState(null);
+  const [payStatus, setPayStatus] = useState("PENDING"); // PENDING|PAID|FAILED
 
   const landId = draft?.landId ?? "";
   const selectedFields = Array.isArray(draft?.selectedFields) ? draft.selectedFields : [];
 
-  const PRICE = useMemo(
-    () => ({
-      contactOwner: 50,
-      broker: 50,
-      phone: 200,
-      line: 150,
-      frame: 100,
-      chanote: 200,
-      phone_line: 300,
-    }),
-    []
-  );
-
-  const LABEL = useMemo(
-    () => ({
-      contactOwner: "เจ้าของ",
-      broker: "นายหน้า",
-      phone: "เบอร์โทร",
-      line: "LINE ID",
-      frame: "กรอบที่ดิน",
-      chanote: "โฉนด/ระวาง",
-      phone_line: "เบอร์โทร / LINE ID",
-    }),
-    []
-  );
-
   const normalizedSelected = useMemo(() => {
-    if (!selectedFields.length) return [];
     const set = new Set();
-    for (const k of selectedFields) {
-      if (!k) continue;
+    selectedFields.forEach((k) => {
       if (k === "phone_line") {
         set.add("phone");
         set.add("line");
       } else set.add(k);
-    }
+    });
     return Array.from(set);
   }, [selectedFields]);
 
-  const amount = useMemo(() => {
-    return normalizedSelected.reduce((sum, k) => sum + (PRICE[k] ?? 0), 0);
-  }, [normalizedSelected, PRICE]);
+  const itemsUi = useMemo(
+    () =>
+      normalizedSelected.map((k) => ({
+        k,
+        label: LABEL[k] || k,
+        price: PRICE[k] || 0,
+      })),
+    [normalizedSelected]
+  );
 
-  const itemsUi = useMemo(() => {
-    if (!normalizedSelected.length) return [];
-    return normalizedSelected.map((k) => ({
-      k,
-      label: LABEL[k] ?? k,
-      price: PRICE[k] ?? 0,
-    }));
-  }, [normalizedSelected, LABEL, PRICE]);
+  const amount = useMemo(() => itemsUi.reduce((sum, i) => sum + i.price, 0), [itemsUi]);
+
+  const canPay = !!paymentMethod && amount > 0 && !loading;
+
+  const onPay = async () => {
+    if (!paymentMethod) return alert("กรุณาเลือกวิธีชำระเงิน");
+    if (!amount) return;
+
+    const orderId = `PM_${todayKeyTH()}_${landId}`;
+
+    // ✅ PromptPay -> ขึ้น QR ก่อน (ไม่ redirect)
+    if (paymentMethod === "promptpay") {
+      setLoading(true);
+      setPayStatus("PENDING");
+
+      const qrText = buildPromptPayMockQr(amount); // mock payload
+      setQrData({ orderId, amount, qrText });
+
+      setQrOpen(true);
+      setLoading(false);
+      return;
+    }
+
+    // Card/Bank (ยังไม่ทำ ChillPay) -> mock
+    alert("Card/Bank: ยังไม่เชื่อม ChillPay API (mock)");
+  };
 
   if (!open || !landId) return null;
 
-  // ✅ Dock layout: center vs left
-  const isLeft = dock === "left";
-
   return createPortal(
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,.35)",
-        zIndex: 1000000, // ให้สูงกว่าพวก popup/map
-        display: "flex",
-        alignItems: "center",
-        justifyContent: isLeft ? "flex-start" : "center",
-        padding: 16,
-      }}
-      onClick={onClose}
-    >
-      <div
-        style={{
-          width: 440,
-          maxWidth: "100%",
-          background: "#fff",
-          borderRadius: 16,
-          padding: 14,
-          boxShadow: "0 18px 60px rgba(0,0,0,.25)",
-          marginLeft: isLeft ? 16 : 0, // ✅ ดันไปซ้าย (ไม่ทับ popup ขวา)
-        }}
-        onClick={(ev) => ev.stopPropagation()}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-          <div style={{ fontWeight: 900 }}>ชำระเงินเพื่อปลดล็อกข้อมูล</div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 999,
-              border: "1px solid #ddd",
-              background: "#fff",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1,
-            }}
-            aria-label="close"
-          >
+    <div className={`pay-backdrop ${dock === "left" ? "is-left" : ""}`} onClick={onClose}>
+      <div className="pay-card" onClick={(e) => e.stopPropagation()}>
+        <div className="pay-head">
+          <div className="pay-title">ชำระเงินเพื่อปลดล็อกข้อมูล</div>
+          <button className="pay-close" onClick={onClose} disabled={loading}>
             ×
           </button>
         </div>
 
-        <div style={{ marginTop: 10, fontSize: 13, opacity: 0.8 }}>
+        <div className="pay-meta">
           Land ID: <b>{landId}</b>
         </div>
 
-        <div style={{ marginTop: 10 }}>
-          <div style={{ fontWeight: 800, marginBottom: 6 }}>รายการปลดล็อก:</div>
-
+        <div className="pay-section">
+          <div className="pay-section-title">รายการปลดล็อก</div>
           {itemsUi.length ? (
-            <ul style={{ margin: 0, paddingLeft: 18 }}>
+            <ul className="pay-items">
               {itemsUi.map((it) => (
                 <li key={it.k}>
-                  {it.label}{" "}
-                  <span style={{ opacity: 0.75 }}>({it.price.toLocaleString("th-TH")} บาท)</span>
+                  {it.label} <span style={{ opacity: 0.75 }}>({it.price.toLocaleString("th-TH")} บาท)</span>
                 </li>
               ))}
             </ul>
           ) : (
-            <div style={{ fontSize: 13, opacity: 0.7 }}>ยังไม่ได้เลือกรายการ</div>
+            <div className="pay-empty">ยังไม่ได้เลือกรายการ</div>
           )}
         </div>
 
-        <div style={{ marginTop: 12, fontWeight: 900, fontSize: 16 }}>
-          ยอดชำระ: {amount.toLocaleString("th-TH")} บาท
+        <div className="pay-total">ยอดชำระ: {amount.toLocaleString("th-TH")} บาท</div>
+
+        {/* ✅ dropdown custom */}
+        <div className="pay-pm">
+          <div className="pm-head">เลือกวิธีชำระเงิน:</div>
+          <PaymentMethodDropdown
+            value={paymentMethod}
+            options={PAYMENT_METHODS}
+            onChange={setPaymentMethod}
+            disabled={loading}
+          />
+          <div className="pay-note">* PromptPay = แสดง QR ในหน้า • Card/Bank = Redirect</div>
         </div>
 
-        <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            style={{
-              flex: 1,
-              height: 40,
-              borderRadius: 999,
-              border: "2px solid #118e44",
-              background: "#fff",
-              fontWeight: 900,
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
+        <div className="pay-actions">
+          <button className="pay-btn pay-btn-outline" onClick={onClose} disabled={loading}>
             ยกเลิก
           </button>
 
-          <button
-            type="button"
-            disabled={loading || !itemsUi.length}
-            onClick={() => {
-              try {
-                setLoading(true);
-
-                // ✅ สำคัญ: ส่ง selectedFields เข้าไป
-                const saved = confirmUnlockContactMock({
-                  landId,
-                  selectedFields: normalizedSelected,
-                });
-
-                onPaid?.(saved);
-                onClose?.();
-                alert("ชำระเงินสำเร็จ (mock) ✅");
-              } finally {
-                setLoading(false);
-              }
-            }}
-            style={{
-              flex: 1,
-              height: 40,
-              borderRadius: 999,
-              border: "0",
-              background: "#118e44",
-              color: "#fff",
-              fontWeight: 900,
-              cursor: loading || !itemsUi.length ? "not-allowed" : "pointer",
-              opacity: loading || !itemsUi.length ? 0.7 : 1,
-            }}
-          >
-            {loading ? "กำลังยืนยัน..." : "ยืนยันชำระเงิน (mock)"}
+          <button className="pay-btn pay-btn-primary" disabled={!canPay} onClick={onPay}>
+            {paymentMethod === "promptpay" ? "สร้าง QR เพื่อชำระเงิน" : "ไปชำระเงิน"}
           </button>
         </div>
+
+        <div className="pay-foot">* ตอนนี้ยังไม่เชื่อม ChillPay API (โหมด mock)</div>
       </div>
+
+      {/* ✅ QR Modal */}
+      <PromptPayQrModal
+        open={qrOpen}
+        data={qrData}
+        status={payStatus}
+        onClose={() => {
+          setQrOpen(false);
+          setQrData(null);
+          setPayStatus("PENDING");
+        }}
+        // ถ้าอยากให้มีปุ่ม "ฉันชำระแล้ว" ใน modal -> ส่ง callback เข้าไปได้
+        onPaid={() => {
+          setPayStatus("PAID");
+          setQrOpen(false);
+          onPaid?.(); // ให้ parent ไปปลดล็อก
+          onClose?.();
+        }}
+      />
     </div>,
     document.body
   );

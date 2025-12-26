@@ -9,7 +9,7 @@ import MapPage from "./components/map/MapPage";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import CartPage from "./pages/CartPage";
+import CartPage from "./pages/Cart/CartPage";
 
 export default function App() {
   const location = useLocation();

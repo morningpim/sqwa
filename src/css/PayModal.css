@@ -1,0 +1,392 @@
+/* ==================================================
+   PayModal – Polished UI (Hybrid: PromptPay QR + Redirect)
+   - ใช้ dropdown custom: .pm-dd*
+   - ใช้ qr modal: .pm-qr*
+================================================== */
+
+/* ---------- Backdrop ---------- */
+.pay-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 1000000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* dock left (ไม่บัง popup ขวา) */
+.pay-backdrop.is-left{
+  justify-content: flex-start;
+}
+
+/* ---------- Modal card ---------- */
+.pay-card{
+  width: 480px;
+  max-width: 100%;
+
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 16px;
+
+  padding: 14px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.25);
+  backdrop-filter: blur(6px);
+  position: relative;
+  overflow: visible;
+}
+
+.pay-backdrop.is-left .pay-card{
+  margin-left: 16px;
+}
+
+/* ---------- Header ---------- */
+.pay-head{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.pay-title{
+  font-weight: 1000;
+  letter-spacing: -0.2px;
+}
+
+.pay-close{
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: transform .14s ease, box-shadow .14s ease, opacity .14s ease;
+}
+
+.pay-close:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,.10);
+}
+
+.pay-close:disabled{
+  cursor: not-allowed;
+  opacity: .7;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---------- Meta ---------- */
+.pay-meta{
+  margin-top: 10px;
+  font-size: 13px;
+  opacity: .85;
+}
+
+.pay-meta b{ font-weight: 900; }
+
+/* ---------- Items ---------- */
+.pay-section{
+  margin-top: 10px;
+}
+
+.pay-section-title{
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.pay-items{
+  margin: 0;
+  padding-left: 18px;
+}
+
+.pay-empty{
+  font-size: 13px;
+  opacity: .7;
+}
+
+/* ---------- Total ---------- */
+.pay-total{
+  margin-top: 12px;
+  font-weight: 1000;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+}
+
+/* ---------- Payment method wrapper (ใช้กับ dropdown) ---------- */
+.pay-pm{
+  margin-top: 12px;
+}
+
+.pay-note{
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: .75;
+}
+
+/* ---------- Actions ---------- */
+.pay-actions{
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.pay-btn{
+  flex: 1;
+  height: 40px;
+  border-radius: 999px;
+
+  font-weight: 1000;
+  letter-spacing: -0.1px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: transform .14s ease, box-shadow .14s ease, opacity .14s ease;
+}
+
+.pay-btn:disabled{
+  cursor: not-allowed;
+  opacity: .7;
+  transform: none;
+  box-shadow: none;
+}
+
+/* outline button */
+.pay-btn-outline{
+  border: 2px solid #118e44;
+  background: #fff;
+  color: #118e44;
+  cursor: pointer;
+}
+
+.pay-btn-outline:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px rgba(17,142,68,.14);
+}
+
+/* primary button */
+.pay-btn-primary{
+  border: 0;
+  background: #118e44;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(17,142,68,.18);
+}
+
+.pay-btn-primary:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 20px 42px rgba(17,142,68,.22);
+}
+
+/* ---------- Helper footer ---------- */
+.pay-foot{
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: .65;
+}
+
+/* ==================================================
+   Custom Dropdown (เหมือน CartPage)
+   ใช้ class เดียวกัน (.pm-dd*) เพื่อ reuse CSS ได้
+   * ถ้าคุณมีอยู่แล้วใน CartPage.css ให้ข้ามส่วนนี้ได้
+================================================== */
+
+.pm-dd{
+  position: relative;
+}
+
+.pm-dd-btn{
+  width: 100%;
+  text-align: left;
+
+  padding: 12px 12px;
+  border-radius: 14px;
+
+  border: 1px solid rgba(0,0,0,.10);
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(0,0,0,.05);
+
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease;
+}
+
+.pm-dd-btn:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(0,0,0,.07);
+  border-color: rgba(22,163,74,.25);
+}
+
+.pm-dd-btn.is-open{
+  border-color: rgba(22,163,74,.65);
+  box-shadow: 0 18px 36px rgba(22,163,74,.10);
+}
+
+.pm-dd-btn.is-disabled{
+  opacity: .7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 10px 22px rgba(0,0,0,.05);
+}
+
+.pm-dd-main{
+  min-width: 0;
+}
+
+.pm-dd-label{
+  font-weight: 1000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-dd-label.is-placeholder{
+  opacity: .75;
+}
+
+.pm-dd-sub{
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: .78;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-dd-icon{
+  flex-shrink: 0;
+  font-size: 14px;
+  opacity: .75;
+}
+
+.pm-dd-menu{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+
+  border-radius: 14px;
+  overflow: hidden;
+
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+  backdrop-filter: blur(6px);
+
+  z-index: 99999;  /* ✅ สำคัญ */
+}
+
+.pm-dd-item{
+  width: 100%;
+  text-align: left;
+  padding: 12px 12px;
+
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+
+  transition: background .14s ease;
+}
+
+.pm-dd-item:hover{
+  background: rgba(22,163,74,.06);
+}
+
+.pm-dd-item.is-active{
+  background: rgba(22,163,74,.10);
+}
+
+.pm-dd-item-title{
+  font-weight: 1000;
+}
+
+.pm-dd-item-desc{
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: .78;
+}
+
+/* ==================================================
+   PromptPay QR Modal
+   ใช้ .pm-qr* เหมือน CartPage
+   * ถ้าคุณมีอยู่แล้วใน CartPage.css ให้ข้ามส่วนนี้ได้
+================================================== */
+
+.pm-qr-backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 1000001;
+
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.pm-qr-card{
+  width: 360px;
+  max-width: 100%;
+
+  background: rgba(255,255,255,.98);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 16px;
+
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 18px 60px rgba(0,0,0,.25);
+  backdrop-filter: blur(6px);
+}
+
+.pm-qr-title{
+  font-weight: 1000;
+  font-size: 16px;
+}
+
+.pm-qr-sub{
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: .82;
+}
+
+.pm-qr-box{
+  margin-top: 12px;
+
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.08);
+  padding: 12px;
+
+  display: flex;
+  justify-content: center;
+}
+
+.pm-qr-hint{
+  margin-top: 10px;
+  font-size: 13px;
+  opacity: .9;
+}
+
+/* ==================================================
+   Mobile
+================================================== */
+@media (max-width: 480px){
+  .pay-card{ padding: 12px; }
+  .pay-actions{ flex-direction: column; }
+  .pay-btn{ width: 100%; }
+}

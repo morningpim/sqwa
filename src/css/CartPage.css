@@ -1,13 +1,13 @@
 /* ==================================================
-   Cart Page – Final (Spacing / Layout / Safe Footer)
+   Cart Page – Final UI (SQW / ChillPay Redirect)
 ================================================== */
 
-/* ---------- Page ---------- */
 .cart-page {
-  padding-top: calc(64px + 24px);
-  padding-bottom: 64px;
+  padding-top: calc(64px + 28px);
+  padding-bottom: 220px;
   min-height: calc(100vh - 220px);
 }
+
 /* ---------- Header ---------- */
 .cart-header {
   display: flex;
@@ -19,7 +19,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 900;
+  font-weight: 1000;
+  letter-spacing: -0.3px;
 }
 
 .cart-sub {
@@ -27,48 +28,55 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
+  opacity: .9;
 }
 
 /* ---------- Layout ---------- */
 .cart-layout {
   display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 32px;            /* ⭐ ระยะห่างซ้าย–ขวา */
+  grid-template-columns: 1fr 380px;
+  gap: 34px;
   margin-top: 28px;
 }
 
-@media (max-width: 960px) {
-  .cart-layout {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
+@media (max-width: 1024px) {
+  .cart-layout { grid-template-columns: 1fr; gap: 22px; }
 }
 
 /* ==================================================
-   Left Side – Cart Items (FIX inner padding)
+   Left Side – Cart Items
 ================================================== */
-.cart-items {
-  padding-left: 4px; /* กันการ์ดชิดขอบซ้าย */
-}
+.cart-items { padding-left: 4px; }
 
 .cart-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 22px;
+  padding: 18px 22px;
 
-  gap: 24px;            /* ⭐ โปร่งขึ้น */
-  padding: 18px 22px;   /* ⭐ สำคัญ: กันข้อมูลติดขอบ */
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 16px;
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 12px 28px rgba(0,0,0,.06);
+  backdrop-filter: blur(6px);
+
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
 }
 
-.cart-items .cart-item {
-  margin-bottom: 16px;
+.cart-items .cart-item { margin-bottom: 16px; }
+
+.cart-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(0,0,0,.09);
+  border-color: rgba(22,163,74,.22);
 }
 
 .cart-item-left {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;            /* ⭐ เว้นบรรทัดชัดขึ้น */
+  gap: 10px;
 }
 
 .cart-item-right {
@@ -77,8 +85,7 @@
   flex-direction: column;
   gap: 12px;
   flex-shrink: 0;
-
-  padding-left: 8px;    /* ⭐ กันชนกับ content ซ้าย */
+  padding-left: 8px;
 }
 
 .cart-item-row {
@@ -88,7 +95,7 @@
 }
 
 .cart-land-label { font-weight: 800; }
-.cart-land-id { font-weight: 900; }
+.cart-land-id { font-weight: 1000; }
 
 .cart-fields-text {
   min-width: 0;
@@ -97,30 +104,37 @@
   white-space: nowrap;
 }
 
-.cart-date { font-size: 12px; }
+.cart-date { font-size: 12px; opacity: .8; }
 
 .cart-price-amount {
-  font-weight: 900;
+  font-weight: 1000;
   font-size: 16px;
 }
 
 /* ==================================================
-   Right Side – Summary (FIX inner padding)
+   Right Side – Summary
 ================================================== */
-.cart-summary {
-  padding-right: 24px; /* กันกล่องชิดขอบขวา */
-}
+.cart-summary { padding-right: 18px; }
 
 .cart-summary-box {
-  position: sticky;
-  top: calc(64px + 24px);
+  position: static;
+  top: auto;
+  max-height: none;
 
   display: flex;
   flex-direction: column;
-  gap: 20px;            /* ⭐ โปร่งขึ้น */
+  gap: 18px;
 
-  padding: 22px 24px;   /* ⭐ สำคัญ: กันข้อมูลติดขอบ */
-  margin-bottom: 96px;
+  padding: 22px 24px;
+  border-radius: 18px;
+
+  border: 1px solid rgba(0,0,0,.06);
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 18px 44px rgba(0,0,0,.08);
+  backdrop-filter: blur(6px);
+
+  overflow: visible;
+  padding-bottom: 18px; /* กัน actions ชิดล่างเกินไป */
 }
 
 .summary-head {
@@ -134,7 +148,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 900;
+  font-weight: 1000;
 }
 
 .summary-badge {
@@ -142,11 +156,11 @@
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border-radius: var(--r-pill);
-  background: rgba(22, 163, 74, 0.08);
+  border-radius: 999px;
+  background: rgba(22, 163, 74, 0.10);
   border: 1px solid rgba(22, 163, 74, 0.25);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .summary-total {
@@ -155,46 +169,240 @@
   justify-content: space-between;
   gap: 12px;
 
-  padding: 16px 18px;   /* ⭐ เพิ่ม breathing space */
-  border-radius: var(--r-md);
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
+  padding: 16px 18px;
+  border-radius: 14px;
+
+  background: rgba(22,163,74,.06);
+  border: 1px solid rgba(22,163,74,.16);
 }
 
 .summary-total-label {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .summary-total-value {
+  font-weight: 1000;
+  font-size: 20px;
+  letter-spacing: -0.3px;
+}
+
+/* =========================
+   Custom Dropdown (Payment)
+========================= */
+.pm-wrap {
+  margin-top: 12px;
+}
+
+.pm-head {
   font-weight: 900;
-  font-size: 18px;
+  margin-bottom: 8px;
 }
 
-.summary-hint {
+.pm-dd {
+  position: relative;
+}
+
+.pm-dd-btn {
+  width: 100%;
+  text-align: left;
+
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 13px;
-  line-height: 1.6;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 
-  padding: 0 2px;       /* ⭐ กันข้อความชิดขอบนิดๆ */
+  padding: 12px 12px;
+  border-radius: 14px;
+
+  border: 1px solid rgba(0,0,0,.10);
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(0,0,0,.05);
+
+  cursor: pointer;
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
 }
 
-/* ---------- Buttons ---------- */
-.summary-pay-btn,
-.summary-back-btn {
-  height: 46px;
-  display: inline-flex;
+.pm-dd-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(0,0,0,.07);
+  border-color: rgba(22,163,74,.25);
+}
+
+.pm-dd-btn.is-open {
+  border-color: rgba(22,163,74,.65);
+  box-shadow: 0 18px 36px rgba(22,163,74,.10);
+}
+
+.pm-dd-btn.is-disabled {
+  opacity: .7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 10px 22px rgba(0,0,0,.05);
+}
+
+.pm-dd-main {
+  min-width: 0;
+}
+
+.pm-dd-label {
+  font-weight: 1000;
+  line-height: 1.2;
+}
+
+.pm-dd-label.is-placeholder {
+  opacity: .7;
+}
+
+.pm-dd-sub {
+  font-size: 12px;
+  opacity: .78;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-dd-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  opacity: .75;
+  transform: translateY(-1px);
+}
+
+.pm-dd-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 50;
+
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 22px 60px rgba(0,0,0,.16);
+  backdrop-filter: blur(8px);
+
+  padding: 8px;
+}
+
+.pm-dd-item {
+  width: 100%;
+  text-align: left;
+
+  padding: 10px 10px;
+  border-radius: 12px;
+
+  border: 1px solid transparent;
+  background: transparent;
+
+  cursor: pointer;
+  transition: background .14s ease, border-color .14s ease, transform .14s ease;
+}
+
+.pm-dd-item:hover {
+  background: rgba(22,163,74,.06);
+  border-color: rgba(22,163,74,.18);
+  transform: translateY(-1px);
+}
+
+.pm-dd-item.is-active {
+  background: rgba(22,163,74,.10);
+  border-color: rgba(22,163,74,.35);
+}
+
+.pm-dd-item-title {
+  font-weight: 1000;
+}
+
+.pm-dd-item-desc {
+  font-size: 12px;
+  opacity: .75;
+  margin-top: 2px;
+}
+
+.pm-note {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: .75;
+}
+
+/* =========================
+   PromptPay QR Modal
+========================= */
+.pm-qr-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000000;
+  background: rgba(0,0,0,.45);
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-
-  padding: 0 16px;      /* ⭐ กันข้อความปุ่มชิดขอบ */
+  padding: 16px;
 }
 
+.pm-qr-card {
+  width: 420px;
+  max-width: 100%;
+  border-radius: 18px;
+
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 24px 80px rgba(0,0,0,.25);
+  backdrop-filter: blur(10px);
+
+  padding: 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pm-qr-title {
+  font-weight: 1000;
+  font-size: 18px;
+  letter-spacing: -0.2px;
+}
+
+.pm-qr-sub {
+  font-size: 13px;
+  opacity: .85;
+}
+
+.pm-qr-box {
+  margin: 10px auto 2px;
+  width: fit-content;
+  padding: 12px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.10);
+  box-shadow: 0 12px 30px rgba(0,0,0,.10);
+}
+
+.pm-qr-hint {
+  font-size: 13px;
+  line-height: 1.6;
+  opacity: .9;
+  text-align: center;
+  padding: 6px 8px;
+}
+
+/* ==================================================
+   Sticky actions (No inner scrollbar)
+================================================== */
+.summary-actions{
+  position: sticky;
+  bottom: 14px;
+
+  display: grid;
+  gap: 10px;
+
+  padding-top: 12px;
+
+  background: linear-gradient(to top, rgba(255,255,255,.98) 70%, rgba(255,255,255,0));
+  backdrop-filter: blur(6px);
+}
 
 /* ==================================================
    Empty State
@@ -204,7 +412,11 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 32px;       /* ⭐ ไม่ชิดกรอบ */
+  padding: 34px;
+  border-radius: 18px;
+  border: 1px solid rgba(0,0,0,.06);
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 18px 44px rgba(0,0,0,.08);
 }
 
 /* ==================================================
@@ -229,11 +441,6 @@
    Mobile Safe Area
 ================================================== */
 @media (max-width: 768px) {
-  .cart-page {
-    padding-bottom: 220px; /* ⭐ กัน footer + mobile gesture bar */
-  }
-
-  .cart-summary-box {
-    margin-bottom: 80px;
-  }
+  .cart-summary { padding-right: 0; }
+  .cart-summary-box { margin-bottom: 80px; }
 }
