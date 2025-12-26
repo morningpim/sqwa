@@ -5,18 +5,17 @@ export default function LayersPanel({
   open,
   onClose,
 
-  // tabs
   plan,
   setPlan,
 
-  // sliders
   baseOpacity,
   setBaseOpacity,
 
-  redRoadEnabled,
-  setRedRoadEnabled,
-  redRoadOpacity,
-  setRedRoadOpacity,
+  // DOL
+  dolEnabled,
+  setDolEnabled,
+  dolOpacity,
+  setDolOpacity,
 }) {
   if (!open) return null;
 
@@ -28,10 +27,16 @@ export default function LayersPanel({
 
   return (
     <div className="layers-panel" role="dialog" aria-label="Layers">
+      {/* ===== Base / Plan ===== */}
       <div className="layers-card">
         <div className="layers-header">
           <div className="layers-title">Layers</div>
-          <button className="layers-close" type="button" onClick={onClose} aria-label="Close">
+          <button
+            className="layers-close"
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+          >
             ×
           </button>
         </div>
@@ -64,16 +69,19 @@ export default function LayersPanel({
         </div>
       </div>
 
+      {/* ===== DOL (WMS) ===== */}
       <div className="layers-card">
         <div className="layers-row layers-row-top">
           <label className="layers-check">
             <input
               type="checkbox"
-              checked={redRoadEnabled}
-              onChange={(e) => setRedRoadEnabled(e.target.checked)}
+              checked={dolEnabled}
+              onChange={(e) => setDolEnabled(e.target.checked)}
             />
             <span className="layers-checkmark" />
-            <span className="layers-checktext">ระวางรถที่ดินสีแดง</span>
+            <span className="layers-checktext">
+              เส้นระวางกรมที่ดิน (DOL)
+            </span>
           </label>
         </div>
 
@@ -85,11 +93,11 @@ export default function LayersPanel({
             min="0"
             max="1"
             step="0.01"
-            value={redRoadOpacity}
-            disabled={!redRoadEnabled}
-            onChange={(e) => setRedRoadOpacity(parseFloat(e.target.value))}
+            value={dolOpacity}
+            disabled={!dolEnabled}
+            onChange={(e) => setDolOpacity(parseFloat(e.target.value))}
           />
-          <div className="layers-value">{Number(redRoadOpacity).toFixed(2)}</div>
+          <div className="layers-value">{Number(dolOpacity).toFixed(2)}</div>
         </div>
       </div>
     </div>

@@ -1,8 +1,11 @@
 import { useCallback, useRef } from "react";
 
-export function useLongdoMap({ isSatellite, isTraffic }) {
+export function useLongdoMap({ isSatellite, isTraffic, dolEnabled, dolOpacity }) {
   const mapRef = useRef(null);
   const mapInitedRef = useRef(false);
+
+  // ✅ DOL WMS ref
+  const wmsDolRef = useRef(null);
 
   const waitForLongdo = useCallback(
     () =>
@@ -92,6 +95,56 @@ export function useLongdoMap({ isSatellite, isTraffic }) {
     [pickFirstLayer]
   );
 
+  // ✅ DOL WMS: create once, then reuse
+  const getOrCreateDolLayer = useCallback(() => {
+    const map = mapRef.current;
+    if (!map || !window.longdo) return null;
+
+    if (wmsDolRef.current) return wmsDolRef.current;
+
+    try {
+      const lyr = new window.longdo.Layer("dol", {
+        type: window.longdo.LayerType.WMS,
+        url: "https://ms.longdo.com/mapproxy/service",
+        format: "image/png",
+        srs: "EPSG:3857",
+        opacity: dolOpacity ?? 0.85,
+        transparent: true,
+        // ❌ ห้ามใส่ layers: "dol" (เดาแล้วมักไม่ขึ้น)
+      });
+
+      lyr.zIndex = 99; // ✅ ให้อยู่บนสุด
+      wmsDolRef.current = lyr;
+      return lyr;
+    } catch (e) {
+      console.warn("create DOL layer failed:", e);
+      return null;
+    }
+  }, [dolOpacity]);
+
+  const applyDolVisibility = useCallback(
+    (enabled = dolEnabled, opacity = dolOpacity) => {
+      const map = mapRef.current;
+      if (!map) return;
+
+      const lyr = getOrCreateDolLayer();
+      if (!lyr) return;
+
+      try {
+        lyr.opacity = opacity ?? 0.85;
+
+        const list = map.Layers?.list?.() || [];
+        const has = list.includes(lyr);
+
+        if (enabled && !has) map.Layers?.add?.(lyr);
+        if (!enabled && has) map.Layers?.remove?.(lyr);
+      } catch (e) {
+        console.warn("applyDolVisibility failed:", e);
+      }
+    },
+    [dolEnabled, dolOpacity, getOrCreateDolLayer]
+  );
+
   const zoomIn = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -155,10 +208,21 @@ export function useLongdoMap({ isSatellite, isTraffic }) {
       applySatellite(isSatellite);
       applyTraffic(isTraffic);
 
+      applyDolVisibility(dolEnabled, dolOpacity);
       return map;
     },
-    [applySatellite, applyTraffic, hideLongdoUi, isSatellite, isTraffic, waitForLongdo]
+    [
+      applySatellite,
+      applyTraffic,
+      applyDolVisibility,
+      dolEnabled,
+      dolOpacity,
+      hideLongdoUi,
+      isSatellite,
+      isTraffic,
+      waitForLongdo,
+    ]
   );
 
-  return { mapRef, initMap, applySatellite, applyTraffic, zoomIn, zoomOut, locateMe };
+  return { mapRef, initMap, applySatellite, applyTraffic, applyDolVisibility, zoomIn, zoomOut, locateMe };
 }

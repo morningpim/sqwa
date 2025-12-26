@@ -1,5 +1,5 @@
 // src/components/map/MapPage.jsx
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import ModeDisclaimerModal from "../Common/ModeDisclaimerModal";
@@ -31,6 +31,9 @@ import { mockLands } from "./lands/mockLands";
 import LandDetailPanel from "./LandDetailPanel";
 import UnlockPickerModal from "./UnlockPickerModal";
 
+// ✅ เพิ่ม import hook ที่แยกไฟล์
+import { useLandFilters } from "./hooks/useLandFilters";
+
 export default function MapPage() {
   // =========================================================================
   // Router
@@ -49,15 +52,26 @@ export default function MapPage() {
   const [openLayerMenu, setOpenLayerMenu] = useState(false);
   const [isSatellite, setIsSatellite] = useState(false);
   const [isTraffic, setIsTraffic] = useState(false);
-
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filterValue, setFilterValue] = useState(() => ({ ...DEFAULT_FILTER }));
-  const resetFilter = useCallback(() => setFilterValue({ ...DEFAULT_FILTER }), []);
+  const [dolEnabled, setDolEnabled] = useState(true);
+  const [dolOpacity, setDolOpacity] = useState(0.35);
 
   // =========================================================================
   // Data (mock)
   // =========================================================================
-  const lands = mockLands;
+  const lands = useMemo(() => mockLands, []);
+
+  // =========================================================================
+  // ✅ Filter logic (แยกออกเป็น hook)
+  // =========================================================================
+  const {
+    filterOpen,
+    setFilterOpen,
+    filterValue,
+    setFilterValue,
+    filteredLands,
+    applyFilters,
+    resetFilter,
+  } = useLandFilters(lands, DEFAULT_FILTER);
 
   // =========================================================================
   // Hooks: access/cart
@@ -68,9 +82,20 @@ export default function MapPage() {
   // =========================================================================
   // Longdo map
   // =========================================================================
-  const { mapRef, initMap, applySatellite, applyTraffic, zoomIn, zoomOut, locateMe } = useLongdoMap({
+  const {
+    mapRef,
+    initMap,
+    applySatellite,
+    applyTraffic,
+    applyDolVisibility,
+    zoomIn,
+    zoomOut,
+    locateMe,
+  } = useLongdoMap({
     isSatellite,
     isTraffic,
+    dolEnabled,
+    dolOpacity,
   });
 
   const [mapObj, setMapObj] = useState(null);
@@ -108,6 +133,10 @@ export default function MapPage() {
     if (mapObj) applyTraffic(isTraffic);
   }, [mapObj, isTraffic, applyTraffic]);
 
+  useEffect(() => {
+    if (mapObj) applyDolVisibility?.(dolEnabled, dolOpacity);
+  }, [mapObj, dolEnabled, dolOpacity, applyDolVisibility]);
+
   // =========================================================================
   // Popup (map -> UI)
   // =========================================================================
@@ -122,7 +151,7 @@ export default function MapPage() {
   });
 
   // =========================================================================
-  // Drag guard (กันลากแล้วเกิด click หลุด)
+  // Drag guard
   // =========================================================================
   const { isDraggingRef } = useDragGuard({
     enabledRef: popupApi.popupOpenRef,
@@ -130,7 +159,7 @@ export default function MapPage() {
   });
 
   // =========================================================================
-  // UX: remember / reopen popup (สำหรับ modal flow)
+  // UX: remember / reopen popup
   // =========================================================================
   const { rememberPopup, reopenPopup } = useReopenPopup({
     popupApi,
@@ -138,7 +167,7 @@ export default function MapPage() {
   });
 
   // =========================================================================
-  // Unlock + Pay flow (ย้าย state pay/unlock มาไว้ใน hook)
+  // Unlock + Pay flow
   // =========================================================================
   const unlockFlow = useUnlockFlow({
     mode,
@@ -156,7 +185,6 @@ export default function MapPage() {
     mapObj,
     onOverlayOrMarkerSelect: openPopupForWithAccess,
     onMapClickClose: () => {
-      // ถ้ามี modal เปิดอยู่ อย่าปิด popup
       if (unlockFlow.payOpenRef.current || unlockFlow.unlockOpenRef.current) return;
       if (isDraggingRef.current) return;
 
@@ -181,7 +209,10 @@ export default function MapPage() {
   // Derived: selected land + unlocked fields
   // =========================================================================
   const selectedLand = popupApi.selectedLand;
-  const { unlockedFields: unlockedForSelected } = useSelectedLandAccess(selectedLand, accessApi.access);
+  const { unlockedFields: unlockedForSelected } = useSelectedLandAccess(
+    selectedLand,
+    accessApi.access
+  );
 
   // =========================================================================
   // Render
@@ -196,7 +227,7 @@ export default function MapPage() {
         onClose={() => setFilterOpen(false)}
         value={filterValue}
         onChange={setFilterValue}
-        onApply={() => setFilterOpen(false)}
+        onApply={applyFilters}
         onClear={resetFilter}
       />
 
@@ -210,7 +241,9 @@ export default function MapPage() {
         }}
       />
 
-      {!!mapObj && <LandMarkers map={mapObj} lands={lands} onSelect={onSelectLand} />}
+      {!!mapObj && (
+        <LandMarkers map={mapObj} lands={filteredLands} onSelect={onSelectLand} />
+      )}
 
       <MapControls
         onSearch={handleSearch}
@@ -220,6 +253,10 @@ export default function MapPage() {
         setIsSatellite={setIsSatellite}
         isTraffic={isTraffic}
         setIsTraffic={setIsTraffic}
+        dolEnabled={dolEnabled}
+        setDolEnabled={setDolEnabled}
+        dolOpacity={dolOpacity}
+        setDolOpacity={setDolOpacity}
         onZoomIn={zoomIn}
         onZoomOut={zoomOut}
         onLocate={locateMe}

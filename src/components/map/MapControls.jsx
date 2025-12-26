@@ -11,6 +11,11 @@ export default function MapControls({
   isTraffic,
   setIsTraffic,
 
+  dolEnabled,
+  setDolEnabled,
+  dolOpacity,
+  setDolOpacity,
+
   onZoomIn,
   onZoomOut,
   onLocate,
@@ -26,8 +31,6 @@ export default function MapControls({
   const [layersOpen, setLayersOpen] = useState(false);
   const [plan, setPlan] = useState("bkk2556");
   const [baseOpacity, setBaseOpacity] = useState(1);
-  const [redRoadEnabled, setRedRoadEnabled] = useState(true);
-  const [redRoadOpacity, setRedRoadOpacity] = useState(0.45);
   const [searchOpen, setSearchOpen] = useState(false);
 
   // ===== close dropdown when click outside =====
@@ -104,10 +107,10 @@ export default function MapControls({
         setPlan={setPlan}
         baseOpacity={baseOpacity}
         setBaseOpacity={setBaseOpacity}
-        redRoadEnabled={redRoadEnabled}
-        setRedRoadEnabled={setRedRoadEnabled}
-        redRoadOpacity={redRoadOpacity}
-        setRedRoadOpacity={setRedRoadOpacity}
+        dolEnabled={dolEnabled}
+        setDolEnabled={setDolEnabled}
+        dolOpacity={dolOpacity}
+        setDolOpacity={setDolOpacity}
       />
 
       {/* ===== FAB buttons ===== */}

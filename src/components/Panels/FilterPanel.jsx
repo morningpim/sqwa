@@ -11,7 +11,7 @@ export default function FilterPanel({
 }) {
   if (!open) return null;
 
-  const update = (patch) => onChange({ ...value, ...patch });
+  const update = (patch) => onChange?.({ ...value, ...patch });
 
   return (
     <div className="filter-panel" role="dialog" aria-label="ตัวกรอง">
@@ -186,10 +186,17 @@ export default function FilterPanel({
 
         {/* Footer (ไม่เลื่อน) */}
         <div className="filter-footer">
-          <button className="btn-outline" type="button" onClick={onClear}>
+          <button
+            className="btn-outline"
+            type="button"
+            onClick={() => {
+              onClear?.();
+              onClose?.();
+            }}
+          >
             ล้าง
           </button>
-          <button className="btn-primary" type="button" onClick={onApply}>
+          <button className="btn-primary" type="button" onClick={() => onApply?.()}>
             ใช้ตัวกรอง
           </button>
         </div>
