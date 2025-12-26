@@ -1,0 +1,239 @@
+/* ==================================================
+   Cart Page – Final (Spacing / Layout / Safe Footer)
+================================================== */
+
+/* ---------- Page ---------- */
+.cart-page {
+  padding-top: calc(64px + 24px);
+  padding-bottom: 64px;
+  min-height: calc(100vh - 220px);
+}
+/* ---------- Header ---------- */
+.cart-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cart-title-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+}
+
+.cart-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+/* ---------- Layout ---------- */
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 32px;            /* ⭐ ระยะห่างซ้าย–ขวา */
+  margin-top: 28px;
+}
+
+@media (max-width: 960px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* ==================================================
+   Left Side – Cart Items (FIX inner padding)
+================================================== */
+.cart-items {
+  padding-left: 4px; /* กันการ์ดชิดขอบซ้าย */
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 24px;            /* ⭐ โปร่งขึ้น */
+  padding: 18px 22px;   /* ⭐ สำคัญ: กันข้อมูลติดขอบ */
+}
+
+.cart-items .cart-item {
+  margin-bottom: 16px;
+}
+
+.cart-item-left {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;            /* ⭐ เว้นบรรทัดชัดขึ้น */
+}
+
+.cart-item-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+
+  padding-left: 8px;    /* ⭐ กันชนกับ content ซ้าย */
+}
+
+.cart-item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-land-label { font-weight: 800; }
+.cart-land-id { font-weight: 900; }
+
+.cart-fields-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cart-date { font-size: 12px; }
+
+.cart-price-amount {
+  font-weight: 900;
+  font-size: 16px;
+}
+
+/* ==================================================
+   Right Side – Summary (FIX inner padding)
+================================================== */
+.cart-summary {
+  padding-right: 24px; /* กันกล่องชิดขอบขวา */
+}
+
+.cart-summary-box {
+  position: sticky;
+  top: calc(64px + 24px);
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;            /* ⭐ โปร่งขึ้น */
+
+  padding: 22px 24px;   /* ⭐ สำคัญ: กันข้อมูลติดขอบ */
+  margin-bottom: 96px;
+}
+
+.summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summary-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+}
+
+.summary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--r-pill);
+  background: rgba(22, 163, 74, 0.08);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.summary-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 16px 18px;   /* ⭐ เพิ่ม breathing space */
+  border-radius: var(--r-md);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+.summary-total-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+
+.summary-total-value {
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.summary-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+
+  padding: 0 2px;       /* ⭐ กันข้อความชิดขอบนิดๆ */
+}
+
+/* ---------- Buttons ---------- */
+.summary-pay-btn,
+.summary-back-btn {
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 16px;      /* ⭐ กันข้อความปุ่มชิดขอบ */
+}
+
+
+/* ==================================================
+   Empty State
+================================================== */
+.cart-empty {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 32px;       /* ⭐ ไม่ชิดกรอบ */
+}
+
+/* ==================================================
+   Material Symbols
+================================================== */
+.material-icon {
+  font-family: "Material Symbols Outlined" !important;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.ds-btn .material-icon {
+  font-size: 18px;
+  color: currentColor;
+}
+
+/* ==================================================
+   Mobile Safe Area
+================================================== */
+@media (max-width: 768px) {
+  .cart-page {
+    padding-bottom: 220px; /* ⭐ กัน footer + mobile gesture bar */
+  }
+
+  .cart-summary-box {
+    margin-bottom: 80px;
+  }
+}

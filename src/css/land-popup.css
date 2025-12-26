@@ -43,23 +43,33 @@
   max-height: none !important;
 }
 
-/* กันกรณีมี div เปล่าชั้นนอกสุดที่ใส่ bg/shadow */
-.ldpopupshell > div,
-.ldpopup > div,
-.longdo-popup > div,
-.longdo-popup-container > div,
-.longdo-popup-wrapper > div{
-  background: transparent !important;
-  background-color: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
+/* =========================================
+   🔥 FIX CLICK ISSUE (Longdo canvas)
+   ให้ popup รับ mouse / click ได้จริง
+   ========================================= */
+#sqw-popup-root,
+#sqw-popup-root *,
+.sqw-popup,
+.land-popup-shell,
+.sqw-actions,
+.sqw-btn,
+.sqw-pay-btn {
+  pointer-events: auto !important;
 }
+
+/* กันกรณี parent จาก Longdo ปิด mouse */
+.ldpopupshell,
+.ldpopup,
+.ldpopupbody,
+.ldpopupcontent,
+.longdo-popup,
+.longdo-popup-wrapper,
+.longdo-popup-container,
+.longdo-popup-window,
+.longdo-popup-frame {
+  pointer-events: auto !important;
+}
+
 
 /* root wrapper ของเรา: ต้องโปร่งใส + หดตามเนื้อหา */
 #sqw-popup-root{
@@ -290,4 +300,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ✅ กันคลิกทะลุไปโดน canvas ของแผนที่ */
+#sqw-popup-root,
+#sqw-popup-root * {
+  pointer-events: auto !important;
 }

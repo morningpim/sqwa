@@ -1,36 +1,51 @@
-import React from "react";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
+
+const CART_KEY = "sqw_cart_v1";
+
+function readCartCount() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+    return Array.isArray(arr) ? arr.length : 0;
+  } catch {
+    return 0;
+  }
+}
 
 export default function Navbar() {
   const location = useLocation();
-  const [params] = useSearchParams();
+  const [cartCount, setCartCount] = useState(() => readCartCount());
 
-  const isMap = location.pathname === "/map";
-  const mode = params.get("mode") || "buy";
+  useEffect(() => {
+    const onChanged = () => setCartCount(readCartCount());
 
-  const modeLabel =
-    mode === "buy"
-      ? "โหมดซื้อขายที่ดิน"
-      : mode === "sell"
-      ? "โหมดฝากขายที่ดิน"
-      : "";
+    window.addEventListener("sqw-cart-changed", onChanged);
+    window.addEventListener("storage", onChanged); // เผื่อเปิดหลายแท็บ
+
+    return () => {
+      window.removeEventListener("sqw-cart-changed", onChanged);
+      window.removeEventListener("storage", onChanged);
+    };
+  }, []);
+
+  const isMap = useMemo(() => (location.pathname || "").startsWith("/map"), [location.pathname]);
+
+  const modeLabel = useMemo(() => {
+    if (!isMap) return "";
+    const sp = new URLSearchParams(location.search || "");
+    const mode = sp.get("mode") || "buy";
+    return mode === "sell" ? "โหมดขายที่ดิน" : "โหมดซื้อขายที่ดิน";
+  }, [isMap, location.search]);
 
   return (
     <header className="nav">
-      {/* ซ้าย */}
       <Link to="/" className="nav-logo">
         SQW
       </Link>
 
-      {/* กลาง (แสดงเฉพาะหน้า map) */}
-      {isMap && (
-        <div className="nav-mode-pill">
-          {modeLabel}
-        </div>
-      )}
+      {isMap && <div className="nav-mode-pill">{modeLabel}</div>}
 
-      {/* ขวา */}
       <div className="nav-right">
         <nav className="nav-menu">
           <Link to="/" className="nav-item">
@@ -48,16 +63,13 @@ export default function Navbar() {
         </nav>
 
         <Link to="/login">
-          <button className="ds-btn ds-btn-outline">
-            เข้าสู่ระบบ
-          </button>
+          <button className="ds-btn ds-btn-outline">เข้าสู่ระบบ</button>
         </Link>
-        
-        <Link to="/cart" className="cart-btn">
+
+        <Link to="/cart" className="cart-btn" aria-label="cart">
           <ShoppingCart size={20} />
-          <span className="cart-badge">2</span>
+          {cartCount > 0 ? <span className="cart-badge">{cartCount}</span> : null}
         </Link>
-        
       </div>
     </header>
   );

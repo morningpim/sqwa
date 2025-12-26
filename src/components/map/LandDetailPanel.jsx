@@ -100,24 +100,10 @@ function normalizeLand(input = {}) {
       ? `${toNumber(rai) ?? 0}-${toNumber(ngan) ?? 0}-${toNumber(wah) ?? 0}`
       : sqwToRNW(areaSqw) ?? "-");
 
-  const frontage = pick(
-    input.frontage,
-    input.frontWidth,
-    input.front,
-    input.roadFrontage,
-    input.frontMeter,
-    input.widthFront
-  );
+  const frontage = pick(input.frontage, input.frontWidth, input.front, input.roadFrontage, input.frontMeter, input.widthFront);
   const roadWidth = pick(input.roadWidth, input.roadwidth, input.road, input.roadSize, input.roadMeter);
 
-  const pricePerWa = pick(
-    input.pricePerWa,
-    input.pricePerSqw,
-    input.pricePerWah,
-    input.price_per_wa,
-    input.unitPrice,
-    input.priceUnit
-  );
+  const pricePerWa = pick(input.pricePerWa, input.pricePerSqw, input.pricePerWah, input.price_per_wa, input.unitPrice, input.priceUnit);
   const totalPrice = pick(input.totalPrice, input.total, input.sumPrice, input.total_price, input.priceTotal);
 
   const contactOwner = pick(input.contactOwner, input.ownerContact, input.contactName, input.ownerName, "");
@@ -172,7 +158,7 @@ export default function buildLandPopupHtml(
   const canReveal = (fieldKey) => canSeeAllForThisLand || unlockedSet.has(fieldKey);
   const showValue = (fieldKey, realValue, masked) => (canReveal(fieldKey) ? (realValue || "-") : masked);
 
-  const memberUI = `
+    const memberUI = `
     <div class="sqw-divider"></div>
 
     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -205,11 +191,6 @@ export default function buildLandPopupHtml(
   // ✅ non-member: กดปุ่มแล้วไปเด้ง UnlockPickerModal ใน MapPage
   const nonMemberUI = `
     <div class="sqw-divider"></div>
-
-    <div style="font-size:12px; opacity:.75; margin-top:6px;">
-      * กด “ปลดล็อกข้อมูล” แล้วเลือกฟิลด์ที่ต้องการในหน้าต่าง Pop up
-    </div>
-
     <div class="sqw-actions" style="margin-top:10px;">
       <button class="sqw-btn" type="button">แชทกับผู้ขาย</button>
 
@@ -223,6 +204,7 @@ export default function buildLandPopupHtml(
       </button>
     </div>
   `;
+
 
   return `
     <div id="sqw-popup-root">

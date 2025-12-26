@@ -9,6 +9,7 @@ import MapPage from "./components/map/MapPage";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import CartPage from "./pages/CartPage";
 
 export default function App() {
   const location = useLocation();
@@ -17,38 +18,28 @@ export default function App() {
     location.pathname === "/login" ||
     location.pathname === "/signup";
 
-  const isMapPage = location.pathname === "/map";
+  const hideFooter =
+    location.pathname === "/map" ||
+    location.pathname === "/cart" ||
+    location.pathname === "/login" ||
+    location.pathname === "/signup";
 
   return (
-    <div className="min-h-screen">
+    <div className="app-shell">
       {!hideNavbar && <Navbar />}
 
-      {/* ✅ หน้า /map ไม่ใช้ <main class="pt-16"> เพื่อไม่ดันซ้ำ */}
-      {isMapPage ? (
-        <MapPage />
-      ) : (
-        <main className={hideNavbar ? "" : "pt-16"}>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <>
-                  <HeroSection />
-                  <NewsSection />
-                  <FooterSection />
-                </>
-              }
-            />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/map" element={<MapPage />} />
-            <Route path="*" element={<FooterSection />} />
-          </Routes>
+      <main className={`app-main ${hideNavbar ? "" : "pt-16"}`}>
+        <Routes>
+          <Route path="/" element={<><HeroSection /><NewsSection /></>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/map" element={<MapPage />} />
+          <Route path="/cart" element={<CartPage />} />
+        </Routes>
+      </main>
 
-          {/* หน้าอื่นมี footer แต่หน้า map ไม่เอา */}
-          <FooterSection />
-        </main>
-      )}
+      {!hideFooter && <FooterSection />}
     </div>
   );
 }
+

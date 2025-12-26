@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 
 import ModeDisclaimerModal from "../Common/ModeDisclaimerModal";
@@ -15,6 +15,7 @@ import LandMarkers from "./LandMarkers";
 import { mockLands } from "./lands/mockLands";
 
 import buildLandPopupHtml from "./LandDetailPanel";
+import UnlockPickerModal from "./UnlockPickerModal";
 
 // -------------------------
 // Utils
@@ -55,113 +56,11 @@ function normalizePoint(pt) {
 }
 
 // -------------------------
-// ✅ Unlock Picker Modal
-// -------------------------
-function UnlockPickerModal({ open, onClose, selected, setSelected, onConfirm }) {
-  if (!open) return null;
-
-  const items = [
-    { k: "contactOwner", label: "เจ้าของ" },
-    { k: "broker", label: "นายหน้า" },
-    { k: "phone", label: "โทร" },
-    { k: "line", label: "LINE ID" },
-    { k: "frame", label: "กรอบที่ดิน" },
-    { k: "chanote", label: "ข้อมูลโฉนด/ระวาง" },
-  ];
-
-  const toggle = (k) => {
-    setSelected((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));
-  };
-
-  return createPortal(
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,.35)",
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-      }}
-      onClick={onClose}
-    >
-      <div
-        style={{
-          width: "min(520px, 95vw)",
-          background: "#fff",
-          borderRadius: 16,
-          border: "2px solid #118e44",
-          boxShadow: "0 20px 60px rgba(0,0,0,.25)",
-          overflow: "hidden",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontWeight: 800, fontSize: 20, color: "#118e44" }}>เลือกข้อมูลที่ต้องการปลดล็อก</div>
-          <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 18, border: "1px solid #ccc" }}>
-            ✕
-          </button>
-        </div>
-
-        <div style={{ padding: "0 16px 16px", display: "grid", gap: 10 }}>
-          {items.map((it) => (
-            <label
-              key={it.k}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                border: "2px solid #118e44",
-                borderRadius: 12,
-                padding: "10px 12px",
-                cursor: "pointer",
-              }}
-            >
-              <input type="checkbox" checked={selected.includes(it.k)} onChange={() => toggle(it.k)} />
-              <span style={{ fontWeight: 700 }}>{it.label}</span>
-            </label>
-          ))}
-        </div>
-
-        <div style={{ padding: 16, display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid #ccc", background: "#fff" }}
-          >
-            ยกเลิก
-          </button>
-
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={selected.length === 0}
-            style={{
-              padding: "10px 14px",
-              borderRadius: 12,
-              border: 0,
-              background: selected.length ? "#118e44" : "#9bd3b0",
-              color: "#fff",
-              fontWeight: 800,
-              cursor: selected.length ? "pointer" : "not-allowed",
-            }}
-          >
-            ไปหน้าชำระเงิน
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
-
-// -------------------------
 // MAIN
 // -------------------------
 export default function MapPage() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const mode = params.get("mode") || "buy";
 
   const [showDisclaimer, setShowDisclaimer] = useState(true);
@@ -187,12 +86,12 @@ export default function MapPage() {
   const [lands] = useState(mockLands);
 
   // -------------------------
-  // ✅ Access / Quota (FRONTEND MOCK)
+  // Access / Quota (FRONTEND MOCK)
   // -------------------------
   const ACCESS_KEY = "sqw_access_v1";
-  const todayKeyTH = () => new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
+  const todayKeyTH = () => new Date().toLocaleDateString("en-CA");
 
-  const loadAccess = () => {
+  const loadAccess = useCallback(() => {
     try {
       const raw = localStorage.getItem(ACCESS_KEY);
       const data = raw ? JSON.parse(raw) : null;
@@ -205,28 +104,80 @@ export default function MapPage() {
         dateKey,
         isMember: !!data?.isMember,
         quotaUsed,
-        unlockedFields: data?.unlockedFields ?? {}, // { [landId]: ["phone","line"] }
+        unlockedFields: data?.unlockedFields ?? {},
       };
     } catch {
       return { dateKey: todayKeyTH(), isMember: false, quotaUsed: 0, unlockedFields: {} };
     }
-  };
+  }, []);
 
-  const saveAccess = (next) => localStorage.setItem(ACCESS_KEY, JSON.stringify(next));
+  const saveAccess = useCallback((next) => {
+    localStorage.setItem(ACCESS_KEY, JSON.stringify(next));
+  }, []);
+
   const [access, setAccess] = useState(() => loadAccess());
 
   // -------------------------
-  // ✅ Pay + Unlock Picker
+  // Pay + Unlock Picker
   // -------------------------
   const [payOpen, setPayOpen] = useState(false);
-  const [payDraft, setPayDraft] = useState(null); // { landId, fields }
+  const [payDraft, setPayDraft] = useState(null); // { landId, selectedFields }
 
   const [unlockOpen, setUnlockOpen] = useState(false);
   const [unlockLandId, setUnlockLandId] = useState("");
-  const [unlockSelected, setUnlockSelected] = useState([]);
 
-  const { mapRef, initMap, applySatellite, applyTraffic, zoomIn, zoomOut, locateMe } =
-    useLongdoMap({ isSatellite, isTraffic });
+  // ref กัน map click ปิด popup ตอน modal เปิด
+  const payOpenRef = useRef(false);
+  useEffect(() => {
+    payOpenRef.current = payOpen;
+  }, [payOpen]);
+
+  const unlockOpenRef = useRef(false);
+  useEffect(() => {
+    unlockOpenRef.current = unlockOpen;
+  }, [unlockOpen]);
+
+  // -------------------------
+  // Cart
+  // -------------------------
+  const CART_KEY = "sqw_cart_v1";
+
+  const addToCart = useCallback(
+    ({ landId, selectedFields, total }) => {
+      if (!landId || !Array.isArray(selectedFields) || selectedFields.length === 0) return;
+
+      const item = {
+        id: `${landId}:${selectedFields.slice().sort().join(",")}:${Date.now()}`,
+        landId: String(landId),
+        selectedFields: selectedFields.slice(),
+        total: Number(total || 0),
+        createdAt: Date.now(),
+      };
+
+      let cart = [];
+      try {
+        cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+        if (!Array.isArray(cart)) cart = [];
+      } catch {
+        cart = [];
+      }
+
+      cart.push(item);
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+
+      // ให้ Navbar badge อัปเดต
+      window.dispatchEvent(new Event("sqw-cart-changed"));
+
+      // ไปหน้า cart
+      navigate("/cart");
+    },
+    [navigate]
+  );
+
+  const { mapRef, initMap, applySatellite, applyTraffic, zoomIn, zoomOut, locateMe } = useLongdoMap({
+    isSatellite,
+    isTraffic,
+  });
 
   const [mapObj, setMapObj] = useState(null);
 
@@ -241,6 +192,7 @@ export default function MapPage() {
   const [safeTop, setSafeTop] = useState(0);
   const [safeRight, setSafeRight] = useState(0);
   const [overlaySize, setOverlaySize] = useState({ w: 0, h: 0 });
+  const [overlayOffset, setOverlayOffset] = useState({ left: 0, top: 0 });
 
   const [popupSize, setPopupSize] = useState({ w: 360, h: 360 });
 
@@ -261,6 +213,7 @@ export default function MapPage() {
     if (!overlayRect) return;
 
     setOverlaySize({ w: overlayRect.width, h: overlayRect.height });
+    setOverlayOffset({ left: overlayRect.left, top: overlayRect.top });
 
     const searchTopbar =
       document.querySelector(".map-topbar") ||
@@ -342,12 +295,64 @@ export default function MapPage() {
     return () => window.removeEventListener("resize", computeSafeAreas);
   }, [computeSafeAreas]);
 
+  // -------------------------
   // popup state
+  // -------------------------
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedLand, setSelectedLand] = useState(null);
   const [popupPos, setPopupPos] = useState(null);
   const selectedLocRef = useRef(null);
   const lastPopupOpenAtRef = useRef(0);
+  const lastPopupLandRef = useRef(null);
+  const lastPopupLocRef = useRef(null);
+
+  const selectedLandRef = useRef(null);
+  useEffect(() => {
+    selectedLandRef.current = selectedLand;
+  }, [selectedLand]);
+
+  const popupOpenRef = useRef(false);
+  useEffect(() => {
+    popupOpenRef.current = popupOpen;
+  }, [popupOpen]);
+
+  // -------------------------
+  // กันลากแผนที่แล้วเกิด click หลุด
+  // -------------------------
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const DRAG_THRESHOLD = 6; // px
+
+  useEffect(() => {
+    const onDown = (e) => {
+      if (!popupOpenRef.current) return;
+      isDraggingRef.current = false;
+      dragStartRef.current = { x: e.clientX ?? 0, y: e.clientY ?? 0 };
+    };
+
+    const onMove = (e) => {
+      if (!popupOpenRef.current) return;
+      const dx = (e.clientX ?? 0) - dragStartRef.current.x;
+      const dy = (e.clientY ?? 0) - dragStartRef.current.y;
+      if (Math.hypot(dx, dy) > DRAG_THRESHOLD) isDraggingRef.current = true;
+    };
+
+    const onUp = () => {
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 0);
+    };
+
+    document.addEventListener("pointerdown", onDown, true);
+    document.addEventListener("pointermove", onMove, true);
+    document.addEventListener("pointerup", onUp, true);
+
+    return () => {
+      document.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("pointermove", onMove, true);
+      document.removeEventListener("pointerup", onUp, true);
+    };
+  }, []);
 
   const closePopup = useCallback(() => {
     setPopupOpen(false);
@@ -399,6 +404,8 @@ export default function MapPage() {
   const openPopupFor = useCallback(
     (land, loc) => {
       if (!land || !loc) return;
+      lastPopupLandRef.current = land;
+      lastPopupLocRef.current = loc;
       selectedLocRef.current = loc;
       setSelectedLand(land);
       setPopupOpen(true);
@@ -407,7 +414,7 @@ export default function MapPage() {
       computeSafeAreas();
       setAccess(loadAccess());
     },
-    [setPopupPosFromLoc, computeSafeAreas]
+    [setPopupPosFromLoc, computeSafeAreas, loadAccess]
   );
 
   const handleSelectLand = useCallback(
@@ -509,6 +516,10 @@ export default function MapPage() {
     if (!map) return;
 
     const onMapClick = () => {
+      // ✅ ถ้ามี modal เปิดอยู่ อย่าปิด popup
+      if (payOpenRef.current || unlockOpenRef.current) return;
+
+      if (isDraggingRef.current) return;
       const dt = Date.now() - (lastPopupOpenAtRef.current || 0);
       if (dt < 250) return;
       closePopup();
@@ -562,7 +573,6 @@ export default function MapPage() {
   // popup HTML
   const popupHtml = useMemo(() => {
     if (!selectedLand) return "";
-
     const landId = selectedLand?.id ?? selectedLand?.landId ?? "";
     const unlocked = access?.unlockedFields?.[landId] ?? [];
 
@@ -622,14 +632,25 @@ export default function MapPage() {
     top = Math.max(minTop, Math.min(maxTop, top));
 
     return {
-      position: "absolute",
-      left: `${left}px`,
-      top: `${top}px`,
-      zIndex: 50,
-      pointerEvents: "none",
+      position: "fixed",
+      left: `${overlayOffset.left + left}px`,
+      top: `${overlayOffset.top + top}px`,
+      zIndex: 999999,
+      pointerEvents: "auto",
       background: "transparent",
     };
-  }, [popupPos, popupSide, safeTop, safeRight, overlaySize.w, overlaySize.h, popupSize.w, popupSize.h]);
+  }, [
+    popupPos,
+    popupSide,
+    safeTop,
+    safeRight,
+    overlayOffset.left,
+    overlayOffset.top,
+    overlaySize.w,
+    overlaySize.h,
+    popupSize.w,
+    popupSize.h,
+  ]);
 
   const arrowStyle = useMemo(() => {
     const base = {
@@ -650,14 +671,47 @@ export default function MapPage() {
     return { ...base, right: `${-ARROW_SIZE / 2 - ARROW_GAP}px` };
   }, [popupSide]);
 
-  // ✅ Click inside popup
-  const handlePopupClick = useCallback(
-    (e) => {
-      // ✅ กัน map ปิด popup ตอนคลิกใน popup
-      lastPopupOpenAtRef.current = Date.now();
+  // ✅ ฟังก์ชันเปิด unlock modal
+  const openUnlockPicker = useCallback((landId) => {
+    const id = String(landId || "");
+    if (!id) return;
 
-      // close
-      const closeBtn = e.target?.closest?.('[data-sqw-close="1"]');
+    setPopupOpen(false);
+    setPopupPos(null);
+
+    const cur = loadAccess(); // ✅ ใช้ตัวล่าสุด
+    const arr = cur?.unlockedFields?.[id];
+    const unlockedSet = new Set(Array.isArray(arr) ? arr : []);
+
+    const allKeys = ["contactOwner", "broker", "phone", "line", "frame", "chanote"];
+    const remaining = allKeys.filter((k) => !unlockedSet.has(k));
+
+    if (remaining.length === 0) {
+      alert("ปลดล็อกข้อมูลครบแล้ว ✅");
+      return;
+    }
+
+    setUnlockLandId(id);
+    setUnlockOpen(true);
+  }, [loadAccess]);
+
+  useEffect(() => {
+    window.__unlockOpen = (landId) => openUnlockPicker(String(landId || ""));
+    return () => {
+      try {
+        delete window.__unlockOpen;
+      } catch {}
+    };
+  }, [openUnlockPicker]);
+
+  // ✅ handler เดียว (delegation)
+  const handlePopupDelegate = useCallback(
+    (e) => {
+      if (isDraggingRef.current) return;
+
+      const t = e.target;
+
+      const closeBtn = t?.closest?.('[data-sqw-close="1"]');
       if (closeBtn) {
         e.preventDefault();
         e.stopPropagation();
@@ -665,14 +719,26 @@ export default function MapPage() {
         return;
       }
 
-      const landId = selectedLand?.id ?? selectedLand?.landId ?? "";
-      if (!landId) return;
+      const openBtn = t?.closest?.('[data-action="open-unlock-picker"]');
+      if (openBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const landIdFromAttr = openBtn.getAttribute("data-land-id") || "";
+        const curLand = selectedLandRef.current;
+        const landId = landIdFromAttr || (curLand?.id ?? curLand?.landId ?? "");
+        if (landId) openUnlockPicker(landId);
+        return;
+      }
 
-      // member: unlock all
-      const unlockAllBtn = e.target?.closest?.('[data-action="unlock-all"]');
+      const unlockAllBtn = t?.closest?.('[data-action="unlock-all"]');
       if (unlockAllBtn) {
         e.preventDefault();
         e.stopPropagation();
+
+        const landIdFromAttr = unlockAllBtn.getAttribute("data-land-id") || "";
+        const curLand = selectedLandRef.current;
+        const landId = landIdFromAttr || (curLand?.id ?? curLand?.landId ?? "");
+        if (!landId) return;
 
         const cur = loadAccess();
         if (!cur.isMember) return;
@@ -688,38 +754,44 @@ export default function MapPage() {
         const unlockedFields = { ...(cur.unlockedFields ?? {}) };
         unlockedFields[landId] = allFields;
 
-        const saved = {
-          dateKey: todayKeyTH(),
-          isMember: true,
-          quotaUsed: used,
-          unlockedFields,
-        };
-
+        const saved = { dateKey: todayKeyTH(), isMember: true, quotaUsed: used, unlockedFields };
         saveAccess(saved);
         setAccess(saved);
-        return;
-      }
-
-      // ✅ non-member: open picker modal
-      const openPickerBtn = e.target?.closest?.('[data-action="open-unlock-picker"]');
-      if (openPickerBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        setUnlockLandId(landId);
-        setUnlockSelected([]);
-        setUnlockOpen(true);
-        return;
       }
     },
-    [closePopup, selectedLand]
+    [closePopup, loadAccess, openUnlockPicker, saveAccess]
   );
 
-  // Render
+  // -------------------------
+  // ✅ Unlock Items (ซ่อนที่ปลดล็อกแล้ว)
+  // -------------------------
+  const ALL_UNLOCK_ITEMS = useMemo(
+    () => [
+      { k: "contactOwner", label: "เจ้าของ", price: 50, icon: "👤" },
+      { k: "broker", label: "นายหน้า", price: 50, icon: "🧑‍💼" },
+      { k: "phone", label: "เบอร์โทร", price: 200, icon: "📞" },
+      { k: "line", label: "LINE ID", price: 150, icon: "💬" },
+      { k: "frame", label: "กรอบที่ดิน", price: 100, icon: "🗺️" },
+      { k: "chanote", label: "โฉนด/ระวาง", price: 200, icon: "📄" },
+    ],
+    []
+  );
+
+  const unlockedForThisLand = useMemo(() => {
+    const landId = String(unlockLandId || "");
+    const arr = access?.unlockedFields?.[landId];
+    return Array.isArray(arr) ? arr : [];
+  }, [access, unlockLandId]);
+
+  const unlockedSetForThisLand = useMemo(() => new Set(unlockedForThisLand), [unlockedForThisLand]);
+
+  const unlockItems = useMemo(() => {
+    return ALL_UNLOCK_ITEMS.filter((it) => !unlockedSetForThisLand.has(it.k));
+  }, [ALL_UNLOCK_ITEMS, unlockedSetForThisLand]);
+
   return (
     <div className="map-shell">
       <div id="map" className="map-canvas" />
-
       {showDisclaimer && <ModeDisclaimerModal onClose={handleAcceptDisclaimer} />}
 
       <FilterPanel
@@ -771,60 +843,68 @@ export default function MapPage() {
       />
 
       {/* popup */}
-      {popupOpen && popupPos && overlayEl
+      {popupOpen && popupPos
         ? createPortal(
             <div style={popupStyle}>
-              <div ref={popupBoxRef} style={{ position: "relative", pointerEvents: "auto" }} onClick={handlePopupClick}>
+              <div ref={popupBoxRef} style={{ position: "relative", pointerEvents: "auto" }}>
                 <div style={arrowStyle} />
                 <div
                   className="land-popup-shell"
                   style={{ position: "relative", zIndex: 2, pointerEvents: "auto" }}
+                  onPointerDownCapture={handlePopupDelegate}
+                  onClick={handlePopupDelegate}
                   dangerouslySetInnerHTML={{ __html: popupHtml }}
                 />
               </div>
             </div>,
-            overlayEl
+            document.body
           )
         : null}
 
-      {/* ✅ modal เลือกข้อมูลที่จะปลดล็อก */}
+      {/* ✅ Unlock Picker */}
       <UnlockPickerModal
         open={unlockOpen}
-        selected={unlockSelected}
-        setSelected={setUnlockSelected}
-        onClose={() => setUnlockOpen(false)}
-        onConfirm={() => {
-          if (!unlockLandId || unlockSelected.length === 0) return;
-          setPayDraft({ landId: unlockLandId, fields: unlockSelected });
+        landId={unlockLandId}
+        title="ปลดล็อกข้อมูลที่ดินนี้"
+        subtitle="ข้อมูลติดต่อ"
+        items={unlockItems}
+        initialSelected={[]}
+        onCancel={() => {
+          setUnlockOpen(false);
+          if (lastPopupLandRef.current && lastPopupLocRef.current) {
+            openPopupFor(
+              lastPopupLandRef.current,
+              lastPopupLocRef.current
+            );
+          }
+        }}
+        onAddToCart={({ selected, total }) => {
+          addToCart({ landId: unlockLandId, selectedFields: selected, total });
+          setUnlockOpen(false);
+        }}
+        onConfirm={({ selected }) => {
+          if (!unlockLandId || !selected?.length) return;
+          setPayDraft({ landId: unlockLandId, selectedFields: selected });
           setUnlockOpen(false);
           setPayOpen(true);
         }}
       />
 
-      {/* modal จ่ายเงิน (mock) */}
+      {/* ✅ PayModal (mock) */}
       <PayModal
         open={payOpen}
         draft={payDraft}
-        onClose={() => setPayOpen(false)}
-        onConfirm={() => {
-          if (!payDraft?.landId || !Array.isArray(payDraft.fields)) return;
-
-          const cur = loadAccess();
-          const unlockedFields = { ...(cur.unlockedFields ?? {}) };
-          const prev = unlockedFields[payDraft.landId] ?? [];
-          unlockedFields[payDraft.landId] = Array.from(new Set([...prev, ...payDraft.fields]));
-
-          const saved = {
-            dateKey: todayKeyTH(),
-            isMember: cur.isMember,
-            quotaUsed: cur.quotaUsed,
-            unlockedFields,
-          };
-
-          saveAccess(saved);
-          setAccess(saved);
+        onClose={() => {
           setPayOpen(false);
-          alert("ชำระเงินสำเร็จ (mock) ✅");
+          // ✅ ถ้ายกเลิกชำระเงิน ให้ popup กลับมา
+          if (lastPopupLandRef.current && lastPopupLocRef.current) {
+            openPopupFor(lastPopupLandRef.current, lastPopupLocRef.current);
+          }
+        }}
+        onPaid={(savedAccess) => {
+          setAccess(savedAccess);
+          setPayOpen(false);
+          closePopup(); // ✅ ชำระแล้ว ไม่ให้ popup กลับมา
         }}
       />
     </div>
