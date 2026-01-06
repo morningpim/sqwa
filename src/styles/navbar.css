@@ -106,3 +106,74 @@
   border-radius: 999px;
   line-height: 1;
 }
+
+/* profile in nav */
+.nav-profile {
+  position: relative;
+}
+
+.nav-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.nav-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nav-avatar span {
+  font-weight: 900;
+  color: #111;
+}
+
+.nav-profile-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 200px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.15);
+  padding: 8px;
+  z-index: 1000;
+}
+
+.nav-profile-name {
+  padding: 8px 10px;
+  font-weight: 900;
+  border-bottom: 1px solid #eee;
+}
+
+.nav-profile-menu button {
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  border-radius: 10px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.nav-profile-menu button:hover {
+  background: #f3f4f6;
+}
+
+.nav-profile-menu .danger {
+  color: #dc2626;
+}
+
+.nav-profile-divider {
+  height: 1px;
+  background: #eee;
+  margin: 6px 0;
+}

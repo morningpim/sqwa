@@ -1,6 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "../../css/land-popup.css";
 import { QUOTA_LIMIT } from "./constants/unlock";
+
+// ✅ path ถูกตามโครงในรูป: src/components/map -> src/utils
+import { isFavorite as isFavInStore, toggleFavorite as toggleFavInStore } from "../../utils/favorites";
 
 // -------------------------
 // utils เดิม (ใช้ต่อได้)
@@ -132,6 +135,8 @@ function normalizeLand(input = {}) {
   const line = pick(input.line, input.lineId, input.line_id, input.lineID, "");
   const frame = pick(input.frame, input.landFrame, input.frameNo, input.land_frame, "");
   const chanote = pick(input.chanote, input.deedInformation, input.deed, input.chanode, input.titleDeed, "");
+  const lat = pick(input.lat, input.latitude, input.y, input.location?.lat);
+  const lng = pick(input.lng, input.lon, input.longitude, input.x, input.location?.lng);
 
   return {
     id,
@@ -149,6 +154,10 @@ function normalizeLand(input = {}) {
     line,
     frame,
     chanote,
+
+    // ✅ add
+    lat,
+    lng,
   };
 }
 
@@ -171,14 +180,42 @@ export default function LandDetailPanel({
   const L = useMemo(() => normalizeLand(land), [land]);
   const unlockedSet = useMemo(() => new Set(unlockedFields), [unlockedFields]);
 
-  // favorite (local fallback)
-  const [favLocal, setFavLocal] = useState(false);
+  // ✅ init favLocal จาก localStorage (กรณี parent ไม่คุม)
+  const [favLocal, setFavLocal] = useState(() => (L?.id ? isFavInStore(L.id) : false));
+
+  // ✅ sync เมื่อ land เปลี่ยน (เฉพาะกรณี parent ไม่คุม)
+  useEffect(() => {
+    if (!L?.id) return;
+    if (typeof isFavorite === "boolean") return;
+    setFavLocal(isFavInStore(L.id));
+  }, [L?.id, isFavorite]);
+
   const fav = typeof isFavorite === "boolean" ? isFavorite : favLocal;
 
   const handleFav = () => {
-    const next = !fav;
-    if (typeof onToggleFavorite === "function") onToggleFavorite(L.id, next);
-    else setFavLocal(next);
+    if (!L?.id) return;
+
+    const payload = {
+      id: L.id,
+      title: L.owner,
+      owner: L.owner,
+      updatedAt: L.updatedAt,
+      totalPrice: L.totalPrice,
+      area: L.area,
+      lat: L.lat,
+      lng: L.lng,
+    };
+
+
+    // ✅ ให้ parent จัดการเอง (เช่น ยิง API) ถ้าส่ง handler มา
+    if (typeof onToggleFavorite === "function") {
+      onToggleFavorite(L.id, !fav, payload);
+      return;
+    }
+
+    // ✅ โหมด localStorage
+    const next = toggleFavInStore(L.id, payload);
+    setFavLocal(next);
   };
 
   const canSeeAllForThisLand = isMember && unlockedSet.size > 0;
@@ -188,9 +225,7 @@ export default function LandDetailPanel({
   return (
     <div id="sqw-popup-root">
       <div className="sqw-popup">
-        {/* header */}
         <div className="sqw-head">
-          {/* ✅ Favorite อยู่แค่ตรง header (ไม่ไปทับปุ่มล่าง) */}
           <button
             className={`sqw-fav ${fav ? "is-on" : ""}`}
             type="button"
@@ -296,21 +331,14 @@ export default function LandDetailPanel({
             </div>
           </>
         ) : (
-          <>
-            {/* ✅ คืนปุ่มเดิมครบ 2 ปุ่ม (ไม่ให้พังอีก) */}
-            <div className="sqw-actions" style={{ marginTop: 10 }}>
-              <button className="sqw-btn" type="button">
-                แชทกับผู้ขาย
-              </button>
-              <button
-                className="sqw-btn sqw-pay-btn"
-                type="button"
-                onClick={() => onOpenUnlockPicker?.(L.id)}
-              >
-                คลิกเพื่อปลดล็อคข้อมูล
-              </button>
-            </div>
-          </>
+          <div className="sqw-actions" style={{ marginTop: 10 }}>
+            <button className="sqw-btn" type="button">
+              แชทกับผู้ขาย
+            </button>
+            <button className="sqw-btn sqw-pay-btn" type="button" onClick={() => onOpenUnlockPicker?.(L.id)}>
+              คลิกเพื่อปลดล็อคข้อมูล
+            </button>
+          </div>
         )}
       </div>
     </div>

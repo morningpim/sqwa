@@ -22,6 +22,8 @@ import { useMapSearch } from "./hooks/useMapSearch";
 import { useSelectedLandAccess } from "./hooks/useSelectedLandAccess";
 import { useLandSelection } from "./hooks/useLandSelection";
 import { useUnlockFlow } from "./hooks/useUnlockFlow";
+import { readFavorites, subscribeFavoritesChanged } from "../../utils/favorites";
+
 
 import { DEFAULT_FILTER } from "./constants/filter";
 
@@ -97,6 +99,19 @@ export default function MapPage() {
     applyFilters,
     resetFilter,
   } = useLandFilters(lands, DEFAULT_FILTER);
+
+  const [favoriteIds, setFavoriteIds] = useState(() => {
+    return new Set(readFavorites().map((f) => String(f.id)));
+  });
+
+  useEffect(() => {
+    const sync = () =>
+      setFavoriteIds(new Set(readFavorites().map((f) => String(f.id))));
+
+    const unsub = subscribeFavoritesChanged(sync);
+    return unsub;
+  }, []);
+
 
   // =========================================================================
   // Access / Cart
@@ -242,7 +257,14 @@ export default function MapPage() {
         onClear={resetFilter}
       />
 
-      {!!mapObj && <LandMarkers map={mapObj} lands={filteredLands} onSelect={onSelectLand} />}
+      {!!mapObj && (
+        <LandMarkers
+          map={mapObj}
+          lands={filteredLands}
+          favoriteIds={favoriteIds}   // ✅ เพิ่ม
+          onSelect={onSelectLand}
+        />
+      )}
 
       <MapControls
         pageMode={mode}

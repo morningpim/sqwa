@@ -1,14 +1,16 @@
 import React, { useEffect, useRef } from "react";
 
 /**
- * LandMarkers (FINAL+)
+ * LandMarkers (FINAL+ Fav Highlight)
  * - ✅ กันหมุดซ้อน (StrictMode) ด้วย cleanup
  * - ✅ ใส่ __land / __loc / __onSelect
- * - ✅ ผูก click ที่ marker/polygon โดยตรง (ไม่พึ่ง overlayClick ของ map)
- * - ✅ เก็บ unbind ไว้บน overlay แล้ว cleanup เพื่อกัน "ข้อมูลเก่าค้าง"
+ * - ✅ ผูก click ที่ marker/polygon โดยตรง
+ * - ✅ รองรับ favoriteIds เพื่อ highlight หมุด/โพลิกอน
  */
 
-const DEFAULT_COLOR = "#E11D48"; // red-600
+const DEFAULT_COLOR = "#E11D48"; // red-600 (ปกติ)
+const FAV_COLOR = "#16A34A";     // green-600 (favorite) << ปรับสีได้
+const FAV_RING = "#ffffff";     // วงขาวรอบหมุด
 
 function safeId(v, i) {
   if (v == null) return `land_${i}`;
@@ -19,7 +21,8 @@ function svgToDataUri(svg) {
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 }
 
-function makePinSvg({ color = DEFAULT_COLOR } = {}) {
+function makePinSvg({ color = DEFAULT_COLOR, ring = false } = {}) {
+  // ring=true จะวาดวงกลมขาวรอบๆ ให้เด่นขึ้น
   return `
   <svg xmlns="http://www.w3.org/2000/svg" width="34" height="44" viewBox="0 0 34 44">
     <defs>
@@ -27,9 +30,13 @@ function makePinSvg({ color = DEFAULT_COLOR } = {}) {
         <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,.25)"/>
       </filter>
     </defs>
+
     <path filter="url(#s)"
       d="M17 1C9.82 1 4 6.82 4 14c0 9.75 13 28 13 28s13-18.25 13-28C30 6.82 24.18 1 17 1z"
       fill="${color}"/>
+
+    ${ring ? `<circle cx="17" cy="14" r="7.4" fill="${FAV_RING}"/>` : ""}
+
     <circle cx="17" cy="14" r="5.6" fill="#fff"/>
   </svg>`;
 }
@@ -49,7 +56,6 @@ function getLoc(land) {
 }
 
 function bindOverlayClick(overlay, fn) {
-  // คืนค่า unbind เสมอ เพื่อ cleanup ได้
   try {
     overlay?.Event?.bind?.("click", fn);
     return () => {
@@ -62,7 +68,14 @@ function bindOverlayClick(overlay, fn) {
   }
 }
 
-export default function LandMarkers({ map, lands = [], onSelect }) {
+function isFavId(favoriteIds, id) {
+  if (!favoriteIds) return false;
+  if (favoriteIds instanceof Set) return favoriteIds.has(String(id));
+  if (Array.isArray(favoriteIds)) return favoriteIds.map(String).includes(String(id));
+  return false;
+}
+
+export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) {
   const markerMapRef = useRef(new Map());  // id -> marker overlay
   const polygonMapRef = useRef(new Map()); // id -> polygon overlay
 
@@ -82,16 +95,33 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
 
       idsNow.add(id);
 
+      const fav = isFavId(favoriteIds, id);
+
       let marker = markerMapRef.current.get(id);
 
       const selectFn = () => onSelect?.(land, { lon: loc.lon, lat: loc.lat });
 
+      // ถ้ามี marker แล้ว แต่สถานะ fav เปลี่ยน -> สร้างใหม่ (ชัวร์สุดสำหรับ Longdo)
+      if (marker && marker.__fav !== fav) {
+        try {
+          marker.__unbindClick?.();
+        } catch {}
+        try {
+          map.Overlays.remove(marker);
+        } catch {}
+        markerMapRef.current.delete(id);
+        marker = null;
+      }
+
       if (!marker) {
+        const color = fav ? FAV_COLOR : DEFAULT_COLOR;
+        const url = svgToDataUri(makePinSvg({ color, ring: fav }));
+
         marker = new L.Marker(
           { lon: loc.lon, lat: loc.lat },
           {
             icon: {
-              url: svgToDataUri(makePinSvg({ color: DEFAULT_COLOR })),
+              url,
               offset: { x: 17, y: 42 },
               size: { width: 34, height: 44 },
             },
@@ -99,16 +129,13 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
           }
         );
 
-        // ใส่ข้อมูล
+        marker.__fav = fav;
         marker.__land = land;
         marker.__loc = { lon: loc.lon, lat: loc.lat };
         marker.__onSelect = selectFn;
 
-        // ✅ ผูกคลิกที่ marker ตรง ๆ (ชัวร์สุด)
         marker.__unbindClick?.();
-        marker.__unbindClick = bindOverlayClick(marker, () => {
-          marker.__onSelect?.();
-        });
+        marker.__unbindClick = bindOverlayClick(marker, () => marker.__onSelect?.());
 
         try {
           map.Overlays.add(marker);
@@ -118,7 +145,7 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
 
         markerMapRef.current.set(id, marker);
       } else {
-        // อัปเดตตำแหน่ง + อัปเดตข้อมูล เพื่อกัน "ข้อมูลเก่า"
+        // อัปเดตข้อมูลเดิม
         try {
           marker.location({ lon: loc.lon, lat: loc.lat });
         } catch {}
@@ -129,11 +156,11 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
       }
     });
 
-    // ลบอันที่หายไปจาก lands
+    // ลบอันที่หายไป
     for (const [id, marker] of markerMapRef.current.entries()) {
       if (!idsNow.has(id)) {
         try {
-          marker.__unbindClick?.(); // ✅ unbind event กันค้าง
+          marker.__unbindClick?.();
         } catch {}
         try {
           map.Overlays.remove(marker);
@@ -142,7 +169,7 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
       }
     }
 
-    // cleanup (StrictMode mount/unmount)
+    // cleanup (StrictMode)
     return () => {
       try {
         for (const marker of markerMapRef.current.values()) {
@@ -157,7 +184,7 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
         markerMapRef.current.clear();
       }
     };
-  }, [map, lands, onSelect]);
+  }, [map, lands, favoriteIds, onSelect]);
 
   // -------------------------
   // Polygons (optional)
@@ -174,6 +201,8 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
       if (!poly || !Array.isArray(poly) || poly.length < 3) return;
 
       idsNow.add(id);
+
+      const fav = isFavId(favoriteIds, id);
 
       let overlay = polygonMapRef.current.get(id);
 
@@ -196,23 +225,33 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
 
       const selectFn = () => onSelect?.(land, centerLoc);
 
+      // ถ้า fav เปลี่ยน -> recreate เพื่อเปลี่ยน style ชัวร์สุด
+      if (overlay && overlay.__fav !== fav) {
+        try {
+          overlay.__unbindClick?.();
+        } catch {}
+        try {
+          map.Overlays.remove(overlay);
+        } catch {}
+        polygonMapRef.current.delete(id);
+        overlay = null;
+      }
+
       if (!overlay) {
         overlay = new L.Polygon(pts, {
-          lineWidth: 2,
-          lineColor: "rgba(16,185,129,1)",
-          fillColor: "rgba(16,185,129,0.18)",
+          lineWidth: fav ? 3 : 2,
+          lineColor: fav ? "rgba(22,163,74,1)" : "rgba(16,185,129,1)",
+          fillColor: fav ? "rgba(22,163,74,0.22)" : "rgba(16,185,129,0.18)",
           clickable: true,
         });
 
+        overlay.__fav = fav;
         overlay.__land = land;
         overlay.__loc = centerLoc;
         overlay.__onSelect = selectFn;
 
-        // ✅ bind click ตรง ๆ
         overlay.__unbindClick?.();
-        overlay.__unbindClick = bindOverlayClick(overlay, () => {
-          overlay.__onSelect?.();
-        });
+        overlay.__unbindClick = bindOverlayClick(overlay, () => overlay.__onSelect?.());
 
         try {
           map.Overlays.add(overlay);
@@ -225,7 +264,6 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
           overlay.location(pts);
         } catch {}
 
-        // อัปเดตข้อมูลกัน land เก่า
         overlay.__land = land;
         overlay.__loc = centerLoc;
         overlay.__onSelect = selectFn;
@@ -259,7 +297,7 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
         polygonMapRef.current.clear();
       }
     };
-  }, [map, lands, onSelect]);
+  }, [map, lands, favoriteIds, onSelect]);
 
   return null;
 }

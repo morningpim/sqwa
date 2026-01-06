@@ -10,6 +10,7 @@ import MapPage from "./components/map/MapPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import CartPage from "./pages/Cart/CartPage";
+import ProfilePage from "./pages/ProfilePage"; // ✅ เพิ่ม
 
 export default function App() {
   const location = useLocation();
@@ -22,7 +23,8 @@ export default function App() {
     location.pathname === "/map" ||
     location.pathname === "/cart" ||
     location.pathname === "/login" ||
-    location.pathname === "/signup";
+    location.pathname === "/signup" ||
+    location.pathname === "/profile"; // ✅ เพิ่ม
 
   return (
     <div className="app-shell">
@@ -35,6 +37,9 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/cart" element={<CartPage />} />
+
+          {/* ✅ เพิ่ม */}
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </main>
 
@@ -42,4 +47,3 @@ export default function App() {
     </div>
   );
 }
-
