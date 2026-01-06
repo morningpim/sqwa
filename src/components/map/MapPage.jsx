@@ -31,8 +31,12 @@ import { mockLands } from "./lands/mockLands";
 import LandDetailPanel from "./LandDetailPanel";
 import UnlockPickerModal from "./UnlockPickerModal";
 
-// ✅ เพิ่ม import hook ที่แยกไฟล์
 import { useLandFilters } from "./hooks/useLandFilters";
+import { useLongdoDrawing } from "./hooks/useLongdoDrawing";
+
+// ✅ Role (mock – ยังไม่ทำ backend)
+import { useAuth } from "../../auth/AuthProvider";
+import RolePickerModal from "../../auth/RolePickerModal";
 
 export default function MapPage() {
   // =========================================================================
@@ -40,10 +44,31 @@ export default function MapPage() {
   // =========================================================================
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const mode = params.get("mode") || "buy";
+  const mode = params.get("mode") || "buy"; // buy | sell | eia
 
   // =========================================================================
-  // UI state: disclaimer / layer / filter
+  // Role (mock)
+  // =========================================================================
+  const { role, updateRole } = useAuth();
+  const [roleOpen, setRoleOpen] = useState(false);
+
+  const canDrawInBuy = role === "landlord" || role === "seller" || role === "admin";
+  const canSell = role === "seller" || role === "admin";
+
+  const drawingEnabled = mode === "buy" ? canDrawInBuy : mode === "sell" ? canSell : mode === "eia";
+
+  const [currentMode, setCurrentMode] = useState("normal"); // normal | eia
+
+  // ✅ กัน buyer เข้า sell
+  useEffect(() => {
+    if (mode === "sell" && !canSell) {
+      alert("ต้องเป็น Seller หรือ Admin เท่านั้นถึงจะใช้โหมด Sell ได้");
+      navigate("/map?mode=buy", { replace: true });
+    }
+  }, [mode, canSell, navigate]);
+
+  // =========================================================================
+  // UI state
   // =========================================================================
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   useEffect(() => setShowDisclaimer(true), [mode]);
@@ -56,12 +81,12 @@ export default function MapPage() {
   const [dolOpacity, setDolOpacity] = useState(0.35);
 
   // =========================================================================
-  // Data (mock)
+  // Data
   // =========================================================================
   const lands = useMemo(() => mockLands, []);
 
   // =========================================================================
-  // ✅ Filter logic (แยกออกเป็น hook)
+  // Filters
   // =========================================================================
   const {
     filterOpen,
@@ -74,33 +99,24 @@ export default function MapPage() {
   } = useLandFilters(lands, DEFAULT_FILTER);
 
   // =========================================================================
-  // Hooks: access/cart
+  // Access / Cart
   // =========================================================================
   const accessApi = useMapAccess();
   const { addToCart } = useMapCart(navigate);
 
   // =========================================================================
-  // Longdo map
+  // Longdo Map
   // =========================================================================
-  const {
-    mapRef,
-    initMap,
-    applySatellite,
-    applyTraffic,
-    applyDolVisibility,
-    zoomIn,
-    zoomOut,
-    locateMe,
-  } = useLongdoMap({
-    isSatellite,
-    isTraffic,
-    dolEnabled,
-    dolOpacity,
-  });
+  const { mapRef, initMap, applySatellite, applyTraffic, applyDolVisibility, zoomIn, zoomOut, locateMe } =
+    useLongdoMap({
+      isSatellite,
+      isTraffic,
+      dolEnabled,
+      dolOpacity,
+    });
 
   const [mapObj, setMapObj] = useState(null);
 
-  // init map (หลัง accept disclaimer)
   useEffect(() => {
     if (showDisclaimer) {
       setMapObj(null);
@@ -111,8 +127,6 @@ export default function MapPage() {
       .then(() => {
         const m = mapRef.current || null;
         setMapObj(m);
-
-        // ensure size
         setTimeout(() => {
           try {
             m?.resize?.();
@@ -138,37 +152,39 @@ export default function MapPage() {
   }, [mapObj, dolEnabled, dolOpacity, applyDolVisibility]);
 
   // =========================================================================
-  // Popup (map -> UI)
+  // Drawing
+  // =========================================================================
+  const { drawMode, startDrawing, finishDrawing, clearDrawing } = useLongdoDrawing(mapObj, currentMode);
+
+  useEffect(() => {
+    if (!drawingEnabled) {
+      try {
+        clearDrawing?.();
+      } catch {}
+      setCurrentMode("normal");
+    }
+  }, [drawingEnabled, clearDrawing]);
+
+  // =========================================================================
+  // Popup
   // =========================================================================
   const popupApi = useMapPopup({ mapObj, mapRef });
 
-  // =========================================================================
-  // Helpers: open popup + sync access
-  // =========================================================================
   const { openPopupForWithAccess, onSelectLand } = useLandSelection({
     popupApi,
     accessApi,
   });
 
-  // =========================================================================
-  // Drag guard
-  // =========================================================================
-  const { isDraggingRef } = useDragGuard({
+  useDragGuard({
     enabledRef: popupApi.popupOpenRef,
     threshold: 6,
   });
 
-  // =========================================================================
-  // UX: remember / reopen popup
-  // =========================================================================
   const { rememberPopup, reopenPopup } = useReopenPopup({
     popupApi,
     openPopupForWithAccess,
   });
 
-  // =========================================================================
-  // Unlock + Pay flow
-  // =========================================================================
   const unlockFlow = useUnlockFlow({
     mode,
     accessApi,
@@ -178,24 +194,13 @@ export default function MapPage() {
     reopenPopup,
   });
 
-  // =========================================================================
-  // Map events
-  // =========================================================================
   useMapEvents({
     mapObj,
     onOverlayOrMarkerSelect: openPopupForWithAccess,
-    onMapClickClose: () => {
-      if (unlockFlow.payOpenRef.current || unlockFlow.unlockOpenRef.current) return;
-      if (isDraggingRef.current) return;
-
-      const dt = Date.now() - (popupApi.lastPopupOpenAtRef.current || 0);
-      if (dt < 250) return;
-
-      popupApi.closePopup();
-    },
+    onMapClickClose: () => popupApi.closePopup(),
+    isDrawing: drawMode,
   });
 
-  // ปิด popup เมื่อเปลี่ยน mode หรือกลับไป disclaimer
   useEffect(() => {
     popupApi.closePopup();
   }, [mode, showDisclaimer]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -206,13 +211,10 @@ export default function MapPage() {
   const handleSearch = useMapSearch(mapObj);
 
   // =========================================================================
-  // Derived: selected land + unlocked fields
+  // Derived
   // =========================================================================
   const selectedLand = popupApi.selectedLand;
-  const { unlockedFields: unlockedForSelected } = useSelectedLandAccess(
-    selectedLand,
-    accessApi.access
-  );
+  const { unlockedFields } = useSelectedLandAccess(selectedLand, accessApi.access);
 
   // =========================================================================
   // Render
@@ -220,7 +222,16 @@ export default function MapPage() {
   return (
     <div className="map-shell">
       <div id="map" className="map-canvas" />
+
       {showDisclaimer && <ModeDisclaimerModal onClose={handleAcceptDisclaimer} />}
+
+      {/* Role Picker (mock) */}
+      <RolePickerModal
+        open={roleOpen}
+        onClose={() => setRoleOpen(false)}
+        initialRole={role}
+        onSave={(r) => updateRole(r)}
+      />
 
       <FilterPanel
         open={filterOpen}
@@ -231,21 +242,19 @@ export default function MapPage() {
         onClear={resetFilter}
       />
 
-      <div
-        id="map-overlay"
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          zIndex: 1,
-        }}
-      />
-
-      {!!mapObj && (
-        <LandMarkers map={mapObj} lands={filteredLands} onSelect={onSelectLand} />
-      )}
+      {!!mapObj && <LandMarkers map={mapObj} lands={filteredLands} onSelect={onSelectLand} />}
 
       <MapControls
+        pageMode={mode}
+        currentRole={role}
+        onOpenRolePicker={() => setRoleOpen(true)}
+        drawingEnabled={drawingEnabled}
+        drawMode={drawMode}
+        currentMode={currentMode}
+        onSetMode={setCurrentMode}
+        onStartDrawing={startDrawing}
+        onFinishDrawing={finishDrawing}
+        onClearDrawing={clearDrawing}
         onSearch={handleSearch}
         openLayerMenu={openLayerMenu}
         setOpenLayerMenu={setOpenLayerMenu}
@@ -261,23 +270,16 @@ export default function MapPage() {
         onZoomOut={zoomOut}
         onLocate={locateMe}
         onOpenFilter={() => setFilterOpen(true)}
-        onOpenChat={() => alert("TODO: open chat")}
+        onOpenChat={() => alert("TODO")}
+        onOpenTools={() => alert("TODO")}
       />
 
-      {/* Popup */}
-      <MapPopup
-        open={popupApi.popupOpen}
-        pos={popupApi.popupPos}
-        popupStyle={popupApi.popupStyle}
-        arrowStyle={popupApi.arrowStyle}
-        popupBoxRef={popupApi.popupBoxRef}
-      >
+      {/* ✅ popup */}
+      <MapPopup {...popupApi}>
         <LandDetailPanel
           mode={mode}
           land={selectedLand}
-          isMember={accessApi.access?.isMember ?? false}
-          quotaUsed={accessApi.access?.quotaUsed ?? 0}
-          unlockedFields={unlockedForSelected}
+          unlockedFields={unlockedFields}
           onClose={() => popupApi.closePopup()}
           onOpenUnlockPicker={unlockFlow.onOpenUnlockPicker}
           onUnlockAll={unlockFlow.onUnlockAll}

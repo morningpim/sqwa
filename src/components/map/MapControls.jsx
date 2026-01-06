@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+// src/components/map/MapControls.jsx
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import LayersPanel from "../Panels/LayersPanel";
 import SearchPanel from "../Panels/SearchPanel";
+import MapToolsMenu from "./MapToolsMenu";
 
 export default function MapControls({
   openLayerMenu,
@@ -24,37 +26,108 @@ export default function MapControls({
   onOpenChat,
   onOpenTools,
   onSearch,
+
+  // ✅ role picker
+  onOpenRolePicker,
+  currentRole,
+
+  // ✅ mode ของหน้า
+  pageMode = "buy", // "buy" | "sell" | "eia"
+
+  /* =================== Drawing / EIA =================== */
+  drawingEnabled = true,
+  drawMode = false,
+  currentMode = "normal", // "normal" | "eia"
+  onSetMode,
+  onStartDrawing,
+  onFinishDrawing,
+  onClearDrawing,
 }) {
   const rootRef = useRef(null);
 
-  // ===== Layers panel state =====
+  // ===== local UI states =====
   const [layersOpen, setLayersOpen] = useState(false);
   const [plan, setPlan] = useState("bkk2556");
   const [baseOpacity, setBaseOpacity] = useState(1);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
+
+  const layerLabel = useMemo(() => (isSatellite ? "ดาวเทียม" : "แผนที่"), [isSatellite]);
+
+  // ✅ Drawing visibility rules
+  const showDrawing = useMemo(() => {
+    const modeOk = pageMode === "buy" || pageMode === "sell" || pageMode === "eia";
+    return !!drawingEnabled && modeOk;
+  }, [drawingEnabled, pageMode]);
+
+  const showEiaToggle = useMemo(() => pageMode === "eia", [pageMode]);
+
+  // =========================
+  // ✅ Core: Close/Open manager
+  // =========================
+  const closeAll = useCallback(() => {
+    setOpenLayerMenu?.(false);
+    setSearchOpen(false);
+    setToolsOpen(false);
+    setLayersOpen(false);
+  }, [setOpenLayerMenu]);
+
+  const openOnly = useCallback(
+    (name) => {
+      closeAll();
+      if (name === "layer") setOpenLayerMenu?.(true);
+      if (name === "search") setSearchOpen(true);
+      if (name === "tools") setToolsOpen(true);
+      if (name === "layersPanel") setLayersOpen(true);
+    },
+    [closeAll, setOpenLayerMenu]
+  );
 
   // ===== close dropdown when click outside =====
   useEffect(() => {
     const onDocClick = (e) => {
-      if (!openLayerMenu) return;
       if (!rootRef.current) return;
-      if (!rootRef.current.contains(e.target)) {
-        setOpenLayerMenu(false);
-      }
+      if (!rootRef.current.contains(e.target)) closeAll();
     };
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
-  }, [openLayerMenu, setOpenLayerMenu]);
+  }, [closeAll]);
 
-  const layerLabel = isSatellite ? "ดาวเทียม" : "แผนที่";
+  // =========================
+  // ✅ Safe handlers
+  // =========================
+  const safeToggleDrawMode = useCallback(() => {
+    if (!showEiaToggle) return;
+    if (!onSetMode) return;
+    onSetMode(currentMode === "eia" ? "normal" : "eia");
+  }, [showEiaToggle, onSetMode, currentMode]);
+
+  const safeStartDrawing = useCallback(() => {
+    if (!showDrawing) return;
+    onStartDrawing?.();
+    closeAll();
+  }, [showDrawing, onStartDrawing, closeAll]);
+
+  const safeFinishDrawing = useCallback(() => {
+    if (!showDrawing) return;
+    onFinishDrawing?.();
+    closeAll();
+  }, [showDrawing, onFinishDrawing, closeAll]);
+
+  const safeClearDrawing = useCallback(() => {
+    if (!showDrawing) return;
+    onClearDrawing?.();
+    closeAll();
+  }, [showDrawing, onClearDrawing, closeAll]);
 
   return (
     <div className="map-right-stack" ref={rootRef}>
+      {/* ================= Layer dropdown (เล็ก) ================= */}
       <div className="map-layer-menu">
         <button
           className="map-layer-trigger"
           type="button"
-          onClick={() => setOpenLayerMenu((v) => !v)}
+          onClick={() => (openLayerMenu ? closeAll() : openOnly("layer"))}
           aria-haspopup="menu"
           aria-expanded={openLayerMenu ? "true" : "false"}
         >
@@ -67,8 +140,8 @@ export default function MapControls({
               className={`map-layer-item ${!isSatellite ? "active" : ""}`}
               type="button"
               onClick={() => {
-                setIsSatellite(false);
-                setOpenLayerMenu(false);
+                setIsSatellite?.(false);
+                closeAll();
               }}
             >
               แผนที่
@@ -78,8 +151,8 @@ export default function MapControls({
               className={`map-layer-item ${isSatellite ? "active" : ""}`}
               type="button"
               onClick={() => {
-                setIsSatellite(true);
-                setOpenLayerMenu(false);
+                setIsSatellite?.(true);
+                closeAll();
               }}
             >
               ดาวเทียม
@@ -89,8 +162,8 @@ export default function MapControls({
               className={`map-layer-item ${isTraffic ? "active" : ""}`}
               type="button"
               onClick={() => {
-                setIsTraffic((v) => !v);
-                setOpenLayerMenu(false);
+                setIsTraffic?.((v) => !v);
+                closeAll();
               }}
             >
               จราจร
@@ -99,7 +172,7 @@ export default function MapControls({
         )}
       </div>
 
-      {/* ===== Layers Panel ===== */}
+      {/* ================= Layers Panel (ใหญ่) ================= */}
       <LayersPanel
         open={layersOpen}
         onClose={() => setLayersOpen(false)}
@@ -113,37 +186,36 @@ export default function MapControls({
         setDolOpacity={setDolOpacity}
       />
 
-      {/* ===== FAB buttons ===== */}
-      
+      {/* ================= FAB buttons ================= */}
       <div className="map-fab-stack">
-          <div className={`search-pop-wrap ${searchOpen ? "open" : ""}`}>
-            <button
-              className="map-fab"
-              type="button"
-              title="Search"
-              onClick={() => setSearchOpen((v) => !v)}
-            >
-              <span className="material-icon" aria-hidden="true">search</span>
-            </button>
+        {/* ===== Search ===== */}
+        <div className={`search-pop-wrap ${searchOpen ? "open" : ""}`}>
+          <button
+            className="map-fab"
+            type="button"
+            title="Search"
+            onClick={() => (searchOpen ? closeAll() : openOnly("search"))}
+          >
+            <span className="material-icon" aria-hidden="true">
+              search
+            </span>
+          </button>
 
-            <SearchPanel
-              open={searchOpen}
-              onClose={() => setSearchOpen(false)}
-              onSearch={(text) => {
-                onSearch?.(text);
-                setSearchOpen(false);
-              }}
-            />
-          </div>
+          <SearchPanel
+            open={searchOpen}
+            onClose={() => setSearchOpen(false)}
+            onSearch={(text) => {
+              onSearch?.(text);
+              closeAll();
+            }}
+          />
+        </div>
 
         <button
           className="map-fab"
           type="button"
           title="Layers"
-          onClick={() => {
-            setLayersOpen(true);
-            setOpenLayerMenu(false);
-          }}
+          onClick={() => openOnly("layersPanel")}
         >
           <span className="material-icon" aria-hidden="true">
             layers
@@ -155,8 +227,8 @@ export default function MapControls({
           type="button"
           title="Filter"
           onClick={() => {
+            closeAll();
             onOpenFilter?.();
-            setOpenLayerMenu(false);
           }}
         >
           <span className="material-icon" aria-hidden="true">
@@ -168,58 +240,73 @@ export default function MapControls({
           className="map-fab"
           type="button"
           title="Chat"
-          onClick={onOpenChat}
+          onClick={() => {
+            closeAll();
+            onOpenChat?.();
+          }}
         >
           <span className="material-icon" aria-hidden="true">
             chat
           </span>
         </button>
 
-        <button
-          className="map-fab"
-          type="button"
-          title="Tools"
-          onClick={onOpenTools}
-        >
-          <span className="material-icon" aria-hidden="true">
-            build
-          </span>
-        </button>
+        {/* ===== Tools ===== */}
+        <div className="tools-pop-wrap">
+          <button
+            className="map-fab"
+            type="button"
+            title="Tools"
+            onClick={() => (toolsOpen ? closeAll() : openOnly("tools"))}
+          >
+            <span className="material-icon" aria-hidden="true">
+              build
+            </span>
+          </button>
+
+          <MapToolsMenu
+            open={toolsOpen}
+            onClose={() => setToolsOpen(false)}
+            onOpenTools={() => {
+              closeAll();
+              onOpenTools?.();
+            }}
+            showDrawing={showDrawing}
+            showEiaToggle={showEiaToggle}
+            currentMode={currentMode}
+            drawMode={drawMode}
+            onToggleDrawMode={() => {
+              safeToggleDrawMode();
+              closeAll();
+            }}
+            onStartDrawing={safeStartDrawing}
+            onFinishDrawing={safeFinishDrawing}
+            onClearDrawing={safeClearDrawing}
+            currentRole={currentRole}
+            onOpenRolePicker={() => {
+              closeAll();
+              onOpenRolePicker?.();
+            }}
+          />
+        </div>
       </div>
 
-      {/* ===== Zoom controls ===== */}
+      {/* ================= Zoom controls ================= */}
       <div className="map-zoom-box">
-        <button
-          className="map-zoom-btn"
-          type="button"
-          title="Zoom in"
-          onClick={onZoomIn}
-        >
+        <button className="map-zoom-btn" type="button" title="Zoom in" onClick={onZoomIn}>
           <span className="material-icon" aria-hidden="true">
             add
           </span>
         </button>
-
-        <button
-          className="map-zoom-btn"
-          type="button"
-          title="Zoom out"
-          onClick={onZoomOut}
-        >
+        <button className="map-zoom-btn" type="button" title="Zoom out" onClick={onZoomOut}>
           <span className="material-icon" aria-hidden="true">
             remove
           </span>
         </button>
       </div>
 
-      {/* ===== Locate ===== */}
+      {/* ================= Locate ================= */}
       <div className="map-locate-row">
-        <button
-          className="map-target-btn"
-          type="button"
-          title="Locate"
-          onClick={onLocate}
-        >
+        <button className="map-target-btn" type="button" title="Locate" onClick={onLocate}>
           <span className="material-icon" aria-hidden="true">
             my_location
           </span>

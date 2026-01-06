@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from "react";
 
 /**
- * LandMarkers (FINAL)
- * - ✅ แก้หมุดซ้อน 2 อัน (React StrictMode) ด้วย cleanup ตอน unmount
- * - ใส่ __land และ __loc ไว้บน overlay เพื่อให้ MapPage รับ overlayClick แล้วเปิด popup ได้
+ * LandMarkers (FINAL+)
+ * - ✅ กันหมุดซ้อน (StrictMode) ด้วย cleanup
+ * - ✅ ใส่ __land / __loc / __onSelect
+ * - ✅ ผูก click ที่ marker/polygon โดยตรง (ไม่พึ่ง overlayClick ของ map)
+ * - ✅ เก็บ unbind ไว้บน overlay แล้ว cleanup เพื่อกัน "ข้อมูลเก่าค้าง"
  */
 
 const DEFAULT_COLOR = "#E11D48"; // red-600
@@ -46,9 +48,23 @@ function getLoc(land) {
   return { lat: la, lon: lo };
 }
 
+function bindOverlayClick(overlay, fn) {
+  // คืนค่า unbind เสมอ เพื่อ cleanup ได้
+  try {
+    overlay?.Event?.bind?.("click", fn);
+    return () => {
+      try {
+        overlay?.Event?.unbind?.("click", fn);
+      } catch {}
+    };
+  } catch {
+    return () => {};
+  }
+}
+
 export default function LandMarkers({ map, lands = [], onSelect }) {
-  const markerMapRef = useRef(new Map()); // id -> overlay
-  const polygonMapRef = useRef(new Map()); // id -> overlay
+  const markerMapRef = useRef(new Map());  // id -> marker overlay
+  const polygonMapRef = useRef(new Map()); // id -> polygon overlay
 
   // -------------------------
   // Markers
@@ -68,6 +84,8 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
 
       let marker = markerMapRef.current.get(id);
 
+      const selectFn = () => onSelect?.(land, { lon: loc.lon, lat: loc.lat });
+
       if (!marker) {
         marker = new L.Marker(
           { lon: loc.lon, lat: loc.lat },
@@ -81,9 +99,16 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
           }
         );
 
+        // ใส่ข้อมูล
         marker.__land = land;
         marker.__loc = { lon: loc.lon, lat: loc.lat };
-        marker.__onSelect = () => onSelect?.(land, { lon: loc.lon, lat: loc.lat });
+        marker.__onSelect = selectFn;
+
+        // ✅ ผูกคลิกที่ marker ตรง ๆ (ชัวร์สุด)
+        marker.__unbindClick?.();
+        marker.__unbindClick = bindOverlayClick(marker, () => {
+          marker.__onSelect?.();
+        });
 
         try {
           map.Overlays.add(marker);
@@ -93,16 +118,23 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
 
         markerMapRef.current.set(id, marker);
       } else {
+        // อัปเดตตำแหน่ง + อัปเดตข้อมูล เพื่อกัน "ข้อมูลเก่า"
         try {
           marker.location({ lon: loc.lon, lat: loc.lat });
         } catch {}
+
         marker.__land = land;
         marker.__loc = { lon: loc.lon, lat: loc.lat };
+        marker.__onSelect = selectFn;
       }
     });
 
+    // ลบอันที่หายไปจาก lands
     for (const [id, marker] of markerMapRef.current.entries()) {
       if (!idsNow.has(id)) {
+        try {
+          marker.__unbindClick?.(); // ✅ unbind event กันค้าง
+        } catch {}
         try {
           map.Overlays.remove(marker);
         } catch {}
@@ -110,10 +142,13 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
       }
     }
 
-    // ✅ Cleanup กันหมุดซ้อน (StrictMode mount/unmount)
+    // cleanup (StrictMode mount/unmount)
     return () => {
       try {
         for (const marker of markerMapRef.current.values()) {
+          try {
+            marker.__unbindClick?.();
+          } catch {}
           try {
             map.Overlays.remove(marker);
           } catch {}
@@ -153,22 +188,33 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
 
       if (pts.length < 3) return;
 
+      const centroid = pts.reduce(
+        (acc, p) => ({ lon: acc.lon + p.lon, lat: acc.lat + p.lat }),
+        { lon: 0, lat: 0 }
+      );
+      const centerLoc = { lon: centroid.lon / pts.length, lat: centroid.lat / pts.length };
+
+      const selectFn = () => onSelect?.(land, centerLoc);
+
       if (!overlay) {
+        overlay = new L.Polygon(pts, {
+          lineWidth: 2,
+          lineColor: "rgba(16,185,129,1)",
+          fillColor: "rgba(16,185,129,0.18)",
+          clickable: true,
+        });
+
+        overlay.__land = land;
+        overlay.__loc = centerLoc;
+        overlay.__onSelect = selectFn;
+
+        // ✅ bind click ตรง ๆ
+        overlay.__unbindClick?.();
+        overlay.__unbindClick = bindOverlayClick(overlay, () => {
+          overlay.__onSelect?.();
+        });
+
         try {
-          overlay = new L.Polygon(pts, {
-            lineWidth: 2,
-            lineColor: "rgba(16,185,129,1)",
-            fillColor: "rgba(16,185,129,0.18)",
-            clickable: true,
-          });
-
-          overlay.__land = land;
-          const c = pts.reduce(
-            (acc, p) => ({ lon: acc.lon + p.lon, lat: acc.lat + p.lat }),
-            { lon: 0, lat: 0 }
-          );
-          overlay.__loc = { lon: c.lon / pts.length, lat: c.lat / pts.length };
-
           map.Overlays.add(overlay);
           polygonMapRef.current.set(id, overlay);
         } catch (e) {
@@ -178,12 +224,20 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
         try {
           overlay.location(pts);
         } catch {}
+
+        // อัปเดตข้อมูลกัน land เก่า
         overlay.__land = land;
+        overlay.__loc = centerLoc;
+        overlay.__onSelect = selectFn;
       }
     });
 
+    // ลบ polygon ที่หายไป
     for (const [id, overlay] of polygonMapRef.current.entries()) {
       if (!idsNow.has(id)) {
+        try {
+          overlay.__unbindClick?.();
+        } catch {}
         try {
           map.Overlays.remove(overlay);
         } catch {}
@@ -195,6 +249,9 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
       try {
         for (const overlay of polygonMapRef.current.values()) {
           try {
+            overlay.__unbindClick?.();
+          } catch {}
+          try {
             map.Overlays.remove(overlay);
           } catch {}
         }
@@ -202,7 +259,7 @@ export default function LandMarkers({ map, lands = [], onSelect }) {
         polygonMapRef.current.clear();
       }
     };
-  }, [map, lands]);
+  }, [map, lands, onSelect]);
 
   return null;
 }

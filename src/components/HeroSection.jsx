@@ -18,7 +18,8 @@ export default function HeroSection() {
 
           {/* ฝากขายที่ดิน */}
           <div className="hero-item">
-            <button className="hero-circle-btn">
+            <button className="hero-circle-btn" 
+              onClick={() => navigate("/map?mode=sell")}>
               <img
                 src="/sell-land.png"
                 alt="ฝากขายที่ดิน"

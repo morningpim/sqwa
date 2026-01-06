@@ -50,3 +50,55 @@
   display: grid;
   place-items: center;
 }
+
+/* wrapper ของปุ่ม build */
+.tools-pop-wrap {
+  position: relative;
+}
+
+.tools-pop-wrap .mtm-pop {
+  position: absolute;
+  right: 60px;     /* 👈 ดันไปทางซ้ายของปุ่ม */
+  bottom: 0;       /* จัดให้อยู่ระดับเดียวกับปุ่ม */
+  transform: none; /* กันไม่ให้ลอยผิดตำแหน่ง */
+}
+
+/* กล่องเมนูใต้ build */
+.tools-pop {
+  position: absolute;
+  right: 52px;          /* กางไปทางซ้ายของปุ่ม build */
+  top: 0;
+  min-width: 210px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  padding: 8px;
+  z-index: 9999;
+}
+
+/* ปุ่มในเมนู */
+.tools-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.tools-item:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+/* เส้นแบ่งในเมนู */
+.tools-divider {
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+  margin: 8px 0;
+}
+

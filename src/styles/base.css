@@ -6,6 +6,9 @@ body{
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-en);
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 :lang(th){ font-family: var(--font-th) !important; }

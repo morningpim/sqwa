@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import "../../css/land-popup.css";
 import { QUOTA_LIMIT } from "./constants/unlock";
 
@@ -105,10 +106,24 @@ function normalizeLand(input = {}) {
       ? `${toNumber(rai) ?? 0}-${toNumber(ngan) ?? 0}-${toNumber(wah) ?? 0}`
       : sqwToRNW(areaSqw) ?? "-");
 
-  const frontage = pick(input.frontage, input.frontWidth, input.front, input.roadFrontage, input.frontMeter, input.widthFront);
+  const frontage = pick(
+    input.frontage,
+    input.frontWidth,
+    input.front,
+    input.roadFrontage,
+    input.frontMeter,
+    input.widthFront
+  );
   const roadWidth = pick(input.roadWidth, input.roadwidth, input.road, input.roadSize, input.roadMeter);
 
-  const pricePerWa = pick(input.pricePerWa, input.pricePerSqw, input.pricePerWah, input.price_per_wa, input.unitPrice, input.priceUnit);
+  const pricePerWa = pick(
+    input.pricePerWa,
+    input.pricePerSqw,
+    input.pricePerWah,
+    input.price_per_wa,
+    input.unitPrice,
+    input.priceUnit
+  );
   const totalPrice = pick(input.totalPrice, input.total, input.sumPrice, input.total_price, input.priceTotal);
 
   const contactOwner = pick(input.contactOwner, input.ownerContact, input.contactName, input.ownerName, "");
@@ -148,13 +163,26 @@ export default function LandDetailPanel({
   onClose,
   onOpenUnlockPicker,
   onUnlockAll,
+
+  // (optional) ถ้าอยากให้ parent คุม favorite:
+  isFavorite,
+  onToggleFavorite,
 }) {
-  const L = normalizeLand(land);
-  const unlockedSet = new Set(unlockedFields);
+  const L = useMemo(() => normalizeLand(land), [land]);
+  const unlockedSet = useMemo(() => new Set(unlockedFields), [unlockedFields]);
+
+  // favorite (local fallback)
+  const [favLocal, setFavLocal] = useState(false);
+  const fav = typeof isFavorite === "boolean" ? isFavorite : favLocal;
+
+  const handleFav = () => {
+    const next = !fav;
+    if (typeof onToggleFavorite === "function") onToggleFavorite(L.id, next);
+    else setFavLocal(next);
+  };
 
   const canSeeAllForThisLand = isMember && unlockedSet.size > 0;
   const canReveal = (key) => canSeeAllForThisLand || unlockedSet.has(key);
-
   const showValue = (key, value, masked) => (canReveal(key) ? value || "-" : masked);
 
   return (
@@ -162,7 +190,19 @@ export default function LandDetailPanel({
       <div className="sqw-popup">
         {/* header */}
         <div className="sqw-head">
+          {/* ✅ Favorite อยู่แค่ตรง header (ไม่ไปทับปุ่มล่าง) */}
+          <button
+            className={`sqw-fav ${fav ? "is-on" : ""}`}
+            type="button"
+            aria-label={fav ? "unfavorite" : "favorite"}
+            onClick={handleFav}
+            title={fav ? "เลิกถูกใจ" : "ถูกใจ"}
+          >
+            <span className="material-symbols-outlined">favorite</span>
+          </button>
+
           <div className="sqw-pill">{L.owner || "คุณปาลิส (นายหน้า)"}</div>
+
           <button className="sqw-x" type="button" aria-label="close" onClick={onClose}>
             ×
           </button>
@@ -171,28 +211,57 @@ export default function LandDetailPanel({
         <div className="sqw-meta">🕒 วันที่ลงข้อมูล {L.updatedAt || "-"}</div>
 
         <div className="sqw-grid">
-          <div className="sqw-box"><div className="sqw-box-k">ขนาดที่ดิน</div><div className="sqw-box-v">{L.area} ตร.วา</div></div>
-          <div className="sqw-box"><div className="sqw-box-k">ไร่-งาน-วา</div><div className="sqw-box-v">{L.raw}</div></div>
-          <div className="sqw-box"><div className="sqw-box-k">หน้ากว้างติดถนน</div><div className="sqw-box-v">{L.frontage} ม.</div></div>
-          <div className="sqw-box"><div className="sqw-box-k">ขนาดถนน</div><div className="sqw-box-v">{L.roadWidth} ม.</div></div>
+          <div className="sqw-box">
+            <div className="sqw-box-k">ขนาดที่ดิน</div>
+            <div className="sqw-box-v">{L.area} ตร.วา</div>
+          </div>
+          <div className="sqw-box">
+            <div className="sqw-box-k">ไร่-งาน-วา</div>
+            <div className="sqw-box-v">{L.raw}</div>
+          </div>
+          <div className="sqw-box">
+            <div className="sqw-box-k">หน้ากว้างติดถนน</div>
+            <div className="sqw-box-v">{L.frontage} ม.</div>
+          </div>
+          <div className="sqw-box">
+            <div className="sqw-box-k">ขนาดถนน</div>
+            <div className="sqw-box-v">{L.roadWidth} ม.</div>
+          </div>
         </div>
 
         <div className="sqw-divider" />
 
-        <div className="sqw-row"><span>ราคา/ตร.วา</span><span className="sqw-row-v">{L.pricePerWa} บ.</span></div>
-        <div className="sqw-row"><span>ราคารวม</span><span className="sqw-row-v">{L.totalPrice} บ.</span></div>
+        <div className="sqw-row">
+          <span>ราคา/ตร.วา</span>
+          <span className="sqw-row-v">{L.pricePerWa} บ.</span>
+        </div>
+        <div className="sqw-row">
+          <span>ราคารวม</span>
+          <span className="sqw-row-v">{L.totalPrice} บ.</span>
+        </div>
 
         <div className="sqw-divider" />
 
         <div className="sqw-h">ข้อมูลติดต่อ</div>
 
         <div className="sqw-kv">
-          <div className="k">เจ้าของ</div><div className="v">{showValue("contactOwner", L.contactOwner, "-----")}</div>
-          <div className="k">นายหน้า</div><div className="v">{showValue("broker", L.broker, "-----")}</div>
-          <div className="k">โทร</div><div className="v">{showValue("phone", L.phone, "**********")}</div>
-          <div className="k">LINE ID</div><div className="v">{showValue("line", L.line, "**********")}</div>
-          <div className="k">กรอบที่ดิน</div><div className="v">{showValue("frame", L.frame, "-----")}</div>
-          <div className="k">ข้อมูลโฉนด/ระวาง</div><div className="v">{showValue("chanote", L.chanote, "-----")}</div>
+          <div className="k">เจ้าของ</div>
+          <div className="v">{showValue("contactOwner", L.contactOwner, "-----")}</div>
+
+          <div className="k">นายหน้า</div>
+          <div className="v">{showValue("broker", L.broker, "-----")}</div>
+
+          <div className="k">โทร</div>
+          <div className="v">{showValue("phone", L.phone, "**********")}</div>
+
+          <div className="k">LINE ID</div>
+          <div className="v">{showValue("line", L.line, "**********")}</div>
+
+          <div className="k">กรอบที่ดิน</div>
+          <div className="v">{showValue("frame", L.frame, "-----")}</div>
+
+          <div className="k">ข้อมูลโฉนด/ระวาง</div>
+          <div className="v">{showValue("chanote", L.chanote, "-----")}</div>
         </div>
 
         <div className="sqw-divider" />
@@ -200,7 +269,9 @@ export default function LandDetailPanel({
         {isMember ? (
           <>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div className="sqw-h" style={{ margin: 0 }}>สิทธิ์สมาชิก</div>
+              <div className="sqw-h" style={{ margin: 0 }}>
+                สิทธิ์สมาชิก
+              </div>
               <div style={{ fontSize: 12, opacity: 0.8 }}>
                 โควตาวันนี้: <b>{quotaUsed}</b> / {QUOTA_LIMIT}
               </div>
@@ -211,7 +282,9 @@ export default function LandDetailPanel({
             </div>
 
             <div className="sqw-actions" style={{ marginTop: 10 }}>
-              <button className="sqw-btn" type="button">แชทกับผู้ขาย</button>
+              <button className="sqw-btn" type="button">
+                แชทกับผู้ขาย
+              </button>
               <button
                 className="sqw-btn sqw-pay-btn"
                 type="button"
@@ -224,8 +297,11 @@ export default function LandDetailPanel({
           </>
         ) : (
           <>
+            {/* ✅ คืนปุ่มเดิมครบ 2 ปุ่ม (ไม่ให้พังอีก) */}
             <div className="sqw-actions" style={{ marginTop: 10 }}>
-              <button className="sqw-btn" type="button">แชทกับผู้ขาย</button>
+              <button className="sqw-btn" type="button">
+                แชทกับผู้ขาย
+              </button>
               <button
                 className="sqw-btn sqw-pay-btn"
                 type="button"

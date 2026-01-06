@@ -307,3 +307,66 @@
 #sqw-popup-root * {
   pointer-events: auto !important;
 }
+
+/* =========================
+   FAVORITE (ICON ONLY)
+   - ไม่มีวง
+   - ไม่มีพื้น
+   - กดแล้วหัวใจแดงทึบ
+   ========================= */
+
+/* ปุ่มเปล่า */
+.sqw-fav{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+
+  width: 40px;
+  height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+/* กัน focus ring ของ browser */
+.sqw-fav:focus,
+.sqw-fav:focus-visible{
+  outline: none;
+  box-shadow: none;
+}
+
+/* =========================
+   ICON STATE
+   ========================= */
+
+/* ปกติ = เส้น */
+.sqw-fav .material-symbols-outlined{
+  font-size: 26px;
+  line-height: 1;
+  color: #111;
+
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 600,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+/* ✅ กดแล้ว = หัวใจแดงทึบ */
+.sqw-fav.is-on .material-symbols-outlined{
+  color: #ef4444;
+
+  font-variation-settings:
+    "FILL" 1,   /* ⭐ ต้องเป็น 1 */
+    "wght" 700,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
