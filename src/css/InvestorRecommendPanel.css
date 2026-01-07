@@ -1,0 +1,117 @@
+/* src/components/map/InvestorRecommendPanel.css */
+.inv-panel{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 360px;
+  height: 100%;
+  background: #fff;
+  z-index: 70;
+  border-right: 1px solid rgba(0,0,0,.08);
+  box-shadow: 12px 0 30px rgba(0,0,0,.08);
+  display:flex;
+  flex-direction: column;
+}
+
+.inv-head{
+  padding: 14px;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+.inv-title{
+  font-weight: 1000;
+  font-size: 16px;
+}
+
+.inv-sub{
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: .75;
+  font-weight: 900;
+}
+
+.inv-list{
+  padding: 12px;
+  overflow: auto;
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inv-item{
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 14px;
+  padding: 10px;
+  display:flex;
+  gap: 10px;
+}
+
+.inv-thumb{
+  width: 86px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f4f6;
+  flex: 0 0 auto;
+}
+
+.inv-thumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.inv-thumb-ph{
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e5e7eb, #f3f4f6);
+}
+
+.inv-body{ flex: 1; min-width: 0; }
+
+.inv-name{
+  font-weight: 1000;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.inv-addr{
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: .75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inv-meta{
+  margin-top: 8px;
+  display:grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.inv-meta .m{ opacity: .7; font-weight: 900; }
+
+.inv-actions{
+  margin-top: 8px;
+}
+
+.inv-btn{
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 0;
+  background: #0b7a2a;
+  color: #fff;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.inv-empty{
+  padding: 14px;
+  border: 1px dashed rgba(0,0,0,.18);
+  border-radius: 12px;
+  background: #fafafa;
+  text-align: center;
+  opacity: .8;
+}

@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
+
+// ✅ ถ้ามี utils/favorites อยู่แล้ว แนะนำใช้ตัวนี้ให้ตรงระบบ
+import { readFavorites, subscribeFavoritesChanged } from "../utils/favorites";
 
 const CART_KEY = "sqw_cart_v1";
-const FAV_KEY = "sqw_favorites_v1";     // ✅ ถ้าคุณใช้ key นี้อยู่
-const FAV_EVENT = "sqw-fav-changed";    // ✅ ถ้ามีการ dispatch event นี้
 
 // mock auth (ภายหลังเปลี่ยนเป็น context / api ได้)
 const MOCK_USER = {
@@ -21,23 +22,14 @@ function readCartCount() {
   }
 }
 
-function readFavCount() {
-  try {
-    const arr = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
-    return Array.isArray(arr) ? arr.length : 0;
-  } catch {
-    return 0;
-  }
-}
-
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
   const [cartCount, setCartCount] = useState(() => readCartCount());
 
-  // ✅ fav count
-  const [favCount, setFavCount] = useState(() => readFavCount());
+  // ✅ fav count (ดึงจาก utils/favorites)
+  const [favCount, setFavCount] = useState(() => readFavorites().length);
 
   // 🔐 auth state (ชั่วคราว)
   const [isLoggedIn] = useState(true);
@@ -47,6 +39,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
+  // cart sync
   useEffect(() => {
     const onChanged = () => setCartCount(readCartCount());
     window.addEventListener("sqw-cart-changed", onChanged);
@@ -57,15 +50,11 @@ export default function Navbar() {
     };
   }, []);
 
-  // ✅ sync favorites (ถ้าหน้าพร้อม dispatch event นี้)
+  // ✅ favorites sync (ชัวร์สุด เพราะ subscribe จาก utils)
   useEffect(() => {
-    const onFav = () => setFavCount(readFavCount());
-    window.addEventListener(FAV_EVENT, onFav);
-    window.addEventListener("storage", onFav);
-    return () => {
-      window.removeEventListener(FAV_EVENT, onFav);
-      window.removeEventListener("storage", onFav);
-    };
+    setFavCount(readFavorites().length);
+    const unsub = subscribeFavoritesChanged(() => setFavCount(readFavorites().length));
+    return unsub;
   }, []);
 
   // ปิด dropdown เมื่อคลิกข้างนอก
@@ -98,22 +87,34 @@ export default function Navbar() {
 
   return (
     <header className="nav">
-      <Link to="/" className="nav-logo">SQW</Link>
+      <Link to="/" className="nav-logo">
+        SQW
+      </Link>
 
       {isMap && <div className="nav-mode-pill">{modeLabel}</div>}
 
       <div className="nav-right">
         <nav className="nav-menu">
-          <Link to="/" className="nav-item">หน้าหลัก</Link>
-          <a href="#news" className="nav-item">ข่าวสาร</a>
-          <a href="#guide" className="nav-item">คู่มือการใช้งาน</a>
-          <a href="#contact" className="nav-item">ติดต่อเรา</a>
+          <Link to="/" className="nav-item">
+            หน้าหลัก
+          </Link>
+          <a href="#news" className="nav-item">
+            ข่าวสาร
+          </a>
+          <a href="#guide" className="nav-item">
+            คู่มือการใช้งาน
+          </a>
+          <a href="#contact" className="nav-item">
+            ติดต่อเรา
+          </a>
         </nav>
 
         {/* 🔐 Auth section */}
         {!isLoggedIn ? (
           <Link to="/login">
-            <button className="ds-btn ds-btn-outline">เข้าสู่ระบบ</button>
+            <button className="ds-btn ds-btn-outline" type="button">
+              เข้าสู่ระบบ
+            </button>
           </Link>
         ) : (
           <div className="nav-profile" ref={ref}>
@@ -124,11 +125,7 @@ export default function Navbar() {
               aria-label="profile"
               aria-expanded={open}
             >
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt="avatar" />
-              ) : (
-                <span>{avatarLetter}</span>
-              )}
+              {user.avatarUrl ? <img src={user.avatarUrl} alt="avatar" /> : <span>{avatarLetter}</span>}
             </button>
 
             {open && (
@@ -143,9 +140,21 @@ export default function Navbar() {
                   รายการโปรด {favCount > 0 ? `(${favCount})` : ""}
                 </button>
 
+                {/* ✅ ถ้าอยากเพิ่มลิงก์ประวัติการซื้อใน dropdown ด้วย */}
+                <button type="button" onClick={() => go("/profile?tab=purchase")}>
+                  ประวัติการซื้อ
+                </button>
+
                 <div className="nav-profile-divider" />
 
-                <button type="button" className="danger" onClick={() => { setOpen(false); /* TODO logout */ }}>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={() => {
+                    setOpen(false);
+                    // TODO logout
+                  }}
+                >
                   ออกจากระบบ
                 </button>
               </div>

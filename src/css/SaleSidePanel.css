@@ -1,0 +1,277 @@
+/* src/components/map/SaleSidePanel.css */
+
+.sale-panel{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 380px;
+  height: 100%;
+  background: #fff;
+  z-index: 50;
+  border-right: 1px solid rgba(0,0,0,.08);
+  box-shadow: 12px 0 30px rgba(0,0,0,.08);
+  transform: translateX(0);
+  transition: transform .25s ease;
+  display: flex;
+  flex-direction: column;
+
+  overflow: visible; /* ✅ ให้แท็บโผล่ออกนอก panel ได้ */
+}
+
+/* ✅ ปิดแล้วเหลือแท็บบาง ๆ */
+.sale-panel.closed{
+  transform: translateX(calc(-100% + 14px));
+}
+
+/* ================= HEADER ================= */
+
+.sale-head{
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  position: relative;
+}
+
+.sale-title{
+  font-weight: 1000;
+  font-size: 16px;
+}
+
+.sale-sub{
+  font-size: 12px;
+  opacity: .8;
+  margin-top: 4px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+/* ================= TOGGLE (กลางจอแนวตั้ง) ================= */
+
+.sale-toggle{
+  position: absolute;
+
+  /* ✅ กึ่งกลางจอแนวตั้ง */
+  top: 50%;
+  transform: translateY(-50%);
+
+  right: -14px;          /* โผล่ออกมานอก panel */
+  width: 28px;
+  height: 56px;
+
+  border-radius: 0 14px 14px 0;
+  border: 1px solid rgba(0,0,0,.12);
+  border-left: 0;
+
+  background: #ffffff;
+  font-weight: 900;
+  font-size: 16px;
+  cursor: pointer;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ================= BODY ================= */
+
+.sale-body{
+  padding: 14px;
+  overflow: auto;
+}
+
+.sale-section{ margin-bottom: 12px; }
+
+.sec-title{
+  width: 100%;
+  text-align: left;
+  font-weight: 1000;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.sec-sub{
+  font-size: 12px;
+  opacity: .7;
+  margin-bottom: 10px;
+}
+
+/* ================= FORM ================= */
+
+.row2{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field{ margin-bottom: 10px; }
+
+.field label{
+  display:block;
+  font-size: 12px;
+  opacity:.8;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.field input{
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.14);
+  padding: 0 10px;
+  outline: none;
+}
+
+.rnw{ display:flex; gap: 6px; }
+.rnw input{ width: 33.33%; }
+
+/* ================= ACTIONS ================= */
+
+.actions{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.sale-btn{
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.14);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.sale-btn.primary{
+  border: 0;
+  background: #1a8f3a;
+  color: #fff;
+  grid-column: 1 / -1;
+}
+
+.sale-btn.danger{
+  border: 1px solid rgba(239,68,68,.3);
+  background: #fff5f5;
+  color: #ef4444;
+}
+
+/* ================= LIST ================= */
+
+.divider{
+  height:1px;
+  background: rgba(0,0,0,.06);
+  margin: 12px 0;
+}
+
+.list{
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+
+.item{
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.item.active{
+  border-color: rgba(26,143,58,.35);
+  background: #eaf7ee;
+}
+
+.item-title{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  cursor:pointer;
+}
+
+.item-title .mini{
+  font-size: 11px;
+  opacity: .7;
+  white-space: nowrap;
+}
+
+.item-row{
+  display:flex;
+  justify-content:space-between;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.muted{ opacity: .65; }
+
+.item-actions{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ================= BADGES ================= */
+
+.pill{
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  border: 1px solid rgba(0,0,0,.1);
+}
+
+.pill.ok{
+  background:#eaf7ee;
+  color:#1a8f3a;
+  border-color: rgba(26,143,58,.3);
+}
+
+.pill.warn{
+  background:#fff7ed;
+  color:#b45309;
+  border-color: rgba(180,83,9,.25);
+}
+
+.pill.edit{
+  background:#eef2ff;
+  color:#3730a3;
+  border-color: rgba(55,48,163,.25);
+}
+
+.pill.new{
+  background:#f3f4f6;
+  color:#111827;
+}
+
+/* ================= SUMMARY ================= */
+
+.summary{
+  border: 1px dashed rgba(0,0,0,.16);
+  border-radius: 12px;
+  padding: 10px;
+  display:grid;
+  gap: 6px;
+  background: #fafafa;
+  margin-top: 6px;
+}
+
+.hint{
+  font-size: 12px;
+  opacity:.75;
+  margin-top: 10px;
+}
+
+.empty{
+  padding: 14px;
+  border: 1px dashed rgba(0,0,0,.18);
+  border-radius: 12px;
+  background: #fafafa;
+  text-align:center;
+}

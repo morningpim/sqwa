@@ -6,11 +6,14 @@ import React, { useEffect, useRef } from "react";
  * - ✅ ใส่ __land / __loc / __onSelect
  * - ✅ ผูก click ที่ marker/polygon โดยตรง
  * - ✅ รองรับ favoriteIds เพื่อ highlight หมุด/โพลิกอน
+ * - ✅ รองรับ polygon ได้ทั้ง 2 แบบ:
+ *    - land.polygon = [{lon,lat}...]
+ *    - land.geometry = GeoJSON Polygon { type:"Polygon", coordinates:[[ [lon,lat], ... ]] }
  */
 
 const DEFAULT_COLOR = "#E11D48"; // red-600 (ปกติ)
-const FAV_COLOR = "#16A34A";     // green-600 (favorite) << ปรับสีได้
-const FAV_RING = "#ffffff";     // วงขาวรอบหมุด
+const FAV_COLOR = "#16A34A"; // green-600 (favorite)
+const FAV_RING = "#ffffff"; // วงขาวรอบหมุด
 
 function safeId(v, i) {
   if (v == null) return `land_${i}`;
@@ -41,18 +44,52 @@ function makePinSvg({ color = DEFAULT_COLOR, ring = false } = {}) {
   </svg>`;
 }
 
+/** GeoJSON Polygon -> pts [{lon,lat}...] */
+function geojsonToPts(geometry) {
+  if (!geometry || geometry.type !== "Polygon") return null;
+  const ring = geometry?.coordinates?.[0];
+  if (!Array.isArray(ring) || ring.length < 3) return null;
+
+  const pts = ring
+    .map((c) => {
+      const lon = Number(c?.[0]);
+      const lat = Number(c?.[1]);
+      if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+      return { lon, lat };
+    })
+    .filter(Boolean);
+
+  return pts.length >= 3 ? pts : null;
+}
+
+function centroidFromPts(pts) {
+  const c = pts.reduce(
+    (acc, p) => ({ lon: acc.lon + p.lon, lat: acc.lat + p.lat }),
+    { lon: 0, lat: 0 }
+  );
+  return { lon: c.lon / pts.length, lat: c.lat / pts.length };
+}
+
 function getLoc(land) {
-  const l = land?.location ?? land ?? {};
-  const lat = l.lat ?? l.latitude;
-  const lon = l.lon ?? l.lng ?? l.long ?? l.longitude;
+  // 1) prefer land.location
+  const loc = land?.location ?? null;
+  const lat1 = Number(loc?.lat ?? loc?.latitude);
+  const lon1 = Number(loc?.lon ?? loc?.lng ?? loc?.long ?? loc?.longitude);
+  if (Number.isFinite(lat1) && Number.isFinite(lon1)) return { lat: lat1, lon: lon1 };
 
-  if (lat == null || lon == null) return null;
+  // 2) fallback top-level lat/lon
+  const lat2 = Number(land?.lat ?? land?.latitude);
+  const lon2 = Number(land?.lon ?? land?.lng ?? land?.long ?? land?.longitude);
+  if (Number.isFinite(lat2) && Number.isFinite(lon2)) return { lat: lat2, lon: lon2 };
 
-  const la = Number(lat);
-  const lo = Number(lon);
-  if (!Number.isFinite(la) || !Number.isFinite(lo)) return null;
+  // 3) fallback: centroid from land.geometry (GeoJSON)
+  const pts = geojsonToPts(land?.geometry);
+  if (pts) {
+    const c = centroidFromPts(pts);
+    return { lat: c.lat, lon: c.lon };
+  }
 
-  return { lat: la, lon: lo };
+  return null;
 }
 
 function bindOverlayClick(overlay, fn) {
@@ -76,7 +113,7 @@ function isFavId(favoriteIds, id) {
 }
 
 export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) {
-  const markerMapRef = useRef(new Map());  // id -> marker overlay
+  const markerMapRef = useRef(new Map()); // id -> marker overlay
   const polygonMapRef = useRef(new Map()); // id -> polygon overlay
 
   // -------------------------
@@ -197,8 +234,31 @@ export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) 
 
     lands.forEach((land, i) => {
       const id = safeId(land?.id ?? land?.code ?? land?.uid, i);
+
+      // ✅ รองรับ 2 แบบ: land.polygon หรือ land.geometry (GeoJSON)
       const poly = land?.polygon;
-      if (!poly || !Array.isArray(poly) || poly.length < 3) return;
+      const geoPts = geojsonToPts(land?.geometry);
+
+      let pts = null;
+
+      // A) old format: land.polygon = [{lon,lat}...]
+      if (Array.isArray(poly) && poly.length >= 3) {
+        pts = poly
+          .map((p) => {
+            const lon = Number(p?.lon ?? p?.lng ?? p?.x);
+            const lat = Number(p?.lat ?? p?.y);
+            if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+            return { lon, lat };
+          })
+          .filter(Boolean);
+      }
+
+      // B) new format: GeoJSON polygon
+      if ((!pts || pts.length < 3) && geoPts) {
+        pts = geoPts;
+      }
+
+      if (!pts || pts.length < 3) return;
 
       idsNow.add(id);
 
@@ -206,23 +266,7 @@ export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) 
 
       let overlay = polygonMapRef.current.get(id);
 
-      const pts = poly
-        .map((p) => {
-          const lon = Number(p?.lon ?? p?.lng ?? p?.x);
-          const lat = Number(p?.lat ?? p?.y);
-          if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
-          return { lon, lat };
-        })
-        .filter(Boolean);
-
-      if (pts.length < 3) return;
-
-      const centroid = pts.reduce(
-        (acc, p) => ({ lon: acc.lon + p.lon, lat: acc.lat + p.lat }),
-        { lon: 0, lat: 0 }
-      );
-      const centerLoc = { lon: centroid.lon / pts.length, lat: centroid.lat / pts.length };
-
+      const centerLoc = centroidFromPts(pts);
       const selectFn = () => onSelect?.(land, centerLoc);
 
       // ถ้า fav เปลี่ยน -> recreate เพื่อเปลี่ยน style ชัวร์สุด
@@ -260,6 +304,7 @@ export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) 
           console.warn("add polygon failed:", e);
         }
       } else {
+        // update shape (ถ้าแก้ไข polygon)
         try {
           overlay.location(pts);
         } catch {}

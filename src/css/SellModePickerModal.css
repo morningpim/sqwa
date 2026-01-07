@@ -1,0 +1,92 @@
+/* src/css/SellModePickerModal.css */
+.smp-backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0,0,0,.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 16px;
+}
+
+.smp-card{
+  width: min(760px, 100%);
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.25);
+  padding: 22px 22px 18px;
+  text-align:center;
+}
+
+.smp-title{
+  font-size: 34px;
+  font-weight: 1000;
+  margin-top: 4px;
+}
+
+.smp-sub{
+  font-size: 28px;
+  font-weight: 1000;
+  margin-top: 6px;
+  margin-bottom: 18px;
+}
+
+.smp-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  justify-items:center;
+}
+
+.smp-option{
+  width: 260px;
+  height: 250px;
+  border-radius: 18px;
+  border: 0;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(0,0,0,.16);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap: 12px;
+  transition: transform .12s ease;
+}
+
+.smp-option:hover{
+  transform: translateY(-2px);
+}
+
+.smp-icon{
+  font-size: 70px;
+}
+
+.smp-label{
+  font-size: 22px;
+  font-weight: 1000;
+}
+
+.smp-actions{
+  margin-top: 18px;
+  display:flex;
+  justify-content:center;
+}
+
+.smp-cancel{
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.15);
+  background:#fff;
+  font-weight: 900;
+  cursor:pointer;
+}
+
+@media (max-width: 620px){
+  .smp-title{ font-size: 26px; }
+  .smp-sub{ font-size: 22px; }
+  .smp-grid{ grid-template-columns: 1fr; }
+  .smp-option{ width: 100%; max-width: 320px; height: 220px; }
+}

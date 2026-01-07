@@ -1,0 +1,144 @@
+/* src/components/map/InvestorProfileModal.css */
+.ip-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.ip-modal{
+  width: min(1100px, 96vw);
+  background: #f3f6fb;
+  border-radius: 18px;
+  box-shadow: 0 20px 70px rgba(0,0,0,.25);
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.ip-head{
+  background: #fff;
+  padding: 18px 18px;
+  display:flex;
+  align-items:flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(0,0,0,.07);
+}
+
+.ip-title{
+  font-weight: 1000;
+  font-size: 20px;
+  color: #0b5f25;
+  line-height: 1.2;
+}
+.ip-subtitle{
+  margin-top: 4px;
+  font-weight: 900;
+  opacity: .75;
+}
+
+.ip-close{
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.14);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 1000;
+}
+
+.ip-grid{
+  padding: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px){
+  .ip-grid{ grid-template-columns: 1fr; }
+}
+
+.ip-card{
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.10);
+  border: 1px solid rgba(0,0,0,.06);
+  padding: 14px;
+}
+
+.ip-card-title{
+  font-weight: 1000;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.ip-options{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ip-option{
+  width: 100%;
+  text-align: left;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 2px solid rgba(26,143,58,.55);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 1000;
+  color: #0b5f25;
+  display:flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ip-option.active{
+  background: #0b7a2a;
+  color: #fff;
+  border-color: transparent;
+}
+
+.ip-sub{
+  font-size: 12px;
+  font-weight: 900;
+  opacity: .85;
+}
+
+.ip-foot{
+  padding: 16px 18px;
+  display:flex;
+  justify-content: center;
+  gap: 12px;
+  background: #fff;
+  border-top: 1px solid rgba(0,0,0,.07);
+}
+
+.ip-btn{
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.14);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 1000;
+}
+
+.ip-btn.primary{
+  border: 0;
+  background: #0b7a2a;
+  color: #fff;
+  min-width: 140px;
+}
+
+.ip-btn.primary:disabled{
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.ip-btn.ghost{
+  background: #f7f7f7;
+}

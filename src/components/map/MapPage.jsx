@@ -10,8 +10,22 @@ import MapControls from "./MapControls";
 import FilterPanel from "../Panels/FilterPanel";
 import PayModal from "./Payments/PayModal";
 import MapPopup from "./MapPopup";
+import SaleSidePanel from "./SaleSidePanel";
+import DashboardStats from "./DashboardStats";
+import SellModePickerModal from "./SellModePickerModal";
 
-import { useLongdoMap } from "./hooks/useLongdoMap";
+// ✅ Investor flow
+import InvestorProfileModal from "./InvestorProfileModal";
+import InvestorRecommendPanel from "./InvestorRecommendPanel";
+import { loadInvestorProfile } from "../../utils/investorProfile";
+import { recommendLands } from "./recommend/recommendLands";
+
+// ✅ Broadcast & Line ADs (Mode 2)
+import BroadcastFab from "./broadcast/BroadcastFab";
+import BroadcastNewsModal from "./broadcast/BroadcastNewsModal";
+import BroadcastCreateModal from "./broadcast/BroadcastCreateModal";
+import BroadcastQuickActions from "./broadcast/BroadcastQuickActions";
+
 import { useMapAccess } from "./hooks/useMapAccess";
 import { useMapCart } from "./hooks/useMapCart";
 import { useMapPopup } from "./hooks/useMapPopup";
@@ -22,9 +36,10 @@ import { useMapSearch } from "./hooks/useMapSearch";
 import { useSelectedLandAccess } from "./hooks/useSelectedLandAccess";
 import { useLandSelection } from "./hooks/useLandSelection";
 import { useUnlockFlow } from "./hooks/useUnlockFlow";
+import { useLandFilters } from "./hooks/useLandFilters";
+import { useLongdoDrawing } from "./hooks/useLongdoDrawing";
+
 import { readFavorites, subscribeFavoritesChanged } from "../../utils/favorites";
-
-
 import { DEFAULT_FILTER } from "./constants/filter";
 
 import LandMarkers from "./LandMarkers";
@@ -33,12 +48,13 @@ import { mockLands } from "./lands/mockLands";
 import LandDetailPanel from "./LandDetailPanel";
 import UnlockPickerModal from "./UnlockPickerModal";
 
-import { useLandFilters } from "./hooks/useLandFilters";
-import { useLongdoDrawing } from "./hooks/useLongdoDrawing";
-
-// ✅ Role (mock – ยังไม่ทำ backend)
 import { useAuth } from "../../auth/AuthProvider";
 import RolePickerModal from "../../auth/RolePickerModal";
+
+// ✅ แยกออกมาเป็น hooks
+import { useMyLands } from "./hooks/useMyLands";
+import { useSalePanel } from "./hooks/useSalePanel";
+import { useMapBootstrap } from "./hooks/useMapBootstrap";
 
 export default function MapPage() {
   // =========================================================================
@@ -46,7 +62,20 @@ export default function MapPage() {
   // =========================================================================
   const [params] = useSearchParams();
   const navigate = useNavigate();
+
   const mode = params.get("mode") || "buy"; // buy | sell | eia
+  const focusLandId = params.get("focus"); // /map?mode=...&focus=LAND_ID
+
+  // sell flow params
+  const intent = params.get("intent"); // "seller" | "investor" | null
+  const profile = params.get("profile"); // "done" | null
+
+  const [sellPickOpen, setSellPickOpen] = useState(false);
+
+  // Broadcast
+  const [newsOpen, setNewsOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createRole, setCreateRole] = useState("admin"); // admin|consignor
 
   // =========================================================================
   // Role (mock)
@@ -54,38 +83,112 @@ export default function MapPage() {
   const { role, updateRole } = useAuth();
   const [roleOpen, setRoleOpen] = useState(false);
 
-  const canDrawInBuy = role === "landlord" || role === "seller" || role === "admin";
-  const canSell = role === "seller" || role === "admin";
+  // =========================================================================
+  // Permissions
+  // =========================================================================
+  // วาดได้เฉพาะ landlord,seller,admin
+  const canDraw = role === "landlord" || role === "seller" || role === "admin";
 
-  const drawingEnabled = mode === "buy" ? canDrawInBuy : mode === "sell" ? canSell : mode === "eia";
+  // ✅ intent=investor ให้เข้าได้ทุก role
+  // ✅ intent=seller ต้องเป็น seller/landlord/admin
+  const canSell =
+    intent === "investor"
+      ? true
+      : role === "seller" || role === "admin" || role === "landlord";
 
-  const [currentMode, setCurrentMode] = useState("normal"); // normal | eia
+  const drawingEnabled =
+    mode === "buy" ? canDraw : mode === "sell" ? canDraw : mode === "eia";
 
-  // ✅ กัน buyer เข้า sell
+  const [currentMode, setCurrentMode] = useState("normal"); // normal | eia | draw
+
+  // =========================================================================
+  // ✅ Sell flow: ต้องเลือก intent ก่อน แล้วค่อยเช็ค role
+  // =========================================================================
   useEffect(() => {
-    if (mode === "sell" && !canSell) {
-      alert("ต้องเป็น Seller หรือ Admin เท่านั้นถึงจะใช้โหมด Sell ได้");
+    if (mode !== "sell") {
+      setSellPickOpen(false);
+      return;
+    }
+
+    // 1) เข้า sell แต่ยังไม่เลือก intent -> เปิด modal ให้เลือกก่อน
+    if (!intent) {
+      setSellPickOpen(true);
+      return;
+    }
+
+    // 2) เลือกแล้ว -> ปิด modal
+    setSellPickOpen(false);
+
+    // 3) ถ้า intent=seller และ role ไม่ผ่าน -> เด้งกลับ buy
+    if (!canSell) {
+      alert(
+        "ต้องเป็น Seller, Landlord หรือ Admin เท่านั้นถึงจะใช้โหมด Sell (ผู้ขายฝาก) ได้"
+      );
       navigate("/map?mode=buy", { replace: true });
     }
-  }, [mode, canSell, navigate]);
+  }, [mode, intent, canSell, navigate]);
+
+  const handlePickSellIntent = useCallback(
+    (picked) => {
+      // picked: "seller" | "investor"
+      setSellPickOpen(false);
+      navigate(`/map?mode=sell&intent=${encodeURIComponent(picked)}`, {
+        replace: true,
+      });
+    },
+    [navigate]
+  );
+
+  const handleCloseSellIntent = useCallback(() => {
+    // ถ้าปิด modal โดยไม่เลือก -> กลับ buy
+    setSellPickOpen(false);
+    navigate("/map?mode=buy", { replace: true });
+  }, [navigate]);
 
   // =========================================================================
-  // UI state
+  // ✅ Investor Profile modal open
   // =========================================================================
-  const [showDisclaimer, setShowDisclaimer] = useState(true);
-  useEffect(() => setShowDisclaimer(true), [mode]);
-  const handleAcceptDisclaimer = useCallback(() => setShowDisclaimer(false), []);
+  const shouldAskInvestorProfile =
+    mode === "sell" && intent === "investor" && profile !== "done";
 
-  const [openLayerMenu, setOpenLayerMenu] = useState(false);
-  const [isSatellite, setIsSatellite] = useState(false);
-  const [isTraffic, setIsTraffic] = useState(false);
-  const [dolEnabled, setDolEnabled] = useState(true);
-  const [dolOpacity, setDolOpacity] = useState(0.35);
+  const isInvestorResult =
+    mode === "sell" && intent === "investor" && profile === "done";
 
   // =========================================================================
-  // Data
+  // Map bootstrap (disclaimer + layers + mapObj)
   // =========================================================================
-  const lands = useMemo(() => mockLands, []);
+  const {
+    showDisclaimer,
+    handleAcceptDisclaimer,
+    openLayerMenu,
+    setOpenLayerMenu,
+    isSatellite,
+    setIsSatellite,
+    isTraffic,
+    setIsTraffic,
+    dolEnabled,
+    setDolEnabled,
+    dolOpacity,
+    setDolOpacity,
+    mapRef,
+    mapObj,
+    zoomIn,
+    zoomOut,
+    locateMe,
+  } = useMapBootstrap({ mode });
+
+  // =========================================================================
+  // My lands
+  // =========================================================================
+  const { myLands } = useMyLands();
+
+  // =========================================================================
+  // Data (local + mock)
+  // =========================================================================
+  const lands = useMemo(() => {
+    const local = Array.isArray(myLands) ? myLands : [];
+    return [...local, ...mockLands];
+  }, [myLands]);
 
   // =========================================================================
   // Filters
@@ -100,18 +203,35 @@ export default function MapPage() {
     resetFilter,
   } = useLandFilters(lands, DEFAULT_FILTER);
 
-  const [favoriteIds, setFavoriteIds] = useState(() => {
-    return new Set(readFavorites().map((f) => String(f.id)));
-  });
+  // =========================================================================
+  // ✅ Recommend lands (Investor result)
+  // =========================================================================
+  const investorProfile = useMemo(() => {
+    if (!isInvestorResult) return null;
+    return loadInvestorProfile();
+  }, [isInvestorResult]);
+
+  const recommendedLands = useMemo(() => {
+    if (!isInvestorResult) return null;
+    return recommendLands(lands, investorProfile);
+  }, [isInvestorResult, lands, investorProfile]);
+
+  // ✅ lands ที่ใช้โชว์บนแผนที่/หมุด/สถิติ
+  const landsForMap = isInvestorResult ? recommendedLands || [] : filteredLands;
+
+  // =========================================================================
+  // Favorites
+  // =========================================================================
+  const [favoriteIds, setFavoriteIds] = useState(
+    () => new Set(readFavorites().map((f) => String(f.id)))
+  );
 
   useEffect(() => {
     const sync = () =>
       setFavoriteIds(new Set(readFavorites().map((f) => String(f.id))));
-
     const unsub = subscribeFavoritesChanged(sync);
     return unsub;
   }, []);
-
 
   // =========================================================================
   // Access / Cart
@@ -120,56 +240,10 @@ export default function MapPage() {
   const { addToCart } = useMapCart(navigate);
 
   // =========================================================================
-  // Longdo Map
-  // =========================================================================
-  const { mapRef, initMap, applySatellite, applyTraffic, applyDolVisibility, zoomIn, zoomOut, locateMe } =
-    useLongdoMap({
-      isSatellite,
-      isTraffic,
-      dolEnabled,
-      dolOpacity,
-    });
-
-  const [mapObj, setMapObj] = useState(null);
-
-  useEffect(() => {
-    if (showDisclaimer) {
-      setMapObj(null);
-      return;
-    }
-
-    initMap()
-      .then(() => {
-        const m = mapRef.current || null;
-        setMapObj(m);
-        setTimeout(() => {
-          try {
-            m?.resize?.();
-          } catch {}
-        }, 0);
-      })
-      .catch((e) => {
-        console.error(e);
-        alert("โหลดแผนที่ไม่สำเร็จ: กรุณาเช็ค longdo script/key");
-      });
-  }, [showDisclaimer, initMap, mapRef]);
-
-  useEffect(() => {
-    if (mapObj) applySatellite(isSatellite);
-  }, [mapObj, isSatellite, applySatellite]);
-
-  useEffect(() => {
-    if (mapObj) applyTraffic(isTraffic);
-  }, [mapObj, isTraffic, applyTraffic]);
-
-  useEffect(() => {
-    if (mapObj) applyDolVisibility?.(dolEnabled, dolOpacity);
-  }, [mapObj, dolEnabled, dolOpacity, applyDolVisibility]);
-
-  // =========================================================================
   // Drawing
   // =========================================================================
-  const { drawMode, startDrawing, finishDrawing, clearDrawing } = useLongdoDrawing(mapObj, currentMode);
+  const { drawMode, startDrawing, finishDrawing, clearDrawing, getPoints } =
+    useLongdoDrawing(mapObj, currentMode);
 
   useEffect(() => {
     if (!drawingEnabled) {
@@ -179,6 +253,34 @@ export default function MapPage() {
       setCurrentMode("normal");
     }
   }, [drawingEnabled, clearDrawing]);
+
+  // ✅ draw เฉพาะ sell ที่เป็น seller intent (กัน investor)
+  useEffect(() => {
+    if (mode === "sell" && drawingEnabled && intent !== "investor") {
+      setCurrentMode("draw");
+    }
+  }, [mode, drawingEnabled, intent]);
+
+  // =========================================================================
+  // Sale panel + state (hook)
+  // =========================================================================
+  const canSeeSalePanel =
+    role === "seller" || role === "landlord" || role === "admin";
+
+  // ✅ กัน SaleSidePanel ใน investor result
+  const showSalePanel =
+    canSeeSalePanel &&
+    (mode === "buy" || mode === "sell") &&
+    !(mode === "sell" && intent === "investor");
+
+  const {
+    saleOpen,
+    setSaleOpen,
+    landForm,
+    setLandForm,
+    handleSaveLand,
+    handleDeleteLand,
+  } = useSalePanel({ getPoints, clearDrawing });
 
   // =========================================================================
   // Popup
@@ -221,6 +323,59 @@ export default function MapPage() {
   }, [mode, showDisclaimer]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // =========================================================================
+  // ✅ Focus + Zoom + Open Popup (เมื่อ navigate ไป /map?...&focus=ID)
+  // =========================================================================
+  useEffect(() => {
+    if (!mapObj) return;
+    if (!focusLandId) return;
+    if (!landsForMap?.length) return;
+
+    const land = landsForMap.find((l) => String(l.id) === String(focusLandId));
+    if (!land) return;
+
+    const loc =
+      land?.location ??
+      ({
+        lat: land?.lat ?? land?.latitude,
+        lon: land?.lon ?? land?.lng ?? land?.longitude,
+      } || null);
+
+    if (loc?.lat == null || loc?.lon == null) return;
+
+    const lat = Number(loc.lat);
+    const lon = Number(loc.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+    try {
+      mapObj.location({ lon, lat });
+      mapObj.zoom(16);
+    } catch (e) {
+      console.warn("map focus failed", e);
+    }
+
+    const keep = [];
+    keep.push(`mode=${encodeURIComponent(mode)}`);
+    if (intent) keep.push(`intent=${encodeURIComponent(intent)}`);
+    if (profile) keep.push(`profile=${encodeURIComponent(profile)}`);
+
+    const t = setTimeout(() => {
+      onSelectLand(land, { lon, lat }); // ✅ เปิด popup
+      navigate(`/map?${keep.join("&")}`, { replace: true }); // ✅ ล้าง focus แต่คง params ไว้
+    }, 250);
+
+    return () => clearTimeout(t);
+  }, [
+    mapObj,
+    focusLandId,
+    landsForMap,
+    onSelectLand,
+    navigate,
+    mode,
+    intent,
+    profile,
+  ]);
+
+  // =========================================================================
   // Search
   // =========================================================================
   const handleSearch = useMapSearch(mapObj);
@@ -229,7 +384,10 @@ export default function MapPage() {
   // Derived
   // =========================================================================
   const selectedLand = popupApi.selectedLand;
-  const { unlockedFields } = useSelectedLandAccess(selectedLand, accessApi.access);
+  const { unlockedFields } = useSelectedLandAccess(
+    selectedLand,
+    accessApi.access
+  );
 
   // =========================================================================
   // Render
@@ -238,9 +396,30 @@ export default function MapPage() {
     <div className="map-shell">
       <div id="map" className="map-canvas" />
 
-      {showDisclaimer && <ModeDisclaimerModal onClose={handleAcceptDisclaimer} />}
+      {showDisclaimer && (
+        <ModeDisclaimerModal onClose={handleAcceptDisclaimer} />
+      )}
 
-      {/* Role Picker (mock) */}
+      {/* ✅ Sell Intent Picker */}
+      <SellModePickerModal
+        open={sellPickOpen}
+        onClose={handleCloseSellIntent}
+        onPick={handlePickSellIntent}
+      />
+
+      {/* ✅ Investor Profile Form (intent=investor แต่ยังไม่ done) */}
+      <InvestorProfileModal
+        open={shouldAskInvestorProfile}
+        onClose={() =>
+          navigate(`/map?mode=sell&intent=investor`, { replace: true })
+        }
+        onDone={() =>
+          navigate(`/map?mode=sell&intent=investor&profile=done`, {
+            replace: true,
+          })
+        }
+      />
+
       <RolePickerModal
         open={roleOpen}
         onClose={() => setRoleOpen(false)}
@@ -260,8 +439,8 @@ export default function MapPage() {
       {!!mapObj && (
         <LandMarkers
           map={mapObj}
-          lands={filteredLands}
-          favoriteIds={favoriteIds}   // ✅ เพิ่ม
+          lands={landsForMap}
+          favoriteIds={favoriteIds}
           onSelect={onSelectLand}
         />
       )}
@@ -270,7 +449,7 @@ export default function MapPage() {
         pageMode={mode}
         currentRole={role}
         onOpenRolePicker={() => setRoleOpen(true)}
-        drawingEnabled={drawingEnabled}
+        drawingEnabled={drawingEnabled && intent !== "investor"} // ✅ กัน investor
         drawMode={drawMode}
         currentMode={currentMode}
         onSetMode={setCurrentMode}
@@ -296,7 +475,9 @@ export default function MapPage() {
         onOpenTools={() => alert("TODO")}
       />
 
-      {/* ✅ popup */}
+      {/* ✅ stats ด้านล่าง: ถ้า investor result ให้คิดจากรายการแนะนำ */}
+      <DashboardStats lands={landsForMap} />
+
       <MapPopup {...popupApi}>
         <LandDetailPanel
           mode={mode}
@@ -308,7 +489,55 @@ export default function MapPage() {
         />
       </MapPopup>
 
-      {/* Unlock Picker */}
+      {/* ✅ Investor Recommend List (เฉพาะ profile=done) */}
+      {isInvestorResult && (
+        <InvestorRecommendPanel
+          lands={recommendedLands || []}
+          onFocus={(x) =>
+            navigate(
+              `/map?mode=sell&intent=investor&profile=done&focus=${encodeURIComponent(
+                x.id
+              )}`
+            )
+          }
+        />
+      )}
+
+      {/* ✅ SaleSidePanel (ไม่โชว์ใน investor) */}
+      {showSalePanel && (
+        <SaleSidePanel
+          open={saleOpen}
+          onToggle={() => setSaleOpen((v) => !v)}
+          role={role}
+          allowed={showSalePanel}
+          mode={mode}
+          drawingEnabled={drawingEnabled && intent !== "investor"} // ✅ กัน investor ให้ชัวร์
+          landData={landForm}
+          setLandData={setLandForm}
+          savedLands={myLands}
+          onSave={() => {
+            const r = handleSaveLand?.(); // {id}
+            if (r?.id) {
+              const keep = [];
+              keep.push(`mode=${encodeURIComponent(mode)}`);
+              if (intent) keep.push(`intent=${encodeURIComponent(intent)}`);
+              if (profile) keep.push(`profile=${encodeURIComponent(profile)}`);
+              keep.push(`focus=${encodeURIComponent(r.id)}`);
+              navigate(`/map?${keep.join("&")}`);
+            }
+          }}
+          onDelete={handleDeleteLand}
+          onFocusLand={(land) => {
+            const keep = [];
+            keep.push(`mode=${encodeURIComponent(mode)}`);
+            if (intent) keep.push(`intent=${encodeURIComponent(intent)}`);
+            if (profile) keep.push(`profile=${encodeURIComponent(profile)}`);
+            keep.push(`focus=${encodeURIComponent(land.id)}`);
+            navigate(`/map?${keep.join("&")}`);
+          }}
+        />
+      )}
+
       <UnlockPickerModal
         open={accessApi.unlockOpen}
         landId={accessApi.unlockLandId}
@@ -321,12 +550,56 @@ export default function MapPage() {
         onConfirm={unlockFlow.onConfirmUnlock}
       />
 
-      {/* Pay Modal */}
       <PayModal
         open={unlockFlow.payOpen}
         draft={unlockFlow.payDraft}
         onClose={unlockFlow.onClosePay}
         onPaid={unlockFlow.onPaid}
+      />
+
+      {/* 1) ปุ่มลอยข่าว */}
+      <BroadcastFab onClick={() => setNewsOpen(true)} />
+
+      {/* 2) ปุ่มในบริบท popup */}
+      <BroadcastQuickActions
+        land={selectedLand}
+        role={role}
+        mode={mode}
+        sellIntent={intent} // ✅ FIX: ใช้ intent
+        onAdminClick={() => {
+          setCreateRole("admin");
+          setCreateOpen(true);
+        }}
+        onConsignorClick={() => {
+          setCreateRole("consignor");
+          setCreateOpen(true);
+        }}
+      />
+
+      {/* 3) Modal ข่าว */}
+      <BroadcastNewsModal
+        open={newsOpen}
+        onClose={() => setNewsOpen(false)}
+        canAdmin={role === "admin"}
+        onOpenAdminCreate={() => {
+          setCreateRole("admin");
+          setCreateOpen(true);
+        }}
+      />
+
+      {/* 4) Modal สร้างแคมเปญ */}
+      <BroadcastCreateModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        land={selectedLand}
+        createdByRole={createRole}
+        createdByUserId={role} // MVP: ใส่ role ไปก่อน (ต่อ auth จริงค่อยใส่ userId)
+        mode={
+          mode === "sell" && intent === "seller" ? "consignment" : "buy_sell"
+        }
+        intent={intent || null}
+        defaultFeatured={createRole === "consignor"}
+        defaultPriceTHB={createRole === "consignor" ? 100 : 0}
       />
     </div>
   );

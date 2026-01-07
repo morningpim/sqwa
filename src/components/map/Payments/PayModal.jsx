@@ -1,5 +1,5 @@
-// ...imports เดิม
-import React, { useMemo, useState } from "react";
+// src/components/map/Payments/PayModal.jsx
+import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import "../../../css/PayModal.css";
 
@@ -7,6 +7,8 @@ import { LABEL, PAYMENT_METHODS, PRICE } from "./constants";
 import { buildPromptPayMockQr, todayKeyTH } from "./utils";
 import PaymentMethodDropdown from "./components/PaymentMethodDropdown";
 import PromptPayQrModal from "./components/PromptPayQrModal";
+
+import { addPurchase } from "../../../utils/purchases";
 
 export default function PayModal({ open, draft, onClose, onPaid, dock = "center" }) {
   const [loading, setLoading] = useState(false);
@@ -18,6 +20,16 @@ export default function PayModal({ open, draft, onClose, onPaid, dock = "center"
 
   const landId = draft?.landId ?? "";
   const selectedFields = Array.isArray(draft?.selectedFields) ? draft.selectedFields : [];
+
+  // ✅ reset ทุกครั้งที่เปิด/เปลี่ยน landId กัน state ค้าง
+  useEffect(() => {
+    if (!open) return;
+    setLoading(false);
+    setPaymentMethod("");
+    setQrOpen(false);
+    setQrData(null);
+    setPayStatus("PENDING");
+  }, [open, landId]);
 
   const normalizedSelected = useMemo(() => {
     const set = new Set();
@@ -74,7 +86,7 @@ export default function PayModal({ open, draft, onClose, onPaid, dock = "center"
       <div className="pay-card" onClick={(e) => e.stopPropagation()}>
         <div className="pay-head">
           <div className="pay-title">ชำระเงินเพื่อปลดล็อกข้อมูล</div>
-          <button className="pay-close" onClick={onClose} disabled={loading}>
+          <button className="pay-close" onClick={onClose} disabled={loading} type="button">
             ×
           </button>
         </div>
@@ -89,7 +101,8 @@ export default function PayModal({ open, draft, onClose, onPaid, dock = "center"
             <ul className="pay-items">
               {itemsUi.map((it) => (
                 <li key={it.k}>
-                  {it.label} <span style={{ opacity: 0.75 }}>({it.price.toLocaleString("th-TH")} บาท)</span>
+                  {it.label}{" "}
+                  <span style={{ opacity: 0.75 }}>({it.price.toLocaleString("th-TH")} บาท)</span>
                 </li>
               ))}
             </ul>
@@ -113,11 +126,11 @@ export default function PayModal({ open, draft, onClose, onPaid, dock = "center"
         </div>
 
         <div className="pay-actions">
-          <button className="pay-btn pay-btn-outline" onClick={onClose} disabled={loading}>
+          <button className="pay-btn pay-btn-outline" onClick={onClose} disabled={loading} type="button">
             ยกเลิก
           </button>
 
-          <button className="pay-btn pay-btn-primary" disabled={!canPay} onClick={onPay}>
+          <button className="pay-btn pay-btn-primary" disabled={!canPay} onClick={onPay} type="button">
             {paymentMethod === "promptpay" ? "สร้าง QR เพื่อชำระเงิน" : "ไปชำระเงิน"}
           </button>
         </div>
@@ -135,11 +148,33 @@ export default function PayModal({ open, draft, onClose, onPaid, dock = "center"
           setQrData(null);
           setPayStatus("PENDING");
         }}
-        // ถ้าอยากให้มีปุ่ม "ฉันชำระแล้ว" ใน modal -> ส่ง callback เข้าไปได้
         onPaid={() => {
+          // ✅ 1) อัปเดตสถานะใน UI
           setPayStatus("PAID");
           setQrOpen(false);
-          onPaid?.(); // ให้ parent ไปปลดล็อก
+
+          // ✅ 2) บันทึกประวัติการซื้อ (localStorage)
+          const paidAt = todayKeyTH();
+          const title = `ปลดล็อกข้อมูลแปลง ${landId}`;
+          const note = itemsUi.map((x) => x.label).join(", ");
+
+          addPurchase({
+            // กันชนกันกรณีซื้อซ้ำวันเดียวกัน
+            id: qrData?.orderId || `PM_${paidAt}_${landId}_${Date.now()}`,
+            landId,
+            title,
+            seller: draft?.owner || draft?.seller || "-",
+            totalPrice: amount, // ✅ เก็บเป็น number
+            status: "paid",
+            paidAt,
+            note: note ? `ปลดล็อก: ${note}` : "",
+            paymentMethod,
+          });
+
+          // ✅ 3) แจ้ง parent ให้ปลดล็อกข้อมูล
+          onPaid?.();
+
+          // ✅ 4) ปิด modal หลัก
           onClose?.();
         }}
       />

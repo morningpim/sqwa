@@ -253,3 +253,89 @@
   .fav-grid{ grid-template-columns: 1fr; }
   .profile-stats{ grid-template-columns: 1fr; }
 }
+
+/* =========================
+   Purchase history (new tab)
+   ========================= */
+
+.purchase-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* ใช้สไตล์ใกล้ fav-card เพื่อคุมหน้าตาให้ไปด้วยกัน */
+.purchase-card{
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 16px;
+  padding: 14px;
+  background: #fff;
+}
+
+.purchase-top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.purchase-title{
+  font-weight: 1000;
+  font-size: 15px;
+}
+
+/* status pill */
+.purchase-status{
+  font-size: 12px;
+  font-weight: 1000;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: #f6f7fb;
+  white-space: nowrap;
+}
+
+/* สีสถานะ */
+.purchase-status.paid{
+  border-color: rgba(26,143,58,.30);
+  background: #eaf7ee;
+  color: #1a8f3a;
+}
+.purchase-status.pending{
+  border-color: rgba(245,158,11,.30);
+  background: rgba(245,158,11,.12);
+  color: #b45309;
+}
+.purchase-status.cancelled,
+.purchase-status.refunded{
+  border-color: rgba(239,68,68,.28);
+  background: rgba(239,68,68,.10);
+  color: #ef4444;
+}
+
+.purchase-note{
+  margin-top: 10px;
+  border: 1px dashed rgba(0,0,0,.14);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: #fafafa;
+  font-size: 12px;
+  opacity: .9;
+}
+
+/* ปุ่มลบประวัติ */
+.danger-btn{
+  border: 1px solid rgba(239,68,68,.35);
+  border-radius: 12px;
+  height: 40px;
+  font-weight: 900;
+  cursor: pointer;
+  background: rgba(239,68,68,.10);
+  color: #ef4444;
+}
+
+/* responsive: ให้เหมือน fav-grid */
+@media (max-width: 900px){
+  .purchase-grid{ grid-template-columns: 1fr; }
+}

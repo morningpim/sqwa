@@ -4,6 +4,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "../css/profile.css";
 
 import { readFavorites, removeFavorite, subscribeFavoritesChanged } from "../utils/favorites";
+import { readPurchases, removePurchase, subscribePurchasesChanged } from "../utils/purchases";
+
+// ✅ เพิ่ม: landsLocal เพื่อดึง “ประกาศของฉัน”
+import { readAllLands, removeLand, subscribeLandsChanged } from "../utils/landsLocal";
 
 function useQuery() {
   const { search } = useLocation();
@@ -16,6 +20,10 @@ export default function ProfilePage() {
   const tab = (q.get("tab") || "info").toLowerCase();
 
   const [favorites, setFavorites] = useState(() => readFavorites());
+  const [purchases, setPurchases] = useState(() => readPurchases());
+
+  // ✅ เพิ่ม: posts (ประกาศของฉัน)
+  const [posts, setPosts] = useState(() => readAllLands());
 
   useEffect(() => {
     setFavorites(readFavorites());
@@ -23,7 +31,26 @@ export default function ProfilePage() {
     return unsub;
   }, []);
 
+  useEffect(() => {
+    setPurchases(readPurchases());
+    const unsub = subscribePurchasesChanged(() => setPurchases(readPurchases()));
+    return unsub;
+  }, []);
+
+  // ✅ subscribe “ประกาศของฉัน”
+  useEffect(() => {
+    setPosts(readAllLands());
+    const unsub = subscribeLandsChanged(() => setPosts(readAllLands()));
+    return unsub;
+  }, []);
+
   const goTab = (t) => navigate(`/profile?tab=${t}`);
+
+  const onDeletePost = (id) => {
+    if (!id) return;
+    if (!window.confirm("ต้องการลบประกาศนี้ใช่ไหม?")) return;
+    removeLand(id);
+  };
 
   return (
     <div className="profile-page">
@@ -43,7 +70,8 @@ export default function ProfilePage() {
         {/* stats */}
         <div className="profile-stats">
           <div className="stat-card">
-            <div className="stat-num">12</div>
+            {/* ✅ เปลี่ยน 12 เป็นจำนวนประกาศจริง */}
+            <div className="stat-num">{posts.length}</div>
             <div className="stat-label">ประกาศ</div>
           </div>
           <div className="stat-card">
@@ -51,8 +79,8 @@ export default function ProfilePage() {
             <div className="stat-label">รายการโปรด</div>
           </div>
           <div className="stat-card">
-            <div className="stat-num">7</div>
-            <div className="stat-label">ปลดล็อคเดือนนี้</div>
+            <div className="stat-num">{purchases.length}</div>
+            <div className="stat-label">ประวัติการซื้อ</div>
           </div>
         </div>
 
@@ -62,27 +90,23 @@ export default function ProfilePage() {
           <aside className="profile-side">
             <div className="side-title">เมนูโปรไฟล์</div>
 
-            <button
-              className={`side-item ${tab === "info" ? "active" : ""}`}
-              onClick={() => goTab("info")}
-              type="button"
-            >
+            <button className={`side-item ${tab === "info" ? "active" : ""}`} onClick={() => goTab("info")} type="button">
               ข้อมูลส่วนตัว
             </button>
 
-            <button
-              className={`side-item ${tab === "fav" ? "active" : ""}`}
-              onClick={() => goTab("fav")}
-              type="button"
-            >
+            <button className={`side-item ${tab === "fav" ? "active" : ""}`} onClick={() => goTab("fav")} type="button">
               รายการโปรด
             </button>
 
             <button
-              className={`side-item ${tab === "posts" ? "active" : ""}`}
-              onClick={() => goTab("posts")}
+              className={`side-item ${tab === "purchase" ? "active" : ""}`}
+              onClick={() => goTab("purchase")}
               type="button"
             >
+              ประวัติการซื้อ
+            </button>
+
+            <button className={`side-item ${tab === "posts" ? "active" : ""}`} onClick={() => goTab("posts")} type="button">
               ประกาศของฉัน
             </button>
 
@@ -97,8 +121,78 @@ export default function ProfilePage() {
 
           {/* right content */}
           <section className="profile-content">
-            {tab === "fav" ? (
+            {tab === "posts" ? (
               <>
+                <div className="content-head">
+                  <div>
+                    <div className="content-title">ประกาศของฉัน</div>
+                    <div className="content-sub">ประกาศที่คุณวาดและบันทึกจากหน้าแผนที่</div>
+                  </div>
+                  <div className="content-pill">{posts.length} รายการ</div>
+                </div>
+
+                {posts.length === 0 ? (
+                  <div className="empty-state">
+                    <div className="empty-title">ยังไม่มีประกาศ</div>
+                    <div className="empty-sub">ไปที่หน้าแผนที่ แล้ววาด + บันทึกเพื่อสร้างประกาศ</div>
+                    <button className="outline-btn" type="button" onClick={() => navigate(`/map?mode=buy`)}>
+                      ไปหน้าแผนที่ (โหมดลงขาย)
+                    </button>
+                  </div>
+                ) : (
+                  <div className="purchase-grid">
+                    {posts.map((p) => (
+                      <div key={p.id} className="purchase-card">
+                        <div className="purchase-top">
+                          <div className="purchase-title">
+                            {p.owner || (p.agent ? `${p.agent} (นายหน้า)` : "") || "ไม่ระบุชื่อ"}
+                          </div>
+                          <span className="purchase-status paid">
+                            {p.updatedAt ? `อัปเดต ${p.updatedAt}` : "ประกาศ"}
+                          </span>
+                        </div>
+
+                        <div className="fav-row">
+                          <span className="muted">ขนาด</span>
+                          <b>{Number(p.size || 0).toLocaleString("th-TH")} ตร.วา</b>
+                        </div>
+
+                        <div className="fav-row">
+                          <span className="muted">ราคารวม</span>
+                          <b>{Number(p.totalPrice || 0).toLocaleString("th-TH")} บ.</b>
+                        </div>
+
+                        <div className="fav-row">
+                          <span className="muted">โทร</span>
+                          <b>{p.phone || "-"}</b>
+                        </div>
+
+                        <div className="fav-actions">
+                          {/* ✅ กดแล้วโฟกัสแปลงนั้นบนแผนที่ */}
+                          <button
+                            className="outline-btn"
+                            type="button"
+                            onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}
+                          >
+                            ดูบนแผนที่
+                          </button>
+
+                          <button className="primary-btn" type="button" onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}>
+                            แก้ไขประกาศ
+                          </button>
+
+                          <button className="danger-btn" type="button" onClick={() => onDeletePost(p.id)}>
+                            ลบประกาศ
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : tab === "fav" ? (
+              <>
+                {/* ===== ของเดิมคุณ (fav) ===== */}
                 <div className="content-head">
                   <div>
                     <div className="content-title">รายการโปรด</div>
@@ -111,12 +205,8 @@ export default function ProfilePage() {
                   <div className="empty-state">
                     <div className="empty-title">ยังไม่มีรายการโปรด</div>
                     <div className="empty-sub">ไปที่หน้าแผนที่ แล้วกดหัวใจที่แปลงที่สนใจ</div>
-                    <button
-                        className="outline-btn"
-                        type="button"
-                        onClick={() => navigate(`/map?mode=buy&landId=${encodeURIComponent(f.id)}`)}
-                        >
-                        เปิดแผนที่
+                    <button className="outline-btn" type="button" onClick={() => navigate(`/map?mode=buy`)}>
+                      เปิดแผนที่
                     </button>
                   </div>
                 ) : (
@@ -168,8 +258,79 @@ export default function ProfilePage() {
                   </div>
                 )}
               </>
+            ) : tab === "purchase" ? (
+              <>
+                {/* ===== ของเดิมคุณ (purchase) ===== */}
+                <div className="content-head">
+                  <div>
+                    <div className="content-title">ประวัติการซื้อ</div>
+                    <div className="content-sub">รายการที่คุณทำรายการชำระเงินไว้</div>
+                  </div>
+                  <div className="content-pill">{purchases.length} รายการ</div>
+                </div>
+
+                {purchases.length === 0 ? (
+                  <div className="empty-state">
+                    <div className="empty-title">ยังไม่มีประวัติการซื้อ</div>
+                    <div className="empty-sub">เมื่อคุณชำระเงินสำเร็จ ระบบจะบันทึกไว้ที่นี่</div>
+                    <button className="outline-btn" type="button" onClick={() => navigate(`/map?mode=buy`)}>
+                      ไปหน้าแผนที่
+                    </button>
+                  </div>
+                ) : (
+                  <div className="purchase-grid">
+                    {purchases.map((p) => (
+                      <div key={p.id} className="purchase-card">
+                        <div className="purchase-top">
+                          <div className="purchase-title">{p.title || "รายการสั่งซื้อ"}</div>
+                          <span className={`purchase-status ${p.status || "paid"}`}>
+                            {p.status === "pending"
+                              ? "รอชำระ"
+                              : p.status === "cancelled"
+                              ? "ยกเลิก"
+                              : p.status === "refunded"
+                              ? "คืนเงิน"
+                              : "ชำระแล้ว"}
+                          </span>
+                        </div>
+
+                        <div className="fav-row">
+                          <span className="muted">ผู้ขาย</span>
+                          <b>{p.seller || "-"}</b>
+                        </div>
+
+                        <div className="fav-row">
+                          <span className="muted">วันที่ชำระ</span>
+                          <b>{p.paidAt || "-"}</b>
+                        </div>
+
+                        <div className="fav-row">
+                          <span className="muted">ยอดรวม</span>
+                          <b>{Number(p.totalPrice || 0).toLocaleString("th-TH")} บ.</b>
+                        </div>
+
+                        {p.note ? <div className="purchase-note">{p.note}</div> : null}
+
+                        <div className="fav-actions">
+                          <button
+                            className="outline-btn"
+                            type="button"
+                            onClick={() => navigate(`/map?mode=buy${p.landId ? `&focus=${p.landId}` : ""}`)}
+                          >
+                            ดูแปลง
+                          </button>
+                          <button className="danger-btn" type="button" onClick={() => removePurchase(p.id)}>
+                            ลบประวัติ
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             ) : tab === "info" ? (
               <>
+                {/* ===== ของเดิมคุณ (info) ===== */}
                 <div className="content-head">
                   <div>
                     <div className="content-title">ข้อมูลส่วนตัว</div>
@@ -192,7 +353,9 @@ export default function ProfilePage() {
                   </div>
                   <div className="info-row">
                     <div className="k">สถานะ</div>
-                    <div className="v"><span className="badge">สมาชิก</span></div>
+                    <div className="v">
+                      <span className="badge">สมาชิก</span>
+                    </div>
                   </div>
                 </div>
               </>
