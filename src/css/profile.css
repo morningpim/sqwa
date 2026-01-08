@@ -339,3 +339,16 @@
 @media (max-width: 900px){
   .purchase-grid{ grid-template-columns: 1fr; }
 }
+
+.admin-page .profile-side{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  flex-wrap:nowrap;
+}
+
+.admin-page .profile-side .side-item{
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+}

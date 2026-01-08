@@ -172,6 +172,7 @@ export default function LandDetailPanel({
   onClose,
   onOpenUnlockPicker,
   onUnlockAll,
+  onChatSeller,
 
   // (optional) ถ้าอยากให้ parent คุม favorite:
   isFavorite,
@@ -317,7 +318,11 @@ export default function LandDetailPanel({
             </div>
 
             <div className="sqw-actions" style={{ marginTop: 10 }}>
-              <button className="sqw-btn" type="button">
+              <button
+                className="sqw-btn"
+                type="button"
+                onClick={() => onChatSeller?.(land)}
+              >
                 แชทกับผู้ขาย
               </button>
               <button
@@ -332,7 +337,11 @@ export default function LandDetailPanel({
           </>
         ) : (
           <div className="sqw-actions" style={{ marginTop: 10 }}>
-            <button className="sqw-btn" type="button">
+            <button
+              className="sqw-btn"
+              type="button"
+              onClick={() => onChatSeller?.(land)}
+            >
               แชทกับผู้ขาย
             </button>
             <button className="sqw-btn sqw-pay-btn" type="button" onClick={() => onOpenUnlockPicker?.(L.id)}>

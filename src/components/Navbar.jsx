@@ -1,17 +1,14 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, ShieldCheck } from "lucide-react";
 
-// ✅ ถ้ามี utils/favorites อยู่แล้ว แนะนำใช้ตัวนี้ให้ตรงระบบ
 import { readFavorites, subscribeFavoritesChanged } from "../utils/favorites";
+import { useAuth } from "../auth/AuthProvider"; // ✅ ใช้ role จริง
 
 const CART_KEY = "sqw_cart_v1";
 
-// mock auth (ภายหลังเปลี่ยนเป็น context / api ได้)
-const MOCK_USER = {
-  name: "Pimpa",
-  avatarUrl: "",
-};
+// mock user (ถ้าคุณมี user จริงจาก auth ก็เปลี่ยนได้)
+const MOCK_USER = { name: "Pimpa", avatarUrl: "" };
 
 function readCartCount() {
   try {
@@ -26,9 +23,11 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [cartCount, setCartCount] = useState(() => readCartCount());
+  // ✅ role จาก auth
+  const { role } = useAuth();
+  const isAdmin = role === "admin";
 
-  // ✅ fav count (ดึงจาก utils/favorites)
+  const [cartCount, setCartCount] = useState(() => readCartCount());
   const [favCount, setFavCount] = useState(() => readFavorites().length);
 
   // 🔐 auth state (ชั่วคราว)
@@ -50,10 +49,12 @@ export default function Navbar() {
     };
   }, []);
 
-  // ✅ favorites sync (ชัวร์สุด เพราะ subscribe จาก utils)
+  // favorites sync
   useEffect(() => {
     setFavCount(readFavorites().length);
-    const unsub = subscribeFavoritesChanged(() => setFavCount(readFavorites().length));
+    const unsub = subscribeFavoritesChanged(() =>
+      setFavCount(readFavorites().length)
+    );
     return unsub;
   }, []);
 
@@ -66,7 +67,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  // ✅ helper: กดเมนูแล้วปิด dropdown ด้วย
   const go = useCallback(
     (to) => {
       setOpen(false);
@@ -75,12 +75,15 @@ export default function Navbar() {
     [navigate]
   );
 
-  const isMap = useMemo(() => (location.pathname || "").startsWith("/map"), [location.pathname]);
+  const isMap = useMemo(
+    () => (location.pathname || "").startsWith("/map"),
+    [location.pathname]
+  );
 
   const modeLabel = useMemo(() => {
     if (!isMap) return "";
     const sp = new URLSearchParams(location.search || "");
-    return sp.get("mode") === "sell" ? "โหมดขายที่ดิน" : "โหมดซื้อขายที่ดิน";
+    return sp.get("mode") === "sell" ? "โหมดขายฝากที่ดิน" : "โหมดซื้อขายที่ดิน";
   }, [isMap, location.search]);
 
   const avatarLetter = (user?.name?.[0] || "U").toUpperCase();
@@ -107,9 +110,22 @@ export default function Navbar() {
           <a href="#contact" className="nav-item">
             ติดต่อเรา
           </a>
+
+          {/* ✅ แสดงปุ่มแอดมินบนแถบเมนู (ถ้าอยากให้มี) */}
+          {isAdmin && (
+            <button
+              type="button"
+              className="nav-admin-chip"
+              onClick={() => navigate("/admin?tab=dashboard")}
+              title="ไปหน้า Admin"
+            >
+              <ShieldCheck size={16} />
+              Admin
+            </button>
+          )}
         </nav>
 
-        {/* 🔐 Auth section */}
+        {/* Auth section */}
         {!isLoggedIn ? (
           <Link to="/login">
             <button className="ds-btn ds-btn-outline" type="button">
@@ -125,7 +141,11 @@ export default function Navbar() {
               aria-label="profile"
               aria-expanded={open}
             >
-              {user.avatarUrl ? <img src={user.avatarUrl} alt="avatar" /> : <span>{avatarLetter}</span>}
+              {user.avatarUrl ? (
+                <img src={user.avatarUrl} alt="avatar" />
+              ) : (
+                <span>{avatarLetter}</span>
+              )}
             </button>
 
             {open && (
@@ -140,10 +160,46 @@ export default function Navbar() {
                   รายการโปรด {favCount > 0 ? `(${favCount})` : ""}
                 </button>
 
-                {/* ✅ ถ้าอยากเพิ่มลิงก์ประวัติการซื้อใน dropdown ด้วย */}
                 <button type="button" onClick={() => go("/profile?tab=purchase")}>
                   ประวัติการซื้อ
                 </button>
+
+                {/* ✅ แถบเครื่องมือ Admin (โชว์เฉพาะ admin) */}
+                {isAdmin && (
+                  <>
+                    <div className="nav-profile-divider" />
+                    <div className="nav-profile-section">
+                      <div className="nav-profile-section-title">
+                        <ShieldCheck size={16} />
+                        เครื่องมือแอดมิน
+                      </div>
+
+                      <button
+                        type="button"
+                        className="admin"
+                        onClick={() => go("/admin?tab=dashboard")}
+                      >
+                        Admin Dashboard
+                      </button>
+
+                      <button
+                        type="button"
+                        className="admin"
+                        onClick={() => go("/admin?tab=broadcast")}
+                      >
+                        Broadcast & Line ADs
+                      </button>
+
+                      <button
+                        type="button"
+                        className="admin"
+                        onClick={() => go("/admin?tab=lands")}
+                      >
+                        จัดการประกาศ
+                      </button>
+                    </div>
+                  </>
+                )}
 
                 <div className="nav-profile-divider" />
 

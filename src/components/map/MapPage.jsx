@@ -56,6 +56,9 @@ import { useMyLands } from "./hooks/useMyLands";
 import { useSalePanel } from "./hooks/useSalePanel";
 import { useMapBootstrap } from "./hooks/useMapBootstrap";
 
+// ✅ Mock Chat Modal (ไม่ใช้ Firebase)
+import ChatModalMock from "../chat/ChatModalMock";
+
 export default function MapPage() {
   // =========================================================================
   // Router
@@ -76,18 +79,107 @@ export default function MapPage() {
   const [newsOpen, setNewsOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [createRole, setCreateRole] = useState("admin"); // admin|consignor
+  const [createLand, setCreateLand] = useState(null);
 
   // =========================================================================
-  // Role (mock)
+  // Role (mock) + Auth
   // =========================================================================
-  const { role, updateRole } = useAuth();
+  const auth = useAuth?.() || {};
+  const role = auth.role;
+  const updateRole = auth.updateRole;
+
   const [roleOpen, setRoleOpen] = useState(false);
+
+  // =========================================================================
+  // ✅ Mock Identity for Chat (ถ้า auth ไม่มี uid/name)
+  // =========================================================================
+  const [mockUid] = useState(() => {
+    const existing = localStorage.getItem("mock_uid");
+    if (existing) return existing;
+    const id = `u_${Math.random().toString(16).slice(2)}_${Date.now()}`;
+    localStorage.setItem("mock_uid", id);
+    return id;
+  });
+
+  const [mockName, setMockName] = useState(() => {
+    const existing = localStorage.getItem("mock_name");
+    if (existing) return existing;
+    const name = `Guest-${Math.random().toString(16).slice(2, 6)}`;
+    localStorage.setItem("mock_name", name);
+    return name;
+  });
+
+  const currentUid = auth.uid || auth.user?.uid || mockUid;
+
+  const userProfile = useMemo(() => {
+    const p = auth.profile || {};
+    const name =
+      p.name ||
+      p.displayName ||
+      auth.user?.displayName ||
+      mockName ||
+      "Guest";
+    const photoURL = p.photoURL || auth.user?.photoURL || "";
+    return { name, photoURL };
+  }, [auth.profile, auth.user, mockName]);
+
+  // =========================================================================
+  // ✅ Chat state + handlers (Mock)
+  // =========================================================================
+  const [chatOpen, setChatOpen] = useState(false);
+  const [initialPeer, setInitialPeer] = useState(null); // { uid, name }
+
+  const openChat = useCallback(() => {
+    if (!currentUid) return alert("กรุณาเข้าสู่ระบบก่อนคุย");
+    setInitialPeer(null);
+    setChatOpen(true);
+  }, [currentUid]);
+
+  const openChatWith = useCallback(
+    (otherUid, otherName = "") => {
+      if (!otherUid) return;
+      if (!currentUid) return alert("กรุณาเข้าสู่ระบบก่อนคุย");
+      setInitialPeer({ uid: otherUid, name: otherName || "" });
+      setChatOpen(true);
+    },
+    [currentUid]
+  );
+
+  // ✅ กด “แชทผู้ขาย” จาก land (ปรับ field ให้ตรง schema จริงของคุณ)
+  const openChatWithSellerFromLand = useCallback(
+    (land) => {
+      const sellerUid =
+        land?.sellerUid ||
+        land?.ownerUid ||
+        land?.userId ||
+        land?.createdByUid ||
+        land?.createdByUserId ||
+        null;
+
+      const sellerName =
+        land?.sellerName ||
+        land?.ownerName ||
+        land?.createdByName ||
+        land?.createdBy ||
+        "";
+
+      if (!sellerUid) {
+        alert(
+          "ไม่พบข้อมูลผู้ขายในรายการนี้ (ไม่มี sellerUid/ownerUid/createdByUid)"
+        );
+        return;
+      }
+      openChatWith(sellerUid, sellerName);
+    },
+    [openChatWith]
+  );
 
   // =========================================================================
   // Permissions
   // =========================================================================
   // วาดได้เฉพาะ landlord,seller,admin
   const canDraw = role === "landlord" || role === "seller" || role === "admin";
+  const canUseBuy = role === "seller" || role === "landlord" || role === "admin";
 
   // ✅ intent=investor ให้เข้าได้ทุก role
   // ✅ intent=seller ต้องเป็น seller/landlord/admin
@@ -110,23 +202,25 @@ export default function MapPage() {
       return;
     }
 
-    // 1) เข้า sell แต่ยังไม่เลือก intent -> เปิด modal ให้เลือกก่อน
+    // 1) เข้า sell แต่ยังไม่เลือก intent
     if (!intent) {
       setSellPickOpen(true);
       return;
     }
 
-    // 2) เลือกแล้ว -> ปิด modal
     setSellPickOpen(false);
 
-    // 3) ถ้า intent=seller และ role ไม่ผ่าน -> เด้งกลับ buy
-    if (!canSell) {
+    // 2) intent=seller แต่ role ไม่ผ่าน
+    if (
+      intent === "seller" &&
+      !(role === "seller" || role === "landlord" || role === "admin")
+    ) {
       alert(
         "ต้องเป็น Seller, Landlord หรือ Admin เท่านั้นถึงจะใช้โหมด Sell (ผู้ขายฝาก) ได้"
       );
-      navigate("/map?mode=buy", { replace: true });
+      navigate("/map?mode=sell&intent=investor", { replace: true });
     }
-  }, [mode, intent, canSell, navigate]);
+  }, [mode, intent, role, navigate]);
 
   const handlePickSellIntent = useCallback(
     (picked) => {
@@ -314,13 +408,43 @@ export default function MapPage() {
   useMapEvents({
     mapObj,
     onOverlayOrMarkerSelect: openPopupForWithAccess,
-    onMapClickClose: () => popupApi.closePopup(),
+    onMapClickClose: () => {
+      if (createOpen || newsOpen) return;
+      popupApi.closePopup();
+    },
     isDrawing: drawMode,
   });
 
   useEffect(() => {
     popupApi.closePopup();
   }, [mode, showDisclaimer]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ✅ เพิ่ม: ถ้าเปิด news/create -> ปิด popup อัตโนมัติ
+  useEffect(() => {
+    if (createOpen || newsOpen) popupApi.closePopup();
+  }, [createOpen, newsOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ✅ เปิด create แล้วจำ popup เดิมไว้
+  const openCreate = useCallback(
+    (roleToCreate) => {
+      rememberPopup?.(); // ✅ จำ popup เดิม
+      setCreateLand(popupApi.selectedLand || null);
+      popupApi.closePopup(); // ✅ ปิด popup กันซ้อน
+
+      setCreateRole(roleToCreate); // "admin" | "consignor"
+      setCreateOpen(true);
+    },
+    [rememberPopup, popupApi]
+  );
+
+  // ✅ ปิด create แล้วเปิด popup เดิมกลับมา
+  const closeCreate = useCallback(() => {
+    setCreateOpen(false);
+    setCreateLand(null); // ✅ เคลียร์ snapshot
+    setTimeout(() => {
+      reopenPopup?.();
+    }, 0);
+  }, [reopenPopup]);
 
   // =========================================================================
   // ✅ Focus + Zoom + Open Popup (เมื่อ navigate ไป /map?...&focus=ID)
@@ -388,6 +512,7 @@ export default function MapPage() {
     selectedLand,
     accessApi.access
   );
+  const landForBroadcast = createLand || selectedLand; // ✅ ใช้ snapshot ก่อน
 
   // =========================================================================
   // Render
@@ -424,7 +549,7 @@ export default function MapPage() {
         open={roleOpen}
         onClose={() => setRoleOpen(false)}
         initialRole={role}
-        onSave={(r) => updateRole(r)}
+        onSave={(r) => updateRole?.(r)}
       />
 
       <FilterPanel
@@ -471,23 +596,28 @@ export default function MapPage() {
         onZoomOut={zoomOut}
         onLocate={locateMe}
         onOpenFilter={() => setFilterOpen(true)}
-        onOpenChat={() => alert("TODO")}
+        onOpenChat={openChat} // ✅ เปิด Mock Chat
         onOpenTools={() => alert("TODO")}
       />
 
       {/* ✅ stats ด้านล่าง: ถ้า investor result ให้คิดจากรายการแนะนำ */}
       <DashboardStats lands={landsForMap} />
 
-      <MapPopup {...popupApi}>
-        <LandDetailPanel
-          mode={mode}
-          land={selectedLand}
-          unlockedFields={unlockedFields}
-          onClose={() => popupApi.closePopup()}
-          onOpenUnlockPicker={unlockFlow.onOpenUnlockPicker}
-          onUnlockAll={unlockFlow.onUnlockAll}
-        />
-      </MapPopup>
+      {/* ✅ ซ่อน popup ระหว่างเปิดข่าว/สร้าง Broadcast */}
+      {!createOpen && !newsOpen && (
+        <MapPopup {...popupApi}>
+          <LandDetailPanel
+            mode={mode}
+            land={selectedLand}
+            unlockedFields={unlockedFields}
+            onClose={() => popupApi.closePopup()}
+            onOpenUnlockPicker={unlockFlow.onOpenUnlockPicker}
+            onUnlockAll={unlockFlow.onUnlockAll}
+            // ✅ ถ้า LandDetailPanel ยังไม่มีปุ่มแชท ให้เพิ่มปุ่มเรียก prop นี้
+            onChatSeller={() => openChatWithSellerFromLand(selectedLand)}
+          />
+        </MapPopup>
+      )}
 
       {/* ✅ Investor Recommend List (เฉพาะ profile=done) */}
       {isInvestorResult && (
@@ -565,14 +695,20 @@ export default function MapPage() {
         land={selectedLand}
         role={role}
         mode={mode}
-        sellIntent={intent} // ✅ FIX: ใช้ intent
+        sellIntent={intent}
         onAdminClick={() => {
-          setCreateRole("admin");
-          setCreateOpen(true);
+          if (!selectedLand) {
+            alert("กรุณาเลือกที่ดินก่อนสร้าง Broadcast");
+            return;
+          }
+          openCreate("admin");
         }}
         onConsignorClick={() => {
-          setCreateRole("consignor");
-          setCreateOpen(true);
+          if (!selectedLand) {
+            alert("กรุณาเลือกที่ดินก่อนสร้าง Broadcast");
+            return;
+          }
+          openCreate("consignor");
         }}
       />
 
@@ -581,19 +717,17 @@ export default function MapPage() {
         open={newsOpen}
         onClose={() => setNewsOpen(false)}
         canAdmin={role === "admin"}
-        onOpenAdminCreate={() => {
-          setCreateRole("admin");
-          setCreateOpen(true);
-        }}
+        onOpenAdminCreate={() => openCreate("admin")}
       />
 
       {/* 4) Modal สร้างแคมเปญ */}
       <BroadcastCreateModal
         open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        land={selectedLand}
+        onClose={closeCreate}
+        onSuccess={closeCreate} // ✅ submit สำเร็จ -> ปิด + reopen popup เดิม
+        land={landForBroadcast} // ✅ กัน selectedLand หายหลัง closePopup()
         createdByRole={createRole}
-        createdByUserId={role} // MVP: ใส่ role ไปก่อน (ต่อ auth จริงค่อยใส่ userId)
+        createdByUserId={role} // MVP: ใส่ role ไปก่อน
         mode={
           mode === "sell" && intent === "seller" ? "consignment" : "buy_sell"
         }
@@ -601,6 +735,56 @@ export default function MapPage() {
         defaultFeatured={createRole === "consignor"}
         defaultPriceTHB={createRole === "consignor" ? 100 : 0}
       />
+
+      {/* ✅ Mock Chat Modal */}
+      <ChatModalMock
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        currentUid={currentUid}
+        userProfile={userProfile}
+        initialPeer={initialPeer}
+      />
+
+      {/* ✅ ตัวช่วย: เปลี่ยนชื่อ mock user (ถ้ายังไม่มี auth profile)
+          ลบออกได้ตามต้องการ */}
+      {!auth.profile?.name && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 12,
+            left: 12,
+            zIndex: 9999,
+            background: "rgba(255,255,255,.9)",
+            border: "1px solid #eee",
+            borderRadius: 12,
+            padding: "8px 10px",
+            fontFamily: "system-ui",
+            display: "flex",
+            gap: 8,
+            alignItems: "center",
+          }}
+        >
+          <div style={{ fontSize: 12, opacity: 0.7 }}>mock name:</div>
+          <input
+            value={mockName}
+            onChange={(e) => {
+              const v = e.target.value;
+              setMockName(v);
+              localStorage.setItem("mock_name", v);
+            }}
+            style={{
+              border: "1px solid #ddd",
+              borderRadius: 10,
+              padding: "6px 8px",
+              outline: "none",
+              width: 160,
+            }}
+          />
+          <div style={{ fontSize: 12, opacity: 0.6 }}>
+            uid: {String(currentUid).slice(0, 10)}…
+          </div>
+        </div>
+      )}
     </div>
   );
 }

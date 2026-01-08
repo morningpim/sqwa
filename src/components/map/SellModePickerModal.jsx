@@ -9,7 +9,7 @@ export default function SellModePickerModal({ open, onClose, onPick }) {
     <div className="smp-backdrop" role="dialog" aria-modal="true">
       <div className="smp-card">
         <div className="smp-title">เลือกประเภทการใช้งาน</div>
-        <div className="smp-sub">โหมดฝากขายที่ดิน</div>
+        <div className="smp-sub">โหมดขายฝากที่ดิน</div>
 
         <div className="smp-grid">
           <button

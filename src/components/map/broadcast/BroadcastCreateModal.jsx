@@ -8,6 +8,7 @@ import { createCampaign, makeLandTitle } from "./broadcastHelpers";
 export default function BroadcastCreateModal({
   open,
   onClose,
+  onSuccess, // ✅ เพิ่ม: เรียกเมื่อ submit สำเร็จ
   land,
   createdByRole, // "admin" | "consignor"
   createdByUserId,
@@ -38,7 +39,9 @@ export default function BroadcastCreateModal({
             <div className="bc-title">
               {isConsignor ? "Broadcast 100 บาท (ขายฝาก)" : "สร้าง Broadcast (Admin)"}
             </div>
-            <div className="bc-sub">{land?.id ? `เลือกที่ดิน: ${title}` : "ยังไม่ได้เลือกที่ดิน"}</div>
+            <div className="bc-sub">
+              {land?.id ? `เลือกที่ดิน: ${title}` : "ยังไม่ได้เลือกที่ดิน"}
+            </div>
           </div>
 
           <div className="bc-head-actions">
@@ -54,11 +57,19 @@ export default function BroadcastCreateModal({
               <label>ช่องทาง</label>
               <div className="bc-checks">
                 <label className="bc-check">
-                  <input type="checkbox" checked={web} onChange={(e) => setWeb(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={web}
+                    onChange={(e) => setWeb(e.target.checked)}
+                  />
                   Web Broadcast
                 </label>
                 <label className="bc-check">
-                  <input type="checkbox" checked={lineAds} onChange={(e) => setLineAds(e.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={lineAds}
+                    onChange={(e) => setLineAds(e.target.checked)}
+                  />
                   LINE Ads (Queue)
                 </label>
               </div>
@@ -89,13 +100,19 @@ export default function BroadcastCreateModal({
                   เด่น (Featured)
                 </label>
               </div>
-              {isConsignor && <div className="bc-hint">ผู้ขายฝาก: บังคับเป็น “เด่น” ราคา 100 บาท</div>}
+              {isConsignor && (
+                <div className="bc-hint">ผู้ขายฝาก: บังคับเป็น “เด่น” ราคา 100 บาท</div>
+              )}
             </div>
 
             {!isConsignor && (
               <div className="bc-field">
                 <label>ราคา (บาท)</label>
-                <input value={priceTHB} onChange={(e) => setPriceTHB(e.target.value)} placeholder="0" />
+                <input
+                  value={priceTHB}
+                  onChange={(e) => setPriceTHB(e.target.value)}
+                  placeholder="0"
+                />
                 <div className="bc-hint">Admin อาจตั้งเป็น 0 ได้</div>
               </div>
             )}
@@ -112,7 +129,9 @@ export default function BroadcastCreateModal({
 
                   // “จ่ายเงิน” (MVP)
                   if (isConsignor) {
-                    const ok = window.confirm("ยืนยันชำระ 100 บาท เพื่อทำ Broadcast (MVP จำลองการจ่าย)?");
+                    const ok = window.confirm(
+                      "ยืนยันชำระ 100 บาท เพื่อทำ Broadcast (MVP จำลองการจ่าย)?"
+                    );
                     if (!ok) return;
                   }
 
@@ -134,7 +153,11 @@ export default function BroadcastCreateModal({
                   }
 
                   alert("สร้างแคมเปญสำเร็จ ✅");
-                  onClose?.();
+
+                  // ✅ สำเร็จ: ให้ MapPage ปิด modal + reopen popup เดิม
+                  // ถ้าไม่ได้ส่ง onSuccess มา จะ fallback ไปปิดธรรมดา
+                  if (onSuccess) onSuccess(r);
+                  else onClose?.();
                 }}
               >
                 {isConsignor ? "ชำระ 100 บาท + สร้าง" : "สร้างแคมเปญ"}
