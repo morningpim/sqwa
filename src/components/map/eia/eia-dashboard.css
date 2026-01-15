@@ -1,0 +1,40 @@
+/* src/components/map/eia/eia-dashboard.css */
+
+.eia-dashboard {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 900;
+}
+
+.eia-stat {
+  background: #fff;
+  border: 2px solid #16a34a;
+  border-radius: 16px;
+  padding: 12px 18px;
+  min-width: 110px;
+  text-align: center;
+  box-shadow: 0 12px 24px rgba(0,0,0,.12);
+}
+
+.eia-stat .v {
+  font-size: 20px;
+  font-weight: 800;
+  color: #16a34a;
+}
+
+.eia-stat .k {
+  font-size: 12px;
+  opacity: .7;
+}
+
+.eia-stat.warn {
+  border-color: #f59e0b;
+}
+
+.eia-stat.warn .v {
+  color: #f59e0b;
+}

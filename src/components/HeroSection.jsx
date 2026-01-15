@@ -48,6 +48,23 @@ export default function HeroSection() {
             </span>
           </div>
 
+          <div className="hero-item">
+            <button
+              className="hero-circle-btn"
+              onClick={() => navigate("/map?mode=eia")}
+            >
+              <img
+                src="/eia.png"
+                alt="EIA"
+                className="hero-img-icon hero-img-eia"
+              />
+            </button>
+            <span className="hero-btn-label" lang="th">
+              Future Project 
+              & EIA base map 
+            </span>
+          </div>
+
         </div>
       </div>
     </section>

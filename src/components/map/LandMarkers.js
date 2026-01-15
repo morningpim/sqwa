@@ -15,6 +15,8 @@ const DEFAULT_COLOR = "#E11D48"; // red-600 (ปกติ)
 const FAV_COLOR = "#16A34A"; // green-600 (favorite)
 const FAV_RING = "#ffffff"; // วงขาวรอบหมุด
 
+const EIA_COLOR = "#2563EB";    // 🔵 blue-600 (EIA)
+
 function safeId(v, i) {
   if (v == null) return `land_${i}`;
   return String(v);
@@ -132,7 +134,8 @@ export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) 
 
       idsNow.add(id);
 
-      const fav = isFavId(favoriteIds, id);
+      const isEia = land?.__type === "eia";
+      const fav = !isEia && isFavId(favoriteIds, id);
 
       let marker = markerMapRef.current.get(id);
 
@@ -151,8 +154,18 @@ export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) 
       }
 
       if (!marker) {
-        const color = fav ? FAV_COLOR : DEFAULT_COLOR;
-        const url = svgToDataUri(makePinSvg({ color, ring: fav }));
+        const color = isEia
+          ? EIA_COLOR
+          : fav
+          ? FAV_COLOR
+          : DEFAULT_COLOR;
+
+        const url = svgToDataUri(
+          makePinSvg({
+            color,
+            ring: fav && !isEia,
+          })
+        );
 
         marker = new L.Marker(
           { lon: loc.lon, lat: loc.lat },
@@ -234,6 +247,7 @@ export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) 
 
     lands.forEach((land, i) => {
       const id = safeId(land?.id ?? land?.code ?? land?.uid, i);
+      const isEia = land?.__type === "eia";
 
       // ✅ รองรับ 2 แบบ: land.polygon หรือ land.geometry (GeoJSON)
       const poly = land?.polygon;

@@ -1,0 +1,140 @@
+/* src/components/map/eia/eia-popup.css */
+
+.eia-card {
+  width: 320px;
+  background: #fff;
+  border-radius: 18px;
+  border: 2px solid #16a34a;
+  box-shadow: 0 20px 40px rgba(0,0,0,.15);
+  padding: 14px;
+  font-family: system-ui;
+}
+
+/* ---------- Header ---------- */
+.eia-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eia-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.eia-badge {
+  background: #16a34a;
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.eia-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.eia-close {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* ---------- Images ---------- */
+.eia-images {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.eia-images img {
+  width: 100%;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* ---------- Rows ---------- */
+.eia-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin: 6px 0;
+}
+
+/* ---------- Area ---------- */
+.eia-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.eia-area-box {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 8px;
+  text-align: center;
+}
+
+.eia-area-box.main {
+  border-color: #16a34a;
+}
+
+.eia-area-box .k {
+  font-size: 11px;
+  opacity: .7;
+}
+
+.eia-area-box .v {
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.eia-area-box .v.success {
+  color: #16a34a;
+}
+
+/* ---------- Meta ---------- */
+.eia-meta {
+  font-size: 12px;
+  margin: 10px 0;
+  display: grid;
+  gap: 4px;
+}
+
+.eia-meta span {
+  opacity: .6;
+  margin-right: 4px;
+}
+
+/* ---------- Actions ---------- */
+.eia-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.eia-actions .btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.eia-actions .btn.primary {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+}
+
+.eia-actions .btn.ghost {
+  background: #fff;
+  color: #16a34a;
+  border: 1.5px solid #16a34a;
+}

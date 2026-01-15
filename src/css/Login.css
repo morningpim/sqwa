@@ -229,6 +229,32 @@
   object-fit: cover;
 }
 
+/* ทำให้ Material Symbols แสดงคม */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+/* Google icon ในปุ่ม */
+.google-ms-icon {
+  font-size: 22px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Icon ใน modal เลือกประเภท */
+.user-type-icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-type-icon {
+  font-size: 34px; /* ปรับได้ */
+  line-height: 1;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .login-card {

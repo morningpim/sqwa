@@ -14,6 +14,14 @@ import {
   subscribeCampaignsChanged,
 } from "../../utils/broadcastLocal";
 
+import {
+  readAllApplicants,
+  removeApplicant,
+  subscribeApplicantsChanged,
+  updateApplicantStatus,
+  seedMockApplicants,
+} from "../../utils/applicantsLocal";
+
 /* ---------------- helpers ---------------- */
 function useQuery() {
   const { search } = useLocation();
@@ -28,6 +36,9 @@ export default function AdminPage() {
 
   const [lands, setLands] = useState(() => readAllLands());
   const [broadcasts, setBroadcasts] = useState(() => readAllCampaigns());
+
+  const [applicants, setApplicants] = useState(() => readAllApplicants());
+  const pendingCount = applicants.filter((a) => a.status === "pending").length;
 
   /* -------- sync lands -------- */
   useEffect(() => {
@@ -45,9 +56,16 @@ export default function AdminPage() {
     return unsub;
   }, []);
 
+  /* -------- sync applicants (✅ เอาอันเดียวพอ) -------- */
+  useEffect(() => {
+    const sync = () => setApplicants(readAllApplicants());
+    sync();
+    const unsub = subscribeApplicantsChanged(sync);
+    return unsub;
+  }, []);
+
   /* -------- actions -------- */
   const goTab = (t) => navigate(`/admin?tab=${t}`);
-
   const goBroadcast = () => navigate("/admin/broadcast");
 
   const onDeleteLand = (id) => {
@@ -60,6 +78,31 @@ export default function AdminPage() {
     if (!id) return;
     if (!window.confirm("ต้องการลบแคมเปญบอร์ดแคสนี้ใช่ไหม?")) return;
     removeCampaign(id);
+  };
+
+  const onApproveApplicant = (id) => {
+    if (!id) return;
+    if (!window.confirm("อนุมัติผู้สมัครรายนี้ใช่ไหม?")) return;
+    updateApplicantStatus(id, "approved");
+  };
+
+  const onRejectApplicant = (id) => {
+    if (!id) return;
+    const note = window.prompt("เหตุผลที่ไม่อนุมัติ (optional):", "");
+    updateApplicantStatus(id, "rejected", note || "");
+  };
+
+  const onDeleteApplicant = (id) => {
+    if (!id) return;
+    if (!window.confirm("ลบผู้สมัครรายนี้ใช่ไหม?")) return;
+    removeApplicant(id);
+  };
+
+  const onSeedApplicants = () => {
+    if (!window.confirm("สร้าง mock ผู้สมัคร 5 รายการ? (จะเขียนทับข้อมูลเดิม)"))
+      return;
+    seedMockApplicants();
+    goTab("applicants");
   };
 
   /* ================= render ================= */
@@ -86,8 +129,8 @@ export default function AdminPage() {
             <div className="stat-label">ประกาศทั้งหมด</div>
           </div>
           <div className="stat-card">
-            <div className="stat-num">1</div>
-            <div className="stat-label">Favorite ทั้งหมด</div>
+            <div className="stat-num">{pendingCount}</div>
+            <div className="stat-label">ผู้สมัครรออนุมัติ</div>
           </div>
           <div className="stat-card">
             <div className="stat-num">{broadcasts.length}</div>
@@ -120,6 +163,13 @@ export default function AdminPage() {
               onClick={() => goTab("lands")}
             >
               จัดการประกาศ
+            </button>
+
+            <button
+              className={`side-item ${tab === "applicants" ? "active" : ""}`}
+              onClick={() => goTab("applicants")}
+            >
+              อนุมัติผู้สมัคร
             </button>
 
             <button
@@ -159,15 +209,15 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <div className="info-row">
-                    <div className="k">ธุรกรรม</div>
+                    <div className="k">ผู้สมัครรออนุมัติ</div>
                     <div className="v">
-                      <b>{broadcasts.length}</b>
+                      <b>{pendingCount}</b>
                     </div>
                   </div>
                   <div className="info-row">
-                    <div className="k">ยอดรวมธุรกรรม</div>
+                    <div className="k">ธุรกรรม</div>
                     <div className="v">
-                      <b>250</b> บาท
+                      <b>{broadcasts.length}</b>
                     </div>
                   </div>
                 </div>
@@ -184,18 +234,14 @@ export default function AdminPage() {
                       รายการแคมเปญบอร์ดแคสทั้งหมด
                     </div>
                   </div>
-                  <div className="content-pill">
-                    {broadcasts.length} แคมเปญ
-                  </div>
+                  <div className="content-pill">{broadcasts.length} แคมเปญ</div>
                 </div>
 
                 <div className="fav-grid">
                   {broadcasts.map((b) => (
                     <div key={b.id} className="fav-card">
                       <div className="fav-top">
-                        <div className="fav-owner">
-                          {b.title || "Broadcast"}
-                        </div>
+                        <div className="fav-owner">{b.title || "Broadcast"}</div>
                         <button
                           className="fav-remove"
                           onClick={() => onDeleteBroadcast(b.id)}
@@ -214,9 +260,7 @@ export default function AdminPage() {
                           className="outline-btn"
                           onClick={() =>
                             navigate(
-                              `/admin/broadcast${
-                                b.landId ? `?landId=${b.landId}` : ""
-                              }`
+                              `/admin/broadcast${b.landId ? `?landId=${b.landId}` : ""}`
                             )
                           }
                         >
@@ -246,9 +290,7 @@ export default function AdminPage() {
                   {lands.map((p) => (
                     <div key={p.id} className="purchase-card">
                       <div className="purchase-top">
-                        <div className="purchase-title">
-                          {p.owner || "ไม่ระบุชื่อ"}
-                        </div>
+                        <div className="purchase-title">{p.owner || "ไม่ระบุชื่อ"}</div>
                       </div>
 
                       <div className="fav-row">
@@ -259,26 +301,19 @@ export default function AdminPage() {
                       <div className="fav-actions">
                         <button
                           className="outline-btn"
-                          onClick={() =>
-                            navigate(`/map?mode=buy&focus=${p.id}`)
-                          }
+                          onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}
                         >
                           ดูบนแผนที่
                         </button>
 
                         <button
                           className="primary-btn"
-                          onClick={() =>
-                            navigate(`/admin/broadcast?landId=${p.id}`)
-                          }
+                          onClick={() => navigate(`/admin/broadcast?landId=${p.id}`)}
                         >
                           ทำ Broadcast
                         </button>
 
-                        <button
-                          className="danger-btn"
-                          onClick={() => onDeleteLand(p.id)}
-                        >
+                        <button className="danger-btn" onClick={() => onDeleteLand(p.id)}>
                           ลบ
                         </button>
                       </div>
@@ -288,13 +323,133 @@ export default function AdminPage() {
               </>
             )}
 
+            {/* -------- applicants (✅ เพิ่มตรงนี้) -------- */}
+            {tab === "applicants" && (
+              <>
+                <div className="content-head">
+                  <div>
+                    <div className="content-title">อนุมัติผู้สมัคร</div>
+                    <div className="content-sub">
+                      ข้อมูล mock จาก localStorage (Approve / Reject)
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <button className="outline-btn" onClick={onSeedApplicants}>
+                      สร้าง Mock Data (5)
+                    </button>
+                    <div className="content-pill">
+                      ทั้งหมด {applicants.length} / รออนุมัติ {pendingCount}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="purchase-grid">
+                  {applicants.map((a) => {
+                    const roleLabel =
+                      a.type === "seller"
+                        ? `Seller${a.role ? ` (${a.role})` : ""}`
+                        : a.type === "investor"
+                        ? "Investor"
+                        : "General";
+
+                    const statusLabel =
+                      a.status === "pending"
+                        ? "รออนุมัติ"
+                        : a.status === "approved"
+                        ? "อนุมัติแล้ว"
+                        : "ไม่อนุมัติ";
+
+                    return (
+                      <div key={a.id} className="purchase-card">
+                        <div className="purchase-top">
+                          <div className="purchase-title">
+                            {a.name ? `${a.name} ${a.lastname || ""}` : "ไม่ระบุชื่อ"}
+                          </div>
+                        </div>
+
+                        <div className="fav-row">
+                          <span className="muted">ประเภท</span>
+                          <b>{roleLabel}</b>
+                        </div>
+
+                        <div className="fav-row">
+                          <span className="muted">สถานะ</span>
+                          <b>{statusLabel}</b>
+                        </div>
+
+                        {a.type === "seller" && a.role === "agent" && (
+                          <div className="fav-row">
+                            <span className="muted">License</span>
+                            <b>{a.agentLicense || "-"}</b>
+                          </div>
+                        )}
+
+                        {a.type === "investor" && (
+                          <div className="fav-row">
+                            <span className="muted">Risk Score</span>
+                            <b>{a.investorScore ?? "-"}</b>
+                          </div>
+                        )}
+
+                        {a.status === "rejected" && a.statusNote && (
+                          <div className="fav-row">
+                            <span className="muted">เหตุผล</span>
+                            <b>{a.statusNote}</b>
+                          </div>
+                        )}
+
+                        <div className="fav-actions">
+                          <button
+                            className="outline-btn"
+                            onClick={() => alert(JSON.stringify(a, null, 2))}
+                          >
+                            ดูรายละเอียด
+                          </button>
+
+                          <button
+                            className="primary-btn"
+                            onClick={() => onApproveApplicant(a.id)}
+                            disabled={a.status === "approved"}
+                            title={a.status === "approved" ? "อนุมัติแล้ว" : ""}
+                          >
+                            อนุมัติ
+                          </button>
+
+                          <button
+                            className="outline-btn"
+                            onClick={() => onRejectApplicant(a.id)}
+                            disabled={a.status === "rejected"}
+                            title={a.status === "rejected" ? "ไม่อนุมัติแล้ว" : ""}
+                          >
+                            ไม่อนุมัติ
+                          </button>
+
+                          <button className="danger-btn" onClick={() => onDeleteApplicant(a.id)}>
+                            ลบ
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {applicants.length === 0 && (
+                  <div className="empty-state">
+                    <div className="empty-title">ยังไม่มีผู้สมัคร</div>
+                    <div className="empty-sub">
+                      กด “สร้าง Mock Data (5)” เพื่อใส่ข้อมูลทดสอบ
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
             {/* -------- payments / settings -------- */}
             {(tab === "payments" || tab === "settings") && (
               <div className="empty-state">
                 <div className="empty-title">ยังไม่พร้อมใช้งาน</div>
-                <div className="empty-sub">
-                  เดี๋ยวพัฒนาต่อในเฟสถัดไป
-                </div>
+                <div className="empty-sub">เดี๋ยวพัฒนาต่อในเฟสถัดไป</div>
               </div>
             )}
           </section>

@@ -397,3 +397,22 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.risk-option{
+  display:flex;
+  align-items:center;
+  padding:14px 16px;
+  border:1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-main);
+  cursor:pointer;
+}
+.risk-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.risk-option input[type="radio"]{
+  width:18px;
+  height:18px;
+}

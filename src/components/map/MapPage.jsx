@@ -13,6 +13,7 @@ import MapPopup from "./MapPopup";
 import SaleSidePanel from "./SaleSidePanel";
 import DashboardStats from "./DashboardStats";
 import SellModePickerModal from "./SellModePickerModal";
+import { MAP_MODE, isEia, isSell, isLandMode } from "./mapMode";
 
 // ✅ Investor flow
 import InvestorProfileModal from "./InvestorProfileModal";
@@ -58,6 +59,9 @@ import { useMapBootstrap } from "./hooks/useMapBootstrap";
 
 // ✅ Mock Chat Modal (ไม่ใช้ Firebase)
 import ChatModalMock from "../chat/ChatModalMock";
+import EiaDetailPanel from "./eia/EiaDetailPanel";
+import { mockEias } from "./eia/mockEias";
+import EiaDashboardStats from "./eia/EiaDashboardStats";
 
 export default function MapPage() {
   // =========================================================================
@@ -66,7 +70,7 @@ export default function MapPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
-  const mode = params.get("mode") || "buy"; // buy | sell | eia
+  const mode = params.get("mode") || MAP_MODE.BUY;
   const focusLandId = params.get("focus"); // /map?mode=...&focus=LAND_ID
 
   // sell flow params
@@ -188,8 +192,7 @@ export default function MapPage() {
       ? true
       : role === "seller" || role === "admin" || role === "landlord";
 
-  const drawingEnabled =
-    mode === "buy" ? canDraw : mode === "sell" ? canDraw : mode === "eia";
+  const drawingEnabled = canDraw && mode !== MAP_MODE.EIA;
 
   const [currentMode, setCurrentMode] = useState("normal"); // normal | eia | draw
 
@@ -311,7 +314,24 @@ export default function MapPage() {
   }, [isInvestorResult, lands, investorProfile]);
 
   // ✅ lands ที่ใช้โชว์บนแผนที่/หมุด/สถิติ
-  const landsForMap = isInvestorResult ? recommendedLands || [] : filteredLands;
+  // land data (เดิม)
+  const landsForMap = isInvestorResult
+    ? recommendedLands || []
+    : filteredLands;
+
+  // eia data (ใหม่)
+  const eiaAsLandLike = useMemo(() => {
+    if (!isEia(mode)) return [];
+
+    return mockEias.map((eia) => ({
+      id: `eia-${eia.id}`,   // ❗ ต้องไม่ชน land
+      __type: "eia",         // ใช้แยก popup
+      location: eia.location,
+      geometry: eia.geometry,
+      raw: eia,              // ข้อมูลจริง
+    }));
+  }, [mode]);
+
 
   // =========================================================================
   // Favorites
@@ -380,11 +400,41 @@ export default function MapPage() {
   // Popup
   // =========================================================================
   const popupApi = useMapPopup({ mapObj, mapRef });
+  const [selectedEia, setSelectedEia] = useState(null);
 
   const { openPopupForWithAccess, onSelectLand } = useLandSelection({
     popupApi,
     accessApi,
   });
+
+  // ✅ STEP 3.2: handler กลางสำหรับ map click (land / eia)
+  const handleSelectOverlay = useCallback(
+    (item, loc) => {
+      // =========================
+      // EIA MODE → เปิด EIA popup
+      // =========================
+      if (isEia(mode)) {
+        if (!loc) return;
+
+        // เก็บข้อมูล EIA ที่ถูกคลิก
+        setSelectedEia({ item, loc });
+
+        // ใช้ popup engine เดิม แค่เพื่อเปิด + คำนวณตำแหน่ง
+        popupApi.openPopupFor(
+          { id: "__eia__", __type: "eia" }, // dummy object สำหรับ popup engine
+          loc
+        );
+        return;
+      }
+
+      // =========================
+      // LAND MODE → behavior เดิม
+      // =========================
+      openPopupForWithAccess(item, loc);
+    },
+    [mode, popupApi, openPopupForWithAccess]
+  );
+  // =========================================================================
 
   useDragGuard({
     enabledRef: popupApi.popupOpenRef,
@@ -407,10 +457,12 @@ export default function MapPage() {
 
   useMapEvents({
     mapObj,
-    onOverlayOrMarkerSelect: openPopupForWithAccess,
+    onOverlayOrMarkerSelect: handleSelectOverlay, // ✅ ใช้ handler กลาง
     onMapClickClose: () => {
       if (createOpen || newsOpen) return;
+
       popupApi.closePopup();
+      setSelectedEia(null); // ✅ ปิด EIA popup ด้วย
     },
     isDrawing: drawMode,
   });
@@ -564,9 +616,9 @@ export default function MapPage() {
       {!!mapObj && (
         <LandMarkers
           map={mapObj}
-          lands={landsForMap}
-          favoriteIds={favoriteIds}
-          onSelect={onSelectLand}
+          lands={isEia(mode) ? eiaAsLandLike : landsForMap}
+          favoriteIds={isEia(mode) ? undefined : favoriteIds}
+          onSelect={handleSelectOverlay}
         />
       )}
 
@@ -601,23 +653,39 @@ export default function MapPage() {
       />
 
       {/* ✅ stats ด้านล่าง: ถ้า investor result ให้คิดจากรายการแนะนำ */}
-      <DashboardStats lands={landsForMap} />
+      {isEia(mode) ? (
+        <EiaDashboardStats eias={eiaAsLandLike} />
+      ) : (
+        <DashboardStats lands={landsForMap} />
+      )}
 
       {/* ✅ ซ่อน popup ระหว่างเปิดข่าว/สร้าง Broadcast */}
-      {!createOpen && !newsOpen && (
+      {!createOpen && !newsOpen && popupApi.popupOpen && (
         <MapPopup {...popupApi}>
-          <LandDetailPanel
-            mode={mode}
-            land={selectedLand}
-            unlockedFields={unlockedFields}
-            onClose={() => popupApi.closePopup()}
-            onOpenUnlockPicker={unlockFlow.onOpenUnlockPicker}
-            onUnlockAll={unlockFlow.onUnlockAll}
-            // ✅ ถ้า LandDetailPanel ยังไม่มีปุ่มแชท ให้เพิ่มปุ่มเรียก prop นี้
-            onChatSeller={() => openChatWithSellerFromLand(selectedLand)}
-          />
+          {isEia(mode) ? (
+            <EiaDetailPanel
+              data={selectedEia}
+              onClose={() => {
+                setSelectedEia(null);
+                popupApi.closePopup();
+              }}
+            />
+          ) : (
+            <LandDetailPanel
+              mode={mode}
+              land={popupApi.selectedLand}
+              unlockedFields={unlockedFields}
+              onClose={() => popupApi.closePopup()}
+              onOpenUnlockPicker={unlockFlow.onOpenUnlockPicker}
+              onUnlockAll={unlockFlow.onUnlockAll}
+              onChatSeller={() =>
+                openChatWithSellerFromLand(popupApi.selectedLand)
+              }
+            />
+          )}
         </MapPopup>
       )}
+
 
       {/* ✅ Investor Recommend List (เฉพาะ profile=done) */}
       {isInvestorResult && (

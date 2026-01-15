@@ -214,6 +214,26 @@ export function useMapPopup({ mapObj, mapRef }) {
     [setPopupPosFromLoc, computeSafeAreas]
   );
 
+  const openAt = useCallback(
+    (loc) => {
+      if (!loc) return;
+
+      // ❗ ไม่ set selectedLand
+      lastPopupLandRef.current = null;
+      lastPopupLocRef.current = loc;
+      selectedLocRef.current = loc;
+
+      setSelectedLand(null);
+      setPopupOpen(true);
+      lastPopupOpenAtRef.current = Date.now();
+
+      setPopupPosFromLoc(loc);
+      computeSafeAreas();
+    },
+    [setPopupPosFromLoc, computeSafeAreas]
+  );
+
+
   // helper (คลิกจาก marker/overlay)
   const handleSelectLand = useCallback(
     (land, loc) => {
@@ -355,6 +375,7 @@ export function useMapPopup({ mapObj, mapRef }) {
 
     // actions
     openPopupFor,
+    openAt, 
     closePopup,
     setSelectedLand,
     handleSelectLand,

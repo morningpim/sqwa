@@ -1,42 +1,65 @@
-// src/components/map/MapPopup.jsx
 import React from "react";
 import { createPortal } from "react-dom";
 
+/**
+ * MapPopup
+ *
+ * รองรับ 2 โหมด:
+ * 1) LAND  → มี pos + popupStyle + arrow
+ * 2) EIA   → ไม่มี pos → popup แสดงกลางจอ
+ *
+ * props:
+ * - open: boolean
+ * - pos: { x, y } | null
+ * - popupStyle: { left, top, zIndex }
+ * - arrowStyle: style object (optional)
+ * - popupBoxRef: ref (optional)
+ * - children
+ */
 export default function MapPopup({
   open,
   pos,
-  popupStyle,
+  popupStyle = {},
   arrowStyle,
   popupBoxRef,
   children,
 }) {
-  if (!open || !pos) return null;
+  if (!open) return null;
+
+  // ===== fallback สำหรับ EIA (ไม่มี pos) =====
+  const left = popupStyle.left ?? "50%";
+  const top = popupStyle.top ?? "50%";
+  const zIndex = popupStyle.zIndex ?? 1000;
+
+  const isAnchored = Boolean(pos);
 
   return createPortal(
     <>
-      {/* ชั้นที่ 1: ใช้แค่กำหนดตำแหน่ง (ไม่รับ event) */}
-      <div
-        style={{
-          position: "fixed",
-          left: popupStyle.left,
-          top: popupStyle.top,
-          zIndex: popupStyle.zIndex,
-          pointerEvents: "none",
-        }}
-      >
-        {/* ลูกศร */}
-        <div style={arrowStyle} />
-      </div>
+      {/* ===== Arrow (เฉพาะ LAND) ===== */}
+      {isAnchored && arrowStyle && (
+        <div
+          style={{
+            position: "fixed",
+            left,
+            top,
+            zIndex,
+            pointerEvents: "none",
+          }}
+        >
+          <div style={arrowStyle} />
+        </div>
+      )}
 
-      {/* ชั้นที่ 2: popup จริง (รับ event ได้) */}
+      {/* ===== Popup box ===== */}
       <div
         ref={popupBoxRef}
         className="land-popup-shell land-detail-panel"
         style={{
           position: "fixed",
-          left: popupStyle.left,
-          top: popupStyle.top,
-          zIndex: popupStyle.zIndex + 1,
+          left,
+          top,
+          transform: isAnchored ? undefined : "translate(-50%, -50%)",
+          zIndex: zIndex + 1,
           pointerEvents: "auto",
         }}
       >

@@ -1,13 +1,31 @@
-import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  useCallback,
+} from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, ShieldCheck } from "lucide-react";
 
 import { readFavorites, subscribeFavoritesChanged } from "../utils/favorites";
-import { useAuth } from "../auth/AuthProvider"; // ✅ ใช้ role จริง
+import { useAuth } from "../auth/AuthProvider";
 
 const CART_KEY = "sqw_cart_v1";
 
-// mock user (ถ้าคุณมี user จริงจาก auth ก็เปลี่ยนได้)
+// ======================
+// ✅ MODE CONFIG
+// ======================
+const MODE_LABEL_MAP = {
+  buy: "โหมดซื้อขายที่ดิน",
+  sell: "โหมดขายฝากที่ดิน",
+  eia: "Future Project & EIA base map",
+  //auction: "โหมดประมูลที่ดิน",
+};
+
+const DEFAULT_MODE = "buy";
+
+// mock user
 const MOCK_USER = { name: "Pimpa", avatarUrl: "" };
 
 function readCartCount() {
@@ -80,10 +98,16 @@ export default function Navbar() {
     [location.pathname]
   );
 
+  // ======================
+  // ✅ MODE LABEL LOGIC
+  // ======================
   const modeLabel = useMemo(() => {
     if (!isMap) return "";
+
     const sp = new URLSearchParams(location.search || "");
-    return sp.get("mode") === "sell" ? "โหมดขายฝากที่ดิน" : "โหมดซื้อขายที่ดิน";
+    const mode = sp.get("mode");
+
+    return MODE_LABEL_MAP[mode] || MODE_LABEL_MAP[DEFAULT_MODE];
   }, [isMap, location.search]);
 
   const avatarLetter = (user?.name?.[0] || "U").toUpperCase();
@@ -111,7 +135,6 @@ export default function Navbar() {
             ติดต่อเรา
           </a>
 
-          {/* ✅ แสดงปุ่มแอดมินบนแถบเมนู (ถ้าอยากให้มี) */}
           {isAdmin && (
             <button
               type="button"
@@ -160,11 +183,13 @@ export default function Navbar() {
                   รายการโปรด {favCount > 0 ? `(${favCount})` : ""}
                 </button>
 
-                <button type="button" onClick={() => go("/profile?tab=purchase")}>
+                <button
+                  type="button"
+                  onClick={() => go("/profile?tab=purchase")}
+                >
                   ประวัติการซื้อ
                 </button>
 
-                {/* ✅ แถบเครื่องมือ Admin (โชว์เฉพาะ admin) */}
                 {isAdmin && (
                   <>
                     <div className="nav-profile-divider" />
@@ -220,7 +245,9 @@ export default function Navbar() {
 
         <Link to="/cart" className="cart-btn" aria-label="cart">
           <ShoppingCart size={20} />
-          {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+          {cartCount > 0 && (
+            <span className="cart-badge">{cartCount}</span>
+          )}
         </Link>
       </div>
     </header>

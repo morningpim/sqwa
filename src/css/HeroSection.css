@@ -73,6 +73,7 @@
   cursor: pointer;
   transition: 0.2s;
   border: none;
+  overflow: hidden; 
 }
 
 .hero-circle-btn:hover {
@@ -95,3 +96,7 @@
   color: #000000;
 }
 
+.hero-img-eia {
+  mix-blend-mode: multiply; /* ลบพื้นขาว */
+  filter: contrast(1.15) saturate(1.1);
+}
