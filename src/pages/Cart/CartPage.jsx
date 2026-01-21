@@ -3,8 +3,10 @@ import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearCart, readCart, removeCartItem } from "../../utils/cartStorage";
 import "../../css/CartPage.css";
+import { useTranslation } from "react-i18next";
 
-import { PRICE, LABEL, PAYMENT_METHODS } from "./constants";
+
+import { PRICE, PAYMENT_METHODS, FIELD_I18N_KEY } from "./constants";
 import PaymentMethodDropdown from "./components/PaymentMethodDropdown";
 import PromptPayQrModal from "./components/PromptPayQrModal";
 import { applyUnlockFromCartMock } from "./utils/applyUnlockFromCartMock";
@@ -13,6 +15,8 @@ import { usePaymentStatusPoll } from "./hooks/usePaymentStatusPoll";
 
 export default function CartPage() {
   const nav = useNavigate();
+  const { t } = useTranslation("payment");
+  const { t: tCommon } = useTranslation("common");
 
   const [loading, setLoading] = useState(false);
   const [cart, setCart] = useState(() => readCart());
@@ -61,7 +65,7 @@ export default function CartPage() {
       clearCart();
       setCart([]);
       setQrOpen(false);
-      alert("ชำระเงินสำเร็จ ✅");
+      alert(t("status.paid"));
       nav("/map?mode=buy");
     },
   });
@@ -77,7 +81,7 @@ export default function CartPage() {
       clearCart();
       setCart([]);
 
-      alert("ชำระรวมสำเร็จ (mock) ✅");
+      alert(t("footer.mock"));
       nav("/map?mode=buy");
     } finally {
       setLoading(false);
@@ -90,12 +94,12 @@ export default function CartPage() {
       <div className="cart-header">
         <h2 className="ds-h3 cart-title-line">
           <span className="material-icon">shopping_cart</span>
-          รายการที่เลือกไว้เพื่อปลดล็อกข้อมูล (Hybrid: QR + Redirect)
+          {t("cart.title")}
         </h2>
 
         <div className="cart-sub text-sub">
           <span className="material-icon">info</span>
-          PromptPay แสดง QR ในหน้าเรา • Card/Bank Redirect ไป ChillPay (ตอนนี้สามารถ mock ได้)
+          {t("cart.subtitle")}
         </div>
       </div>
 
@@ -107,9 +111,9 @@ export default function CartPage() {
               <div className="cart-empty-icon">
                 <span className="material-icon">shopping_cart</span>
               </div>
-              <div className="cart-empty-title">ยังไม่มีรายการในตะกร้า</div>
+              <div className="cart-empty-title">{t("cart.empty.title")}</div>
               <div className="cart-empty-sub text-sub">
-                ไปที่หน้าแผนที่ แล้วเลือกข้อมูลที่ต้องการปลดล็อกก่อนนะ
+                {t("cart.empty.subtitle")}
               </div>
 
               <button
@@ -118,7 +122,7 @@ export default function CartPage() {
                 onClick={() => nav("/map?mode=buy")}
               >
                 <span className="material-icon">map</span>
-                ไปหน้าแผนที่
+                {t("cart.action.goMap")}
               </button>
             </div>
           ) : (
@@ -138,14 +142,18 @@ export default function CartPage() {
                     <div className="cart-item-row cart-fields text-sub">
                       <span className="material-icon">checklist</span>
                       <span className="cart-fields-text">
-                        เลือก: {fields.map((k) => LABEL[k] || k).join(", ")}
+                        {tCommon("field.selected")}
+                        {fields
+                          .map((k) => tCommon(FIELD_I18N_KEY[k] || "unknown"))
+                          .join(", ")
+                        }
                       </span>
                     </div>
 
                     <div className="cart-item-row cart-date text-muted">
                       <span className="material-icon">schedule</span>
                       <span>
-                        เพิ่มเมื่อ: {it.createdAt ? new Date(it.createdAt).toLocaleString("th-TH") : "-"}
+                        {tCommon("date.added")}: {it.createdAt ? new Date(it.createdAt).toLocaleString("th-TH") : "-"}
                       </span>
                     </div>
                   </div>
@@ -153,7 +161,7 @@ export default function CartPage() {
                   <div className="cart-item-right">
                     <div className="cart-item-row cart-price">
                       <span className="material-icon">payments</span>
-                      <span className="cart-price-amount">{sub.toLocaleString("th-TH")} บาท</span>
+                      <span className="cart-price-amount">{sub.toLocaleString("th-TH")} {t("total.unit")}</span>
                     </div>
 
                     <button
@@ -166,7 +174,7 @@ export default function CartPage() {
                       }}
                     >
                       <span className="material-icon">delete</span>
-                      ลบ
+                      {tCommon("action.delete")}
                     </button>
                   </div>
                 </div>
@@ -181,7 +189,7 @@ export default function CartPage() {
             <div className="summary-head">
               <div className="summary-title">
                 <span className="material-icon">receipt_long</span>
-                สรุปรายการ
+                {t("cart.summary.title")}
               </div>
               <div className="summary-badge">
                 <span className="material-icon">shopping_bag</span>
@@ -192,14 +200,14 @@ export default function CartPage() {
             <div className="summary-total">
               <div className="summary-total-label">
                 <span className="material-icon">payments</span>
-                ยอดรวมทั้งหมด
+                {t("cart.summary.total")}
               </div>
               <div className="summary-total-value">{total.toLocaleString("th-TH")} บาท</div>
             </div>
 
             {/* Payment method (Custom Dropdown) */}
             <div className="pm-wrap">
-              <div className="pm-head">เลือกวิธีชำระเงิน:</div>
+              <div className="pm-head">{t("cart.paymentMethod")}</div>
 
               <PaymentMethodDropdown
                 value={paymentMethod}
@@ -208,12 +216,12 @@ export default function CartPage() {
                 disabled={loading}
               />
 
-              <div className="pm-note">* PromptPay = QR ในหน้าเรา • Card/Bank = Redirect</div>
+              <div className="pm-note">{t("note.promptpay")} • {t("note.redirect")}</div>
             </div>
 
             <div className="summary-hint text-sub" style={{ marginTop: 12 }}>
               <span className="material-icon">lock_open</span>
-              ของจริง: หลังชำระแล้ว backend/IPN จะเป็นคนยืนยันและปลดล็อกข้อมูลให้
+              {t("hint.postPaid")}
             </div>
 
             {/* Actions (sticky bottom) */}
@@ -226,10 +234,11 @@ export default function CartPage() {
               >
                 <span className="material-icon">credit_card</span>
                 {loading
-                  ? "กำลังดำเนินการ..."
+                  ? `${tCommon("loading")}...`
                   : paymentMethod === "promptpay"
-                  ? "สร้าง QR เพื่อชำระเงิน"
-                  : "ไปชำระเงิน (ChillPay)"}
+                  ? t("action.generateQr")
+                  : t("action.pay")
+                }
               </button>
 
               {/* (ทางเลือก) โฟลว์เดิม mock */}
@@ -241,7 +250,7 @@ export default function CartPage() {
                 title="ทดสอบโฟลว์เดิม (ปลดล็อกทันที) — แนะนำลบเมื่อจะใช้ของจริง"
               >
                 <span className="material-icon">science</span>
-                {loading ? "กำลังทำ..." : "ทดสอบปลดล็อกทันที (mock เดิม)"}
+                {loading ? tCommon("loading") : t("cart.action.mockPay")}
               </button>
 
               <button
@@ -251,7 +260,7 @@ export default function CartPage() {
                 disabled={loading}
               >
                 <span className="material-icon">arrow_back</span>
-                กลับไปเลือกเพิ่ม
+                {t("cart.action.back")}
               </button>
             </div>
           </div>

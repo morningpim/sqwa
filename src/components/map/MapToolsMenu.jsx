@@ -1,5 +1,6 @@
 // src/components/map/MapToolsMenu.jsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 import "../../css/MapToolsMenu.css";
 
 export default function MapToolsMenu({
@@ -25,16 +26,20 @@ export default function MapToolsMenu({
   onOpenRolePicker,
 }) {
   if (!open) return null;
+  const { t } = useTranslation("map");
+  const { t: tCommon } = useTranslation("common");
+  const { t: tRole } = useTranslation("rolePicker"); // ถ้า role.change อยู่ที่นี่
+
 
   return (
     <div className="mtm-pop">
       <div className="mtm-drawCard">
         <div className="mtm-drawHeader">
           <div className="mtm-title">
-            <span className="mtm-titleText">draw</span>
+            <span className="mtm-titleText">{t("draw")}</span>
           </div>
 
-          <button className="mtm-x" onClick={onClose} aria-label="close">
+          <button className="mtm-x" onClick={onClose} aria-label={tCommon("close")}>
             ✕
           </button>
         </div>
@@ -50,7 +55,9 @@ export default function MapToolsMenu({
             <span className="material-icon" aria-hidden="true">
               swap_horiz
             </span>
-            {currentMode === "eia" ? "EIA" : "Normal"}
+            {currentMode === "eia"
+              ? t("eiaMode")
+              : t("normalMode")}
           </button>
         )}
 
@@ -63,7 +70,7 @@ export default function MapToolsMenu({
                 onClose?.();
               }}
             >
-              ▶ start
+              ▶ {t("drawStart")}
             </button>
 
             <button
@@ -75,7 +82,7 @@ export default function MapToolsMenu({
                 onClose?.();
               }}
             >
-              ✔ Finish
+              ✔ {t("drawFinish")}
             </button>
 
             <button
@@ -85,7 +92,7 @@ export default function MapToolsMenu({
                 onClose?.();
               }}
             >
-              🧍 Clear
+              🧍 {t("drawClear")}
             </button>
           </div>
         )}
@@ -97,14 +104,14 @@ export default function MapToolsMenu({
           <span className="material-icon" aria-hidden="true">
             build
           </span>
-          <span className="mtm-itemText">Tools</span>
+          <span className="mtm-itemText">{t("tools")}</span>
         </button>
 
         <button className="mtm-item" type="button" onClick={() => onOpenRolePicker?.()}>
           <span className="material-icon" aria-hidden="true">
             badge
           </span>
-          <span className="mtm-itemText">Role</span>
+          <span className="mtm-itemText">{tRole("change")}</span>
           {currentRole ? <span className="mtm-badge">{currentRole}</span> : null}
         </button>
       </div>

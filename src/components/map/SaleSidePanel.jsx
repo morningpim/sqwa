@@ -1,5 +1,6 @@
 // src/components/map/SaleSidePanel.jsx
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import "../../css/SaleSidePanel.css";
 
 
@@ -114,6 +115,7 @@ export default function SaleSidePanel({
   const [wahModel, setWahModel] = useState("");
 
   const isEditing = !!landData?.id;
+  const { t } = useTranslation("sale");
 
   // ✅ Gate เฉพาะตอนแก้ไข: ต้องครบ 14 วันจาก createdAt
   const editGate = useMemo(() => getEditGateInfo(landData, 14), [landData]);
@@ -219,10 +221,10 @@ export default function SaleSidePanel({
   };
 
   const headerTitle = useMemo(() => {
-    if (mode === "sell") return "ข้อมูลแปลง (โหมดขาย)";
-    if (mode === "buy") return "ข้อมูลแปลง (โหมดซื้อ)";
-    return "ข้อมูลแปลง";
-  }, [mode]);
+    if (mode === "sell") return t("header.sell");
+    if (mode === "buy") return t("header.buy");
+    return t("header.default");
+  }, [mode, t]);
 
   return (
     <aside className={`sale-panel ${open ? "" : "closed"}`}>
@@ -230,14 +232,24 @@ export default function SaleSidePanel({
         <div>
           <div className="sale-title">{headerTitle}</div>
           <div className="sale-sub">
-            role: <b>{role || "-"}</b>{" "}
-            {drawingEnabled ? <span className="pill ok">วาดได้</span> : <span className="pill warn">วาดไม่ได้</span>}
-            {isEditing ? <span className="pill edit">กำลังแก้ไข</span> : <span className="pill new">สร้างใหม่</span>}
-            {isEditing && !canEditCurrentLand ? <span className="pill warn">ล็อก 14 วัน</span> : null}
+            {t("role")}: <b>{role || "-"}</b>
+            {drawingEnabled 
+            ? <span className="pill ok">{t("sub.drawable")}</span>
+            : <span className="pill warn">{t("sub.notDrawable")}</span>}
+            {isEditing 
+            ? <span className="pill edit">{t("sub.editing")}</span> 
+            : <span className="pill new">{t("sub.new")}</span>}
+            {isEditing && !canEditCurrentLand 
+            ? <span className="pill warn">{t("sub.locked")}</span> 
+            : null}
           </div>
         </div>
 
-        <button className="sale-toggle" type="button" onClick={onToggle} title="ซ่อน/แสดง">
+        <button 
+          className="sale-toggle" 
+          type="button" 
+          onClick={onToggle} 
+          title={t(".toggle.title")}>
           {open ? "‹" : "›"}
         </button>
       </div>
@@ -246,16 +258,16 @@ export default function SaleSidePanel({
         {/* =============== FORM SECTION =============== */}
         <div className="sale-section">
           <button className="sec-title" type="button" onClick={() => setIsFormOpen((v) => !v)}>
-            {isFormOpen ? "▲" : "▼"} ฟอร์มข้อมูลแปลง
+            {isFormOpen ? "▲" : "▼"} {t("section.form")}
           </button>
 
           {isFormOpen && (
             <>
-              <div className="sec-sub">ข้อมูลการประเมินแปลง (ระบบสามารถให้ข้อมูลอัตโนมัติ)</div>
+              <div className="sec-sub">{t("section.formSub")}</div>
 
               <div className="row2">
                 <div className="field">
-                  <label>ขนาดที่ดิน (ตร.วา)</label>
+                  <label>{t("field.sizeSqw")}</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -278,7 +290,7 @@ export default function SaleSidePanel({
                 </div>
 
                 <div className="field">
-                  <label>ขนาดที่ดิน (ไร่/งาน/วา)</label>
+                  <label>{t("field.sizeRNW")}</label>
                   <div className="rnw">
                     <input
                       inputMode="numeric"
@@ -289,7 +301,7 @@ export default function SaleSidePanel({
                         setTimeout(onRNWInput, 0);
                       }}
                       onBlur={normalizeRNW}
-                      placeholder="ไร่"
+                      placeholder={t("placeholder.rai")}
                     />
                     <input
                       inputMode="numeric"
@@ -300,7 +312,7 @@ export default function SaleSidePanel({
                         setTimeout(onRNWInput, 0);
                       }}
                       onBlur={normalizeRNW}
-                      placeholder="งาน"
+                      placeholder={t("placeholder.ngan")}
                     />
                     <input
                       inputMode="decimal"
@@ -311,7 +323,7 @@ export default function SaleSidePanel({
                         setTimeout(onRNWInput, 0);
                       }}
                       onBlur={normalizeRNW}
-                      placeholder="วา"
+                      placeholder={t("placeholder.wah")}
                     />
                   </div>
                 </div>
@@ -319,7 +331,7 @@ export default function SaleSidePanel({
 
               <div className="row2">
                 <div className="field">
-                  <label>หน้ากว้างติดถนน (M)</label>
+                  <label>{t("field.width")}</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -331,7 +343,7 @@ export default function SaleSidePanel({
                 </div>
 
                 <div className="field">
-                  <label>ขนาดถนน (M)</label>
+                  <label>{t("field.road")}</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -345,7 +357,7 @@ export default function SaleSidePanel({
 
               <div className="row2">
                 <div className="field">
-                  <label>ราคาต่อตารางวา</label>
+                  <label>{t("field.pricePerSqw")}</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -366,7 +378,7 @@ export default function SaleSidePanel({
                 </div>
 
                 <div className="field">
-                  <label>ราคารวม</label>
+                  <label>{t("field.totalPrice")}</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -388,82 +400,84 @@ export default function SaleSidePanel({
               </div>
 
               <div className="field">
-                <label>เจ้าของ</label>
+                <label>{t("field.owner")}</label>
                 <input
                   type="text"
                   value={landData?.owner ?? ""}
                   onChange={(e) => patchLand({ owner: e.target.value })}
-                  placeholder="ชื่อเจ้าของ"
+                  placeholder={t("placeholder.owner")}
                   disabled={!canEditCurrentLand || !!String(landData?.agent ?? "").trim()}
                 />
               </div>
 
               <div className="field">
-                <label>นายหน้า</label>
+                <label>{t("field.agent")}</label>
                 <input
                   type="text"
                   value={landData?.agent ?? ""}
                   onChange={(e) => patchLand({ agent: e.target.value })}
-                  placeholder="ชื่อนายหน้า"
+                  placeholder={t("placeholder.agent")}
                   disabled={!canEditCurrentLand || !!String(landData?.owner ?? "").trim()}
                 />
               </div>
 
               <div className="row2">
                 <div className="field">
-                  <label>โทร</label>
+                  <label>{t("field.phone")}</label>
                   <input
                     type="text"
                     value={landData?.phone ?? ""}
                     disabled={!canEditCurrentLand}
                     onChange={(e) => patchLand({ phone: e.target.value })}
-                    placeholder="08x-xxx-xxxx"
+                    placeholder={t("placeholder.phone")}
                   />
                 </div>
 
                 <div className="field">
-                  <label>LINE ID</label>
+                  <label>{t("field.lineId")}</label>
                   <input
                     type="text"
                     value={landData?.lineId ?? ""}
                     disabled={!canEditCurrentLand}
                     onChange={(e) => patchLand({ lineId: e.target.value })}
-                    placeholder="@lineid หรือ lineid"
+                    placeholder={t("placeholder.lineId")}
                   />
                 </div>
               </div>
 
               <div className="field">
-                <label>กรอบที่ดิน</label>
+                <label>{t("field.landFrame")}</label>
                 <input
                   type="text"
                   value={landData?.landFrame ?? ""}
                   disabled={!canEditCurrentLand}
                   onChange={(e) => patchLand({ landFrame: e.target.value })}
-                  placeholder="กรอบที่ดิน"
+                  placeholder={t("field.landFrame")}
                 />
               </div>
 
               <div className="field">
-                <label>ข้อมูลโฉนด/ระวาง</label>
+                <label>{t("field.deed")}</label>
                 <input
                   type="text"
                   value={landData?.deedInformation ?? ""}
                   disabled={!canEditCurrentLand}
                   onChange={(e) => patchLand({ deedInformation: e.target.value })}
-                  placeholder="ข้อมูลโฉนด/ระวาง"
+                  placeholder={t("field.deed")}
                 />
               </div>
 
               <div className="summary">
                 <div>
-                  <span className="muted">ขนาด</span> <b>{formatDecimal(landData?.size, 0) || "-"} ตร.วา</b>
+                  <span className="muted">{t("summary.size")}</span> 
+                  <b>{formatDecimal(landData?.size, 0) || "-"} {t("summary.unitSqw")}</b>
                 </div>
                 <div>
-                  <span className="muted">ต่อตร.วา</span> <b>{formatNumber(landData?.price) || "-"} บ.</b>
+                  <span className="muted">{t("summary.perSqw")}</span> 
+                  <b>{formatNumber(landData?.price) || "-"} {t("unit.baht")}</b>
                 </div>
                 <div>
-                  <span className="muted">รวม</span> <b>{formatNumber(landData?.totalPrice) || "-"} บ.</b>
+                  <span className="muted">{t("summary.total")}</span> <b>{formatNumber(landData?.totalPrice) || "-"} {t("unit.baht")}</b>
                 </div>
               </div>
 
@@ -475,11 +489,11 @@ export default function SaleSidePanel({
                   disabled={!drawingEnabled || (isEditing && !canEditCurrentLand)}
                   title={isEditing && !canEditCurrentLand ? `แก้ไขได้เมื่อครบ 14 วัน (เหลือ ${editGate.daysLeft} วัน)` : ""}
                 >
-                  {isEditing ? "บันทึกการแก้ไข" : "บันทึกแปลงใหม่"}
+                  {isEditing ? t("action.saveEdit") : t("action.saveNew")}
                 </button>
 
                 <button className="sale-btn" type="button" onClick={clearForm}>
-                  ล้างฟอร์ม
+                  {t("action.clear")}
                 </button>
 
                 <button
@@ -487,22 +501,21 @@ export default function SaleSidePanel({
                   type="button"
                   onClick={() => onDelete?.(landData?.id)}
                   disabled={!landData?.id}
-                  title="ลบแปลงที่กำลังแก้ไข"
+                  title={t("action.delete")}
                 >
-                  ลบแปลง
+                  {t("action.delete")}
                 </button>
               </div>
 
               {!drawingEnabled && (
                 <div className="hint">
-                  * ตอนนี้วาดไม่ได้ในโหมดนี้/สิทธิ์นี้ — ให้เปลี่ยน role หรือโหมดก่อน แล้วค่อยบันทึก
+                  * {t("hint.notDrawable")}
                 </div>
               )}
 
               {isEditing && !canEditCurrentLand && (
                 <div className="hint">
-                  * แปลงนี้ยังแก้ไขไม่ได้ — ต้องรอให้ครบ 14 วันนับจากวันที่สร้างประกาศ
-                  {editGate?.daysLeft > 0 ? ` (เหลืออีกประมาณ ${editGate.daysLeft} วัน)` : ""}
+                  * {t("hint.editLocked", { days: editGate.daysLeft })}
                 </div>
               )}
             </>
@@ -514,7 +527,7 @@ export default function SaleSidePanel({
         {/* =============== LIST SECTION =============== */}
         <div className="sale-section">
           <button className="sec-title" type="button" onClick={() => setIsListOpen((v) => !v)}>
-            {isListOpen ? "▲" : "▼"} รายการแปลงของฉัน ({Array.isArray(savedLands) ? savedLands.length : 0})
+            {isListOpen ? "▲" : "▼"} {t("section.list")} ({Array.isArray(savedLands) ? savedLands.length : 0})
           </button>
 
           {isListOpen && (
@@ -531,28 +544,32 @@ export default function SaleSidePanel({
                         onClick={() => (canEditThisLand ? onClickEdit(land) : onFocusLand?.(land))}
                         role="button"
                         tabIndex={0}
-                        title={!canEditThisLand ? `แก้ไขได้เมื่อครบ 14 วัน (เหลือ ${gate.daysLeft} วัน)` : "คลิกเพื่อแก้ไข"}
+                        title={!canEditThisLand ? t("list.editLocked", { days: gate.daysLeft }) : t("list.clickToEdit")}
                       >
-                        <b>{land.owner || (land.agent ? `${land.agent} (นายหน้า)` : "") || "ไม่ระบุ"}</b>
+                        <b>
+                          {land.owner ||
+                            (land.agent ? `${land.agent} (${t("list.agent")})` : "") ||
+                            t("list.unknown")}
+                        </b>
                         <span className="mini">
-                          {land.updatedAt ? `อัปเดต ${land.updatedAt}` : ""}
-                          {!canEditThisLand ? ` • ล็อกแก้ไข (${gate.daysLeft} วัน)` : ""}
+                          {land.updatedAt ? t("list.updated", { date: land.updatedAt }) : ""}
+                          {!canEditThisLand ? ` • ${t("list.locked", { days: gate.daysLeft })}` : ""}
                         </span>
                       </div>
 
                       <div className="item-row">
-                        <span className="muted">ขนาด</span>
-                        <b>{formatDecimal(land.size, 0) || "-"} ตร.วา</b>
+                        <span className="muted">{t("list.size")}</span>
+                        {formatDecimal(land.size, 0) || "-"} {t("list.unitSqw")}
                       </div>
 
                       <div className="item-row">
-                        <span className="muted">ราคารวม</span>
-                        <b>{formatNumber(land.totalPrice) || "-"} บ.</b>
+                        <span className="muted">{t("summary.total")}</span>
+                        <b>{formatNumber(land.totalPrice) || "-"} {t("unit.baht")}</b>
                       </div>
 
                       <div className="item-actions">
                         <button className="sale-btn" type="button" onClick={() => onFocusLand?.(land)}>
-                          โฟกัสบนแผนที่
+                          {t("list.focus")}
                         </button>
 
                         <button
@@ -560,20 +577,20 @@ export default function SaleSidePanel({
                           type="button"
                           onClick={() => onClickEdit(land)}
                           disabled={!canEditThisLand}
-                          title={!canEditThisLand ? `แก้ไขได้เมื่อครบ 14 วัน (เหลือ ${gate.daysLeft} วัน)` : "แก้ไข"}
+                          title={!canEditThisLand ? t("list.editLocked", { days: gate.daysLeft }) : t("list.clickToEdit")}
                         >
-                          แก้ไข
+                          {t("list.edit")}
                         </button>
 
                         <button className="sale-btn danger" type="button" onClick={() => onDelete?.(land.id)}>
-                          ลบ
+                          {t("list.delete")}
                         </button>
                       </div>
                     </div>
                   );
                 })
               ) : (
-                <div className="empty">ยังไม่มีข้อมูลแปลง</div>
+                <div className="empty">{t("list.empty")}</div>
               )}
             </div>
           )}

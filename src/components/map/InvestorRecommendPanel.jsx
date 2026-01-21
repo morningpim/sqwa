@@ -1,5 +1,6 @@
 // src/components/map/InvestorRecommendPanel.jsx
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import "../../css/InvestorRecommendPanel.css";
 
 function toNum(v) {
@@ -7,40 +8,44 @@ function toNum(v) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function fmtMoney(v) {
+function fmtMoney(v, locale = "th-TH") {
   const n = toNum(v);
-  return n ? n.toLocaleString("th-TH") : "0";
+  return n ? n.toLocaleString(locale) : "0";
 }
 
-function fmtSqw(v) {
+function fmtSqw(v, locale = "th-TH") {
   const n = Math.max(0, Math.floor(toNum(v)));
-  return n ? n.toLocaleString("th-TH") : "0";
+  return n ? n.toLocaleString(locale) : "0";
 }
 
 export default function InvestorRecommendPanel({ lands = [], onFocus }) {
-  const count = Array.isArray(lands) ? lands.length : 0;
+  // ✅ bind investor namespace
+  const { t, i18n } = useTranslation("investor");
+  const locale = i18n.language === "en" ? "en-US" : "th-TH";
 
   const items = useMemo(() => {
     return (Array.isArray(lands) ? lands : []).map((l) => ({
       id: l.id,
       title:
         l?.owner ||
-        (l?.agent ? `${l.agent} (นายหน้า)` : "") ||
+        (l?.agent ? `${l.agent} ${t("item.agentSuffix")}` : "") ||
         l?.title ||
-        "ไม่ระบุชื่อ",
+        t("item.unknown"),
       size: l?.size,
       totalPrice: l?.totalPrice,
       address: l?.address || l?.province || "",
       thumb: l?.images?.[0] || l?.image || "",
     }));
-  }, [lands]);
+  }, [lands, t]);
 
   return (
     <aside className="inv-panel">
       <div className="inv-head">
         <div>
-          <div className="inv-title">รายการแนะนำที่ดิน</div>
-          <div className="inv-sub">พบ {count} แปลงที่เหมาะกับโปรไฟล์นักลงทุน</div>
+          <div className="inv-title">{t("panel.title")}</div>
+          <div className="inv-sub">
+            {t("panel.subtitle", { count: items.length })}
+          </div>
         </div>
       </div>
 
@@ -54,23 +59,37 @@ export default function InvestorRecommendPanel({ lands = [], onFocus }) {
 
               <div className="inv-body">
                 <div className="inv-name">{it.title}</div>
-                {it.address ? <div className="inv-addr">{it.address}</div> : null}
+                {it.address && <div className="inv-addr">{it.address}</div>}
 
                 <div className="inv-meta">
-                  <div><span className="m">ขนาด</span> <b>{fmtSqw(it.size)} ตร.วา</b></div>
-                  <div><span className="m">ราคา</span> <b>{fmtMoney(it.totalPrice)} บ.</b></div>
+                  <div>
+                    <span className="m">{t("field.size")}</span>{" "}
+                    <b>
+                      {fmtSqw(it.size, locale)} {t("unit.sqw")}
+                    </b>
+                  </div>
+                  <div>
+                    <span className="m">{t("field.price")}</span>{" "}
+                    <b>
+                      {fmtMoney(it.totalPrice, locale)} {t("unit.baht")}
+                    </b>
+                  </div>
                 </div>
 
                 <div className="inv-actions">
-                  <button type="button" className="inv-btn" onClick={() => onFocus?.({ id: it.id })}>
-                    ดูบนแผนที่
+                  <button
+                    type="button"
+                    className="inv-btn"
+                    onClick={() => onFocus?.({ id: it.id })}
+                  >
+                    {t("action.focus")}
                   </button>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <div className="inv-empty">ยังไม่พบรายการแนะนำ</div>
+          <div className="inv-empty">{t("panel.empty")}</div>
         )}
       </div>
     </aside>

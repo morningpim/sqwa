@@ -1,15 +1,13 @@
-// src/pages/Cart/components/PaymentMethodDropdown.jsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 
-/**
- * Custom Dropdown (เปิดรายการเอง)
- * props:
- * - value: string
- * - options: [{key,title,desc}]
- * - onChange: (key) => void
- * - disabled: boolean
- */
-export default function PaymentMethodDropdown({ value, options, onChange, disabled }) {
+export default function PaymentMethodDropdown({
+  value,
+  options,
+  onChange,
+  disabled,
+}) {
+  const { t } = useTranslation("payment");
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
 
@@ -25,9 +23,7 @@ export default function PaymentMethodDropdown({ value, options, onChange, disabl
   }, []);
 
   React.useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") setOpen(false);
-    };
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
@@ -36,16 +32,27 @@ export default function PaymentMethodDropdown({ value, options, onChange, disabl
     <div className="pm-dd" ref={ref}>
       <button
         type="button"
-        className={`pm-dd-btn ${open ? "is-open" : ""} ${disabled ? "is-disabled" : ""}`}
+        className={`pm-dd-btn ${open ? "is-open" : ""} ${
+          disabled ? "is-disabled" : ""
+        }`}
         onClick={() => !disabled && setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
         <div className="pm-dd-main">
           <div className={`pm-dd-label ${selected ? "" : "is-placeholder"}`}>
-            {selected ? selected.title : "— กรุณาเลือกวิธีชำระเงิน —"}
+            {selected
+              ? t(`method.${selected.key}`)
+              : t("placeholder.selectMethod")}
           </div>
-          <div className="pm-dd-sub">{selected ? selected.desc : "เลือกช่องทางชำระเงินก่อนกดไปชำระเงิน"}</div>
+
+          <div className="pm-dd-sub">
+            {selected
+              ? selected.key === "promptpay"
+                ? t("note.promptpay")
+                : t("note.redirect")
+              : t("placeholder.selectMethodHint")}
+          </div>
         </div>
 
         <div className="pm-dd-icon" aria-hidden="true">
@@ -69,8 +76,9 @@ export default function PaymentMethodDropdown({ value, options, onChange, disabl
                   setOpen(false);
                 }}
               >
-                <div className="pm-dd-item-title">{o.title}</div>
-                <div className="pm-dd-item-desc">{o.desc}</div>
+                <div className="pm-dd-item-title">
+                  {t(`method.${o.key}`)}
+                </div>
               </button>
             );
           })}

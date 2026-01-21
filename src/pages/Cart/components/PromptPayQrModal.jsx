@@ -1,41 +1,49 @@
 // src/pages/Cart/components/PromptPayQrModal.jsx
 import React from "react";
 import { QRCodeCanvas } from "qrcode.react";
+import { useTranslation } from "react-i18next";
 
-/**
- * PromptPay QR Modal
- * props:
- * - open: boolean
- * - data: { orderId, amount, qrText, expiresAt? }
- * - status: "PENDING" | "PAID" | "FAILED"
- * - onClose: () => void
- */
 export default function PromptPayQrModal({ open, data, onClose, status }) {
+  const { t } = useTranslation("payment");
+
   if (!open || !data) return null;
 
   return (
     <div className="pm-qr-backdrop" onClick={onClose}>
       <div className="pm-qr-card" onClick={(e) => e.stopPropagation()}>
-        <div className="pm-qr-title">สแกนเพื่อชำระเงิน (PromptPay)</div>
-
-        <div className="pm-qr-sub">
-          Order: <b>{data.orderId}</b> • <b>{Number(data.amount).toLocaleString("th-TH")}</b> บาท
+        {/* title */}
+        <div className="pm-qr-title">
+          {t("promptpay.title")}
         </div>
 
+        {/* order + amount */}
+        <div className="pm-qr-sub">
+          {t("promptpay.order")}:{" "}
+          <b>{data.orderId}</b> •{" "}
+          <b>{Number(data.amount).toLocaleString()}</b>{" "}
+          {t("promptpay.amountUnit")}
+        </div>
+
+        {/* QR */}
         <div className="pm-qr-box">
           <QRCodeCanvas value={String(data.qrText || "")} size={240} />
         </div>
 
+        {/* status */}
         <div className="pm-qr-hint">
           {status === "PAID"
-            ? "ชำระสำเร็จ ✅ กำลังดำเนินการ..."
+            ? t("promptpay.status.paid")
             : status === "FAILED"
-            ? "การชำระไม่สำเร็จ ❌ (ลองใหม่หรือเลือกวิธีอื่น)"
-            : "เปิดแอปธนาคาร → สแกน QR → รอระบบยืนยันสถานะ"}
+            ? t("promptpay.status.failed")
+            : t("promptpay.status.pending")}
         </div>
 
-        <button className="ds-btn ds-btn-outline" onClick={onClose}>
-          ปิด
+        {/* close */}
+        <button
+          className="ds-btn ds-btn-outline"
+          onClick={onClose}
+        >
+          {t("action.close")}
         </button>
       </div>
     </div>

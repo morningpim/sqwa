@@ -1,8 +1,6 @@
-// src/pages/Cart/constants.js
-
 export const ACCESS_KEY = "sqw_access_v1";
 
-/** Pricing / Labels */
+/** Pricing only (logic) */
 export const PRICE = {
   contactOwner: 50,
   broker: 50,
@@ -12,17 +10,25 @@ export const PRICE = {
   chanote: 200,
 };
 
-export const LABEL = {
-  contactOwner: "เจ้าของ",
-  broker: "นายหน้า",
-  phone: "เบอร์โทร",
-  line: "LINE ID",
-  frame: "กรอบที่ดิน",
-  chanote: "โฉนด/ระวาง",
+/**
+ * Field key → i18n key
+ * แทน LABEL เดิม (ห้ามใส่ภาษาในนี้)
+ */
+export const FIELD_I18N_KEY = {
+  // ตัด common. ออก เพราะ namespace ถูกระบุแยกไว้แล้วใน i18n.js
+  contactOwner: "field.owner", 
+  broker: "field.agent",
+  phone: "field.phone",
+  line: "field.lineId",
+  frame: "field.landFrame",
+  chanote: "field.deed",
 };
-
+/**
+ * Payment methods (logic only)
+ * UI จะไปเรียก i18n เอง
+ */
 export const PAYMENT_METHODS = [
-  { key: "promptpay", title: "PromptPay / QR", desc: "สแกนเพื่อชำระเงิน" },
-  { key: "card", title: "บัตรเครดิต/เดบิต", desc: "Visa / MasterCard" },
-  { key: "bank", title: "โอนผ่านธนาคาร", desc: "โอนเข้าบัญชี" },
+  { key: "promptpay" },
+  { key: "card" },
+  { key: "bank" },
 ];

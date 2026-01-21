@@ -1,5 +1,6 @@
 // src/auth/RolePickerModal.jsx
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function RolePickerModal({
   open,
@@ -9,7 +10,9 @@ export default function RolePickerModal({
 }) {
   const [role, setRole] = useState(initialRole);
 
-  // ✅ sync ค่า role ทุกครั้งที่เปิด modal / role เปลี่ยน
+  // ✅ bind rolePicker namespace
+  const { t } = useTranslation("rolePicker");
+
   useEffect(() => {
     setRole(initialRole);
   }, [initialRole, open]);
@@ -39,19 +42,34 @@ export default function RolePickerModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 style={{ margin: 0, marginBottom: 12 }}>เลือก Role (Mock)</h3>
+        <h3 style={{ margin: 0, marginBottom: 12 }}>
+          {t("title")}
+        </h3>
 
-        <label style={{ display: "block", marginBottom: 6 }}>Role</label>
+        <label style={{ display: "block", marginBottom: 6 }}>
+          {t("label")}
+        </label>
+
         <select
           value={role}
           onChange={(e) => setRole(e.target.value)}
           style={{ width: "100%", padding: 10, borderRadius: 10 }}
         >
-          <option value="buyer">buyer (ผู้ซื้อ)</option>
-          <option value="seller">seller (ผู้ขาย)</option>
-          <option value="landlord">landlord (เจ้าของที่ดิน)</option>
-          <option value="staff">staff (เจ้าหน้าที่)</option>
-          <option value="admin">admin</option>
+          <option value="buyer">
+            {t("roles.buyer")}
+          </option>
+          <option value="seller">
+            {t("roles.seller")}
+          </option>
+          <option value="landlord">
+            {t("roles.landlord")}
+          </option>
+          <option value="staff">
+            {t("roles.staff")}
+          </option>
+          <option value="admin">
+            {t("roles.admin")}
+          </option>
         </select>
 
         <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
@@ -59,8 +77,9 @@ export default function RolePickerModal({
             style={{ flex: 1, padding: 10, borderRadius: 10 }}
             onClick={onClose}
           >
-            ยกเลิก
+            {t("action.cancel")}
           </button>
+
           <button
             style={{
               flex: 1,
@@ -75,7 +94,7 @@ export default function RolePickerModal({
               onClose?.();
             }}
           >
-            บันทึก
+            {t("action.save")}
           </button>
         </div>
       </div>

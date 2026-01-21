@@ -1,5 +1,6 @@
 // src/components/map/broadcast/BroadcastNewsModal.jsx
 import React, { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./broadcast.css";
 
 import { readAllCampaigns, subscribeCampaignsChanged } from "../../../utils/broadcastLocal";
@@ -26,6 +27,8 @@ export default function BroadcastNewsModal({
 }) {
   const [campaigns, setCampaigns] = useState(() => readAllCampaigns());
   const [queue, setQueue] = useState(() => readAllLineAdsQueue());
+  const { t } = useTranslation("broadcast");
+  const { t: tCommon } = useTranslation("common");
 
   useEffect(() => {
     if (!open) return;
@@ -66,25 +69,25 @@ export default function BroadcastNewsModal({
       <div className="bc-modal" onMouseDown={(e) => e.stopPropagation()}>
         <div className="bc-head">
           <div>
-            <div className="bc-title">ข่าวประชาสัมพันธ์</div>
-            <div className="bc-sub">รอบบอร์ดแคส: จ / พ / ศ • วันนี้: {dayLabel}</div>
-          </div>
+            <div className="bc-title">{t("news.title")}</div>
+              {t("news.round")} • {t("news.today")}: {dayLabel}          
+            </div>
 
           <div className="bc-head-actions">
             {canAdmin && (
               <button className="bc-btn" type="button" onClick={onOpenAdminCreate}>
-                + เพิ่มข่าว (Admin)
+                + {t("news.addAdmin")}
               </button>
             )}
             <button className="bc-btn" type="button" onClick={onClose}>
-              ปิด
+              {tCommon("close")}
             </button>
           </div>
         </div>
 
         <div className="bc-body">
           {published.length === 0 ? (
-            <div className="bc-empty">ยังไม่มีข่าวที่เผยแพร่</div>
+            <div className="bc-empty">{t("news.empty")}</div>
           ) : (
             <div className="bc-grid">
               {published.map((c) => {
@@ -95,28 +98,41 @@ export default function BroadcastNewsModal({
                 return (
                   <div key={c.id} className={`bc-card ${featured ? "featured" : ""}`}>
                     <div className="bc-badges">
-                      <span className="bc-badge">{c.mode === "consignment" ? "ขายฝาก" : "ซื้อขาย"}</span>
-                      {featured && <span className="bc-badge hot">เด่น</span>}
-                      {c.channels?.lineAds && <span className="bc-badge line">LINE Ads</span>}
+                      <span className="bc-badge">
+                        {c.mode === "consignment" 
+                        ? t("badge.consignment")
+                        : t("badge.buySell")}
+                      </span>
+                      {featured && <span className="bc-badge hot">{t("badge.featured")}</span>}
+                      {c.channels?.lineAds && <span className="bc-badge line">
+                        {t("badge.lineAds")}
+                      </span>}
                     </div>
 
                     <div className="bc-card-title">
-                      <b>{land.owner || (land.agent ? `${land.agent} (นายหน้า)` : "ไม่ระบุ")}</b>
+                      <b>
+                        {land.owner ||
+                          (land.agent
+                            ? `${land.agent} (${t("field.agent")})`
+                            : tCommon("unknown"))}
+                      </b>
                     </div>
 
                     <div className="bc-row">
-                      <span className="muted">ขนาด</span>
+                      <span className="muted">{t("field.size")}</span>
                       <b>{formatRNWFromSqw(land.size)}</b>
                     </div>
 
                     <div className="bc-row">
-                      <span className="muted">ราคารวม</span>
-                      <b>{money(land.totalPrice)} บ.</b>
+                      <span className="muted">{t("field.totalPrice")}</span>
+                      <b>
+                        {money(land.totalPrice)} {t("unit.baht")}
+                      </b>
                     </div>
 
                     <div className="bc-actions">
                       <a className="bc-link" href={link}>
-                        ดูบนแผนที่
+                        {t("action.viewMap")}
                       </a>
                       {c.channels?.lineAds && (
                         <button
@@ -130,10 +146,10 @@ export default function BroadcastNewsModal({
                               channel: "line_ads",
                             });
                             navigator.clipboard?.writeText?.(utm);
-                            alert("คัดลอกลิงก์ LINE Ads แล้ว ✅");
+                            alert(t("alert.copyLineLink"));
                           }}
                         >
-                          คัดลอกลิงก์ Ads
+                          {t("action.copyLineAdsLink")}
                         </button>
                       )}
                     </div>
@@ -146,13 +162,17 @@ export default function BroadcastNewsModal({
           {/* แสดง queue (แอดมินดูได้) */}
           {canAdmin && (
             <div className="bc-queue">
-              <div className="bc-queue-title">LINE Ads Queue</div>
-              <div className="bc-queue-sub">รายการที่สร้างไว้สำหรับนำไปตั้งใน LINE Ads Platform</div>
+              <div className="bc-queue-title">{t("queue.title")}</div>
+              <div className="bc-queue-sub">{t("queue.subtitle")}</div>
               <div className="bc-queue-list">
                 {(Array.isArray(queue) ? queue : []).slice(0, 15).map((q) => (
                   <div key={q.id} className="bc-queue-item">
                     <div className="bc-queue-text">
-                      <b>{q.mode === "consignment" ? "ขายฝาก" : "ซื้อขาย"}</b> • {q.creativeText}
+                      <b>
+                        {q.mode === "consignment"
+                          ? t("badge.consignment")
+                          : t("badge.buySell")}
+                      </b>
                     </div>
                     <div className="bc-queue-actions">
                       <button
@@ -160,25 +180,25 @@ export default function BroadcastNewsModal({
                         type="button"
                         onClick={() => {
                           navigator.clipboard?.writeText?.(q.utmLink);
-                          alert("คัดลอกลิงก์แล้ว ✅");
+                          alert(t("alert.copiedLink"));
                         }}
                       >
-                        Copy Link
+                        {t("action.copyLink")}
                       </button>
                       <button
                         className="bc-btn small"
                         type="button"
                         onClick={() => {
                           navigator.clipboard?.writeText?.(q.creativeText);
-                          alert("คัดลอกข้อความแล้ว ✅");
+                          alert(t("alert.copiedText"));
                         }}
                       >
-                        Copy Text
+                        {t("action.copyText")}
                       </button>
                     </div>
                   </div>
                 ))}
-                {(!queue || queue.length === 0) && <div className="bc-empty">ยังไม่มีรายการใน queue</div>}
+                {(!queue || queue.length === 0) && <div className="bc-empty">{t("queue.empty")}</div>}
               </div>
             </div>
           )}

@@ -1,5 +1,6 @@
 // src/components/map/broadcast/BroadcastCreateModal.jsx
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./broadcast.css";
 
 import { getNextMWFDates } from "./broadcastScheduler";
@@ -8,7 +9,7 @@ import { createCampaign, makeLandTitle } from "./broadcastHelpers";
 export default function BroadcastCreateModal({
   open,
   onClose,
-  onSuccess, // ✅ เพิ่ม: เรียกเมื่อ submit สำเร็จ
+  onSuccess,
   land,
   createdByRole, // "admin" | "consignor"
   createdByUserId,
@@ -17,6 +18,9 @@ export default function BroadcastCreateModal({
   defaultFeatured = false,
   defaultPriceTHB = 0,
 }) {
+  const { t } = useTranslation("broadcast");
+  const { t: tCommon } = useTranslation("common");
+
   const dates = useMemo(() => getNextMWFDates(10, new Date()), []);
   const [scheduleDate, setScheduleDate] = useState(dates[0] || "");
   const [web, setWeb] = useState(true);
@@ -34,27 +38,34 @@ export default function BroadcastCreateModal({
   return (
     <div className="bc-mask" onMouseDown={onClose}>
       <div className="bc-modal" onMouseDown={(e) => e.stopPropagation()}>
+        {/* ===== Header ===== */}
         <div className="bc-head">
           <div>
             <div className="bc-title">
-              {isConsignor ? "Broadcast 100 บาท (ขายฝาก)" : "สร้าง Broadcast (Admin)"}
+              {isConsignor
+                ? t("create.title.consignor")
+                : t("create.title.admin")}
             </div>
             <div className="bc-sub">
-              {land?.id ? `เลือกที่ดิน: ${title}` : "ยังไม่ได้เลือกที่ดิน"}
+              {land?.id
+                ? t("create.land.selected", { title })
+                : t("create.land.none")}
             </div>
           </div>
 
           <div className="bc-head-actions">
             <button className="bc-btn" type="button" onClick={onClose}>
-              ปิด
+              {tCommon("close")}
             </button>
           </div>
         </div>
 
+        {/* ===== Body ===== */}
         <div className="bc-body">
           <div className="bc-form">
+            {/* ช่องทาง */}
             <div className="bc-field">
-              <label>ช่องทาง</label>
+              <label>{t("create.field.channel")}</label>
               <div className="bc-checks">
                 <label className="bc-check">
                   <input
@@ -62,7 +73,7 @@ export default function BroadcastCreateModal({
                     checked={web}
                     onChange={(e) => setWeb(e.target.checked)}
                   />
-                  Web Broadcast
+                  {t("create.field.web")}
                 </label>
                 <label className="bc-check">
                   <input
@@ -70,67 +81,79 @@ export default function BroadcastCreateModal({
                     checked={lineAds}
                     onChange={(e) => setLineAds(e.target.checked)}
                   />
-                  LINE Ads (Queue)
+                  {t("create.field.lineAds")}
                 </label>
               </div>
             </div>
 
+            {/* วันบอร์ดแคส */}
             <div className="bc-field">
-              <label>วันบอร์ดแคส (จ / พ / ศ)</label>
-              <select value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)}>
+              <label>{t("create.field.schedule")}</label>
+              <select
+                value={scheduleDate}
+                onChange={(e) => setScheduleDate(e.target.value)}
+              >
                 {dates.map((d) => (
                   <option key={d} value={d}>
                     {d}
                   </option>
                 ))}
               </select>
-              <div className="bc-hint">ระบบจะ publish อัตโนมัติเมื่อถึงวันบอร์ดแคส</div>
+              <div className="bc-hint">
+                {t("create.hint.autoPublish")}
+              </div>
             </div>
 
+            {/* ความเด่น */}
             <div className="bc-field">
-              <label>ความเด่น</label>
+              <label>{t("create.field.featured")}</label>
               <div className="bc-checks">
                 <label className="bc-check">
                   <input
                     type="checkbox"
                     checked={featured}
                     onChange={(e) => setFeatured(e.target.checked)}
-                    disabled={isConsignor} // ผู้ขายฝากเป็น featured อยู่แล้ว
+                    disabled={isConsignor}
                   />
-                  เด่น (Featured)
+                  {t("create.field.featuredLabel")}
                 </label>
               </div>
               {isConsignor && (
-                <div className="bc-hint">ผู้ขายฝาก: บังคับเป็น “เด่น” ราคา 100 บาท</div>
+                <div className="bc-hint">
+                  {t("create.hint.consignorFeatured")}
+                </div>
               )}
             </div>
 
+            {/* ราคา (admin เท่านั้น) */}
             {!isConsignor && (
               <div className="bc-field">
-                <label>ราคา (บาท)</label>
+                <label>{t("create.field.price")}</label>
                 <input
                   value={priceTHB}
                   onChange={(e) => setPriceTHB(e.target.value)}
                   placeholder="0"
                 />
-                <div className="bc-hint">Admin อาจตั้งเป็น 0 ได้</div>
+                <div className="bc-hint">
+                  {t("create.hint.adminPrice")}
+                </div>
               </div>
             )}
 
+            {/* Actions */}
             <div className="bc-actions-row">
               <button
                 className="bc-btn primary"
                 type="button"
                 onClick={() => {
                   if (!land?.id) {
-                    alert("กรุณาเลือกที่ดินก่อน");
+                    alert(t("create.alert.selectLand"));
                     return;
                   }
 
-                  // “จ่ายเงิน” (MVP)
                   if (isConsignor) {
                     const ok = window.confirm(
-                      "ยืนยันชำระ 100 บาท เพื่อทำ Broadcast (MVP จำลองการจ่าย)?"
+                      t("create.alert.confirmPay")
                     );
                     if (!ok) return;
                   }
@@ -140,36 +163,45 @@ export default function BroadcastCreateModal({
                     mode,
                     channels: { web, lineAds },
                     scheduleDate,
-                    createdByRole: createdByRole,
+                    createdByRole,
                     createdByUserId,
-                    highlight: isConsignor ? "featured" : featured ? "featured" : "normal",
+                    highlight: isConsignor
+                      ? "featured"
+                      : featured
+                      ? "featured"
+                      : "normal",
                     priceTHB: finalPrice,
                     intent,
                   });
 
                   if (!r.ok) {
-                    alert(`สร้างไม่สำเร็จ: ${r.reason}`);
+                    alert(
+                      t("create.alert.createFail", {
+                        reason: r.reason,
+                      })
+                    );
                     return;
                   }
 
-                  alert("สร้างแคมเปญสำเร็จ ✅");
+                  alert(t("create.alert.createSuccess"));
 
-                  // ✅ สำเร็จ: ให้ MapPage ปิด modal + reopen popup เดิม
-                  // ถ้าไม่ได้ส่ง onSuccess มา จะ fallback ไปปิดธรรมดา
                   if (onSuccess) onSuccess(r);
                   else onClose?.();
                 }}
               >
-                {isConsignor ? "ชำระ 100 บาท + สร้าง" : "สร้างแคมเปญ"}
+                {isConsignor
+                  ? t("create.action.submitPaid")
+                  : t("create.action.submit")}
               </button>
 
               <button className="bc-btn" type="button" onClick={onClose}>
-                ยกเลิก
+                {tCommon("close")}
               </button>
             </div>
 
+            {/* Note */}
             <div className="bc-note">
-              * LINE Ads: ระบบจะสร้าง “Queue” เพื่อให้ Admin คัดลอกลิงก์/ข้อความไปตั้งใน LINE Ads Platform
+              {t("create.note.lineAdsQueue")}
             </div>
           </div>
         </div>

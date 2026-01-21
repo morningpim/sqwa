@@ -1,6 +1,6 @@
-// src/components/map/Payments/PayModal.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import "../../../css/PayModal.css";
 
 import { LABEL, PAYMENT_METHODS, PRICE } from "./constants";
@@ -11,17 +11,23 @@ import PromptPayQrModal from "./components/PromptPayQrModal";
 import { addPurchase } from "../../../utils/purchases";
 
 export default function PayModal({ open, draft, onClose, onPaid, dock = "center" }) {
+  const { t } = useTranslation("payment");
+  const { t: tCommon } = useTranslation("common");
   const [loading, setLoading] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState("");
   const [qrOpen, setQrOpen] = useState(false);
   const [qrData, setQrData] = useState(null);
-  const [payStatus, setPayStatus] = useState("PENDING"); // PENDING|PAID|FAILED
+  const [payStatus, setPayStatus] = useState("PENDING"); // PENDING | PAID | FAILED
 
   const landId = draft?.landId ?? "";
-  const selectedFields = Array.isArray(draft?.selectedFields) ? draft.selectedFields : [];
+  const selectedFields = Array.isArray(draft?.selectedFields)
+    ? draft.selectedFields
+    : [];
 
-  // ✅ reset ทุกครั้งที่เปิด/เปลี่ยน landId กัน state ค้าง
+  /* =========================
+     reset state เมื่อเปิด / เปลี่ยน land
+  ========================= */
   useEffect(() => {
     if (!open) return;
     setLoading(false);
@@ -31,43 +37,60 @@ export default function PayModal({ open, draft, onClose, onPaid, dock = "center"
     setPayStatus("PENDING");
   }, [open, landId]);
 
+  /* =========================
+     normalize field (phone_line)
+  ========================= */
   const normalizedSelected = useMemo(() => {
     const set = new Set();
     selectedFields.forEach((k) => {
       if (k === "phone_line") {
         set.add("phone");
         set.add("line");
-      } else set.add(k);
+      } else {
+        set.add(k);
+      }
     });
     return Array.from(set);
   }, [selectedFields]);
 
+  /* =========================
+     UI items
+  ========================= */
   const itemsUi = useMemo(
     () =>
       normalizedSelected.map((k) => ({
         k,
-        label: LABEL[k] || k,
+        label: t(`field.${k}`, LABEL[k] || k),
         price: PRICE[k] || 0,
       })),
-    [normalizedSelected]
+    [normalizedSelected, t]
   );
 
-  const amount = useMemo(() => itemsUi.reduce((sum, i) => sum + i.price, 0), [itemsUi]);
+  const amount = useMemo(
+    () => itemsUi.reduce((sum, i) => sum + i.price, 0),
+    [itemsUi]
+  );
 
-  const canPay = !!paymentMethod && amount > 0 && !loading;
+  const canPay = Boolean(paymentMethod && amount > 0 && !loading);
 
+  /* =========================
+     PAY HANDLER
+  ========================= */
   const onPay = async () => {
-    if (!paymentMethod) return alert("กรุณาเลือกวิธีชำระเงิน");
+    if (!paymentMethod) {
+      alert(t("alert.selectMethod"));
+      return;
+    }
     if (!amount) return;
 
     const orderId = `PM_${todayKeyTH()}_${landId}`;
 
-    // ✅ PromptPay -> ขึ้น QR ก่อน (ไม่ redirect)
+    // PromptPay → แสดง QR
     if (paymentMethod === "promptpay") {
       setLoading(true);
       setPayStatus("PENDING");
 
-      const qrText = buildPromptPayMockQr(amount); // mock payload
+      const qrText = buildPromptPayMockQr(amount);
       setQrData({ orderId, amount, qrText });
 
       setQrOpen(true);
@@ -75,70 +98,118 @@ export default function PayModal({ open, draft, onClose, onPaid, dock = "center"
       return;
     }
 
-    // Card/Bank (ยังไม่ทำ ChillPay) -> mock
-    alert("Card/Bank: ยังไม่เชื่อม ChillPay API (mock)");
+    // Card / Bank (mock)
+    alert(t("alert.notReady"));
   };
 
   if (!open || !landId) return null;
 
   return createPortal(
-    <div className={`pay-backdrop ${dock === "left" ? "is-left" : ""}`} onClick={onClose}>
+    <div
+      className={`pay-backdrop ${dock === "left" ? "is-left" : ""}`}
+      onClick={onClose}
+    >
       <div className="pay-card" onClick={(e) => e.stopPropagation()}>
+        {/* ================= HEAD ================= */}
         <div className="pay-head">
-          <div className="pay-title">ชำระเงินเพื่อปลดล็อกข้อมูล</div>
-          <button className="pay-close" onClick={onClose} disabled={loading} type="button">
+          <div className="pay-title">{t("title")}</div>
+          <button
+            className="pay-close"
+            onClick={onClose}
+            disabled={loading}
+            type="button"
+            aria-label={t("common.close")}
+          >
             ×
           </button>
         </div>
 
         <div className="pay-meta">
-          Land ID: <b>{landId}</b>
+          {t("landId", { id: landId })}
         </div>
 
+        {/* ================= ITEMS ================= */}
         <div className="pay-section">
-          <div className="pay-section-title">รายการปลดล็อก</div>
+          <div className="pay-section-title">
+            {t("section.items")}
+          </div>
+
           {itemsUi.length ? (
             <ul className="pay-items">
               {itemsUi.map((it) => (
                 <li key={it.k}>
                   {it.label}{" "}
-                  <span style={{ opacity: 0.75 }}>({it.price.toLocaleString("th-TH")} บาท)</span>
+                  <span style={{ opacity: 0.75 }}>
+                    ({it.price.toLocaleString()} {t("total.unit")})
+                  </span>
                 </li>
               ))}
             </ul>
           ) : (
-            <div className="pay-empty">ยังไม่ได้เลือกรายการ</div>
+            <div className="pay-empty">
+              {t("empty.items")}
+            </div>
           )}
         </div>
 
-        <div className="pay-total">ยอดชำระ: {amount.toLocaleString("th-TH")} บาท</div>
+        {/* ================= TOTAL ================= */}
+        <div className="pay-total">
+          {t("total.label")}:{" "}
+          {amount.toLocaleString()} {t("total.unit")}
+        </div>
 
-        {/* ✅ dropdown custom */}
+        {/* ================= PAYMENT METHOD ================= */}
         <div className="pay-pm">
-          <div className="pm-head">เลือกวิธีชำระเงิน:</div>
+          <div className="pm-head">
+            {t("section.paymentMethod")}:
+          </div>
+
           <PaymentMethodDropdown
             value={paymentMethod}
-            options={PAYMENT_METHODS}
+            options={PAYMENT_METHODS.map((m) => ({
+              ...m,
+              label: t(`method.${m.value}`),
+            }))}
             onChange={setPaymentMethod}
             disabled={loading}
           />
-          <div className="pay-note">* PromptPay = แสดง QR ในหน้า • Card/Bank = Redirect</div>
+
+          <div className="pay-note">
+            {paymentMethod === "promptpay"
+              ? t("note.promptpay")
+              : t("note.redirect")}
+          </div>
         </div>
 
+        {/* ================= ACTIONS ================= */}
         <div className="pay-actions">
-          <button className="pay-btn pay-btn-outline" onClick={onClose} disabled={loading} type="button">
-            ยกเลิก
+          <button
+            className="pay-btn pay-btn-outline"
+            onClick={onClose}
+            disabled={loading}
+            type="button"
+          >
+            {t("action.cancel")}
           </button>
 
-          <button className="pay-btn pay-btn-primary" disabled={!canPay} onClick={onPay} type="button">
-            {paymentMethod === "promptpay" ? "สร้าง QR เพื่อชำระเงิน" : "ไปชำระเงิน"}
+          <button
+            className="pay-btn pay-btn-primary"
+            disabled={!canPay}
+            onClick={onPay}
+            type="button"
+          >
+            {paymentMethod === "promptpay"
+              ? t("action.generateQr")
+              : t("action.pay")}
           </button>
         </div>
 
-        <div className="pay-foot">* ตอนนี้ยังไม่เชื่อม ChillPay API (โหมด mock)</div>
+        <div className="pay-foot">
+          {t("footer.mock")}
+        </div>
       </div>
 
-      {/* ✅ QR Modal */}
+      {/* ================= QR MODAL ================= */}
       <PromptPayQrModal
         open={qrOpen}
         data={qrData}
@@ -149,32 +220,26 @@ export default function PayModal({ open, draft, onClose, onPaid, dock = "center"
           setPayStatus("PENDING");
         }}
         onPaid={() => {
-          // ✅ 1) อัปเดตสถานะใน UI
           setPayStatus("PAID");
           setQrOpen(false);
 
-          // ✅ 2) บันทึกประวัติการซื้อ (localStorage)
           const paidAt = todayKeyTH();
-          const title = `ปลดล็อกข้อมูลแปลง ${landId}`;
+          const title = t("title");
           const note = itemsUi.map((x) => x.label).join(", ");
 
           addPurchase({
-            // กันชนกันกรณีซื้อซ้ำวันเดียวกัน
             id: qrData?.orderId || `PM_${paidAt}_${landId}_${Date.now()}`,
             landId,
             title,
             seller: draft?.owner || draft?.seller || "-",
-            totalPrice: amount, // ✅ เก็บเป็น number
+            totalPrice: amount,
             status: "paid",
             paidAt,
-            note: note ? `ปลดล็อก: ${note}` : "",
+            note: note ? `Unlock: ${note}` : "",
             paymentMethod,
           });
 
-          // ✅ 3) แจ้ง parent ให้ปลดล็อกข้อมูล
           onPaid?.();
-
-          // ✅ 4) ปิด modal หลัก
           onClose?.();
         }}
       />

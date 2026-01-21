@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../../css/profile.css";
 
 import {
@@ -30,14 +31,15 @@ function useQuery() {
 
 /* ================= component ================= */
 export default function AdminPage() {
+  const { t } = useTranslation("admin");
   const navigate = useNavigate();
   const q = useQuery();
   const tab = (q.get("tab") || "dashboard").toLowerCase();
 
   const [lands, setLands] = useState(() => readAllLands());
   const [broadcasts, setBroadcasts] = useState(() => readAllCampaigns());
-
   const [applicants, setApplicants] = useState(() => readAllApplicants());
+
   const pendingCount = applicants.filter((a) => a.status === "pending").length;
 
   /* -------- sync lands -------- */
@@ -56,7 +58,7 @@ export default function AdminPage() {
     return unsub;
   }, []);
 
-  /* -------- sync applicants (✅ เอาอันเดียวพอ) -------- */
+  /* -------- sync applicants -------- */
   useEffect(() => {
     const sync = () => setApplicants(readAllApplicants());
     sync();
@@ -65,42 +67,41 @@ export default function AdminPage() {
   }, []);
 
   /* -------- actions -------- */
-  const goTab = (t) => navigate(`/admin?tab=${t}`);
+  const goTab = (tname) => navigate(`/admin?tab=${tname}`);
   const goBroadcast = () => navigate("/admin/broadcast");
 
   const onDeleteLand = (id) => {
     if (!id) return;
-    if (!window.confirm("ต้องการลบประกาศนี้ใช่ไหม?")) return;
+    if (!window.confirm(t("lands.confirmDelete"))) return;
     removeLand(id);
   };
 
   const onDeleteBroadcast = (id) => {
     if (!id) return;
-    if (!window.confirm("ต้องการลบแคมเปญบอร์ดแคสนี้ใช่ไหม?")) return;
+    if (!window.confirm(t("broadcast.confirmDelete"))) return;
     removeCampaign(id);
   };
 
   const onApproveApplicant = (id) => {
     if (!id) return;
-    if (!window.confirm("อนุมัติผู้สมัครรายนี้ใช่ไหม?")) return;
+    if (!window.confirm(t("applicants.confirm.approve"))) return;
     updateApplicantStatus(id, "approved");
   };
 
   const onRejectApplicant = (id) => {
     if (!id) return;
-    const note = window.prompt("เหตุผลที่ไม่อนุมัติ (optional):", "");
+    const note = window.prompt(t("applicants.confirm.rejectPrompt"), "");
     updateApplicantStatus(id, "rejected", note || "");
   };
 
   const onDeleteApplicant = (id) => {
     if (!id) return;
-    if (!window.confirm("ลบผู้สมัครรายนี้ใช่ไหม?")) return;
+    if (!window.confirm(t("applicants.confirm.delete"))) return;
     removeApplicant(id);
   };
 
   const onSeedApplicants = () => {
-    if (!window.confirm("สร้าง mock ผู้สมัคร 5 รายการ? (จะเขียนทับข้อมูลเดิม)"))
-      return;
+    if (!window.confirm(t("applicants.seed"))) return;
     seedMockApplicants();
     goTab("applicants");
   };
@@ -113,12 +114,12 @@ export default function AdminPage() {
         <div className="profile-header">
           <div className="profile-avatar">A</div>
           <div className="profile-meta">
-            <div className="profile-name">Admin Panel</div>
-            <div className="profile-sub">ผู้ดูแลระบบ</div>
+            <div className="profile-name">{t("header.title")}</div>
+            <div className="profile-sub">{t("header.subtitle")}</div>
           </div>
 
           <button className="profile-edit-btn" onClick={goBroadcast}>
-            จัดการ Broadcast
+            {t("header.manageBroadcast")}
           </button>
         </div>
 
@@ -126,15 +127,15 @@ export default function AdminPage() {
         <div className="profile-stats">
           <div className="stat-card">
             <div className="stat-num">{lands.length}</div>
-            <div className="stat-label">ประกาศทั้งหมด</div>
+            <div className="stat-label">{t("stats.lands")}</div>
           </div>
           <div className="stat-card">
             <div className="stat-num">{pendingCount}</div>
-            <div className="stat-label">ผู้สมัครรออนุมัติ</div>
+            <div className="stat-label">{t("stats.pendingApplicants")}</div>
           </div>
           <div className="stat-card">
             <div className="stat-num">{broadcasts.length}</div>
-            <div className="stat-label">ธุรกรรม</div>
+            <div className="stat-label">{t("stats.transactions")}</div>
           </div>
         </div>
 
@@ -142,49 +143,19 @@ export default function AdminPage() {
         <div className="profile-grid">
           {/* ===== left menu ===== */}
           <aside className="profile-side">
-            <div className="side-title">เมนูแอดมิน</div>
+            <div className="side-title">{t("menu.title")}</div>
 
-            <button
-              className={`side-item ${tab === "dashboard" ? "active" : ""}`}
-              onClick={() => goTab("dashboard")}
-            >
-              Dashboard
-            </button>
-
-            <button
-              className={`side-item ${tab === "broadcast" ? "active" : ""}`}
-              onClick={() => goTab("broadcast")}
-            >
-              Broadcast &amp; Line ADs
-            </button>
-
-            <button
-              className={`side-item ${tab === "lands" ? "active" : ""}`}
-              onClick={() => goTab("lands")}
-            >
-              จัดการประกาศ
-            </button>
-
-            <button
-              className={`side-item ${tab === "applicants" ? "active" : ""}`}
-              onClick={() => goTab("applicants")}
-            >
-              อนุมัติผู้สมัคร
-            </button>
-
-            <button
-              className={`side-item ${tab === "payments" ? "active" : ""}`}
-              onClick={() => goTab("payments")}
-            >
-              ธุรกรรม/ชำระเงิน
-            </button>
-
-            <button
-              className={`side-item ${tab === "settings" ? "active" : ""}`}
-              onClick={() => goTab("settings")}
-            >
-              ตั้งค่าระบบ
-            </button>
+            {["dashboard", "broadcast", "lands", "applicants", "payments", "settings"].map(
+              (k) => (
+                <button
+                  key={k}
+                  className={`side-item ${tab === k ? "active" : ""}`}
+                  onClick={() => goTab(k)}
+                >
+                  {t(`menu.${k}`)}
+                </button>
+              )
+            )}
           </aside>
 
           {/* ===== right content ===== */}
@@ -194,31 +165,23 @@ export default function AdminPage() {
               <>
                 <div className="content-head">
                   <div>
-                    <div className="content-title">Dashboard รวม</div>
-                    <div className="content-sub">
-                      ภาพรวมข้อมูลของระบบ (MVP จาก localStorage)
-                    </div>
+                    <div className="content-title">{t("dashboard.title")}</div>
+                    <div className="content-sub">{t("dashboard.subtitle")}</div>
                   </div>
                 </div>
 
                 <div className="info-card">
                   <div className="info-row">
-                    <div className="k">ประกาศทั้งหมด</div>
-                    <div className="v">
-                      <b>{lands.length}</b>
-                    </div>
+                    <div className="k">{t("dashboard.lands")}</div>
+                    <div className="v"><b>{lands.length}</b></div>
                   </div>
                   <div className="info-row">
-                    <div className="k">ผู้สมัครรออนุมัติ</div>
-                    <div className="v">
-                      <b>{pendingCount}</b>
-                    </div>
+                    <div className="k">{t("dashboard.pendingApplicants")}</div>
+                    <div className="v"><b>{pendingCount}</b></div>
                   </div>
                   <div className="info-row">
-                    <div className="k">ธุรกรรม</div>
-                    <div className="v">
-                      <b>{broadcasts.length}</b>
-                    </div>
+                    <div className="k">{t("dashboard.transactions")}</div>
+                    <div className="v"><b>{broadcasts.length}</b></div>
                   </div>
                 </div>
               </>
@@ -229,29 +192,31 @@ export default function AdminPage() {
               <>
                 <div className="content-head">
                   <div>
-                    <div className="content-title">Broadcast & Line ADs</div>
-                    <div className="content-sub">
-                      รายการแคมเปญบอร์ดแคสทั้งหมด
-                    </div>
+                    <div className="content-title">{t("broadcast.title")}</div>
+                    <div className="content-sub">{t("broadcast.subtitle")}</div>
                   </div>
-                  <div className="content-pill">{broadcasts.length} แคมเปญ</div>
+                  <div className="content-pill">
+                    {t("broadcast.count", { count: broadcasts.length })}
+                  </div>
                 </div>
 
                 <div className="fav-grid">
                   {broadcasts.map((b) => (
                     <div key={b.id} className="fav-card">
                       <div className="fav-top">
-                        <div className="fav-owner">{b.title || "Broadcast"}</div>
+                        <div className="fav-owner">
+                          {b.title || t("broadcast.fallbackTitle")}
+                        </div>
                         <button
                           className="fav-remove"
                           onClick={() => onDeleteBroadcast(b.id)}
                         >
-                          ลบ
+                          {t("broadcast.action.delete")}
                         </button>
                       </div>
 
                       <div className="fav-row">
-                        <span className="muted">โหมด</span>
+                        <span className="muted">{t("broadcast.field.mode")}</span>
                         <b>{b.mode}</b>
                       </div>
 
@@ -264,7 +229,7 @@ export default function AdminPage() {
                             )
                           }
                         >
-                          ดู / แก้ไข
+                          {t("broadcast.action.viewEdit")}
                         </button>
                       </div>
                     </div>
@@ -278,24 +243,28 @@ export default function AdminPage() {
               <>
                 <div className="content-head">
                   <div>
-                    <div className="content-title">จัดการประกาศ</div>
-                    <div className="content-sub">
-                      ดู / โฟกัสบนแผนที่ / ทำ Broadcast
-                    </div>
+                    <div className="content-title">{t("lands.title")}</div>
+                    <div className="content-sub">{t("lands.subtitle")}</div>
                   </div>
-                  <div className="content-pill">{lands.length} รายการ</div>
+                  <div className="content-pill">
+                    {t("lands.count", { count: lands.length })}
+                  </div>
                 </div>
 
                 <div className="purchase-grid">
                   {lands.map((p) => (
                     <div key={p.id} className="purchase-card">
                       <div className="purchase-top">
-                        <div className="purchase-title">{p.owner || "ไม่ระบุชื่อ"}</div>
+                        <div className="purchase-title">
+                          {p.owner || t("lands.ownerFallback")}
+                        </div>
                       </div>
 
                       <div className="fav-row">
-                        <span className="muted">ขนาด</span>
-                        <b>{p.size} ตร.วา</b>
+                        <span className="muted">{t("lands.field.size")}</span>
+                        <b>
+                          {p.size} {t("lands.field.unitSqw")}
+                        </b>
                       </div>
 
                       <div className="fav-actions">
@@ -303,18 +272,21 @@ export default function AdminPage() {
                           className="outline-btn"
                           onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}
                         >
-                          ดูบนแผนที่
+                          {t("lands.action.viewMap")}
                         </button>
 
                         <button
                           className="primary-btn"
                           onClick={() => navigate(`/admin/broadcast?landId=${p.id}`)}
                         >
-                          ทำ Broadcast
+                          {t("lands.action.broadcast")}
                         </button>
 
-                        <button className="danger-btn" onClick={() => onDeleteLand(p.id)}>
-                          ลบ
+                        <button
+                          className="danger-btn"
+                          onClick={() => onDeleteLand(p.id)}
+                        >
+                          {t("lands.action.delete")}
                         </button>
                       </div>
                     </div>
@@ -323,123 +295,119 @@ export default function AdminPage() {
               </>
             )}
 
-            {/* -------- applicants (✅ เพิ่มตรงนี้) -------- */}
+            {/* -------- applicants -------- */}
             {tab === "applicants" && (
               <>
                 <div className="content-head">
                   <div>
-                    <div className="content-title">อนุมัติผู้สมัคร</div>
-                    <div className="content-sub">
-                      ข้อมูล mock จาก localStorage (Approve / Reject)
-                    </div>
+                    <div className="content-title">{t("applicants.title")}</div>
+                    <div className="content-sub">{t("applicants.subtitle")}</div>
                   </div>
 
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <button className="outline-btn" onClick={onSeedApplicants}>
-                      สร้าง Mock Data (5)
+                      {t("applicants.seed")}
                     </button>
                     <div className="content-pill">
-                      ทั้งหมด {applicants.length} / รออนุมัติ {pendingCount}
+                      {t("applicants.summary", {
+                        total: applicants.length,
+                        pending: pendingCount,
+                      })}
                     </div>
                   </div>
                 </div>
 
                 <div className="purchase-grid">
-                  {applicants.map((a) => {
-                    const roleLabel =
-                      a.type === "seller"
-                        ? `Seller${a.role ? ` (${a.role})` : ""}`
-                        : a.type === "investor"
-                        ? "Investor"
-                        : "General";
-
-                    const statusLabel =
-                      a.status === "pending"
-                        ? "รออนุมัติ"
-                        : a.status === "approved"
-                        ? "อนุมัติแล้ว"
-                        : "ไม่อนุมัติ";
-
-                    return (
-                      <div key={a.id} className="purchase-card">
-                        <div className="purchase-top">
-                          <div className="purchase-title">
-                            {a.name ? `${a.name} ${a.lastname || ""}` : "ไม่ระบุชื่อ"}
-                          </div>
-                        </div>
-
-                        <div className="fav-row">
-                          <span className="muted">ประเภท</span>
-                          <b>{roleLabel}</b>
-                        </div>
-
-                        <div className="fav-row">
-                          <span className="muted">สถานะ</span>
-                          <b>{statusLabel}</b>
-                        </div>
-
-                        {a.type === "seller" && a.role === "agent" && (
-                          <div className="fav-row">
-                            <span className="muted">License</span>
-                            <b>{a.agentLicense || "-"}</b>
-                          </div>
-                        )}
-
-                        {a.type === "investor" && (
-                          <div className="fav-row">
-                            <span className="muted">Risk Score</span>
-                            <b>{a.investorScore ?? "-"}</b>
-                          </div>
-                        )}
-
-                        {a.status === "rejected" && a.statusNote && (
-                          <div className="fav-row">
-                            <span className="muted">เหตุผล</span>
-                            <b>{a.statusNote}</b>
-                          </div>
-                        )}
-
-                        <div className="fav-actions">
-                          <button
-                            className="outline-btn"
-                            onClick={() => alert(JSON.stringify(a, null, 2))}
-                          >
-                            ดูรายละเอียด
-                          </button>
-
-                          <button
-                            className="primary-btn"
-                            onClick={() => onApproveApplicant(a.id)}
-                            disabled={a.status === "approved"}
-                            title={a.status === "approved" ? "อนุมัติแล้ว" : ""}
-                          >
-                            อนุมัติ
-                          </button>
-
-                          <button
-                            className="outline-btn"
-                            onClick={() => onRejectApplicant(a.id)}
-                            disabled={a.status === "rejected"}
-                            title={a.status === "rejected" ? "ไม่อนุมัติแล้ว" : ""}
-                          >
-                            ไม่อนุมัติ
-                          </button>
-
-                          <button className="danger-btn" onClick={() => onDeleteApplicant(a.id)}>
-                            ลบ
-                          </button>
+                  {applicants.map((a) => (
+                    <div key={a.id} className="purchase-card">
+                      <div className="purchase-top">
+                        <div className="purchase-title">
+                          {a.name
+                            ? `${a.name} ${a.lastname || ""}`
+                            : t("lands.ownerFallback")}
                         </div>
                       </div>
-                    );
-                  })}
+
+                      <div className="fav-row">
+                        <span className="muted">{t("applicants.field.type")}</span>
+                        <b>{t(`applicants.type.${a.type || "general"}`)}</b>
+                      </div>
+
+                      <div className="fav-row">
+                        <span className="muted">{t("applicants.field.status")}</span>
+                        <b>{t(`applicants.status.${a.status}`)}</b>
+                      </div>
+
+                      {a.type === "seller" && a.role === "agent" && (
+                        <div className="fav-row">
+                          <span className="muted">{t("applicants.field.license")}</span>
+                          <b>{a.agentLicense || "-"}</b>
+                        </div>
+                      )}
+
+                      {a.type === "investor" && (
+                        <div className="fav-row">
+                          <span className="muted">{t("applicants.field.riskScore")}</span>
+                          <b>{a.investorScore ?? "-"}</b>
+                        </div>
+                      )}
+
+                      {a.status === "rejected" && a.statusNote && (
+                        <div className="fav-row">
+                          <span className="muted">{t("applicants.field.reason")}</span>
+                          <b>{a.statusNote}</b>
+                        </div>
+                      )}
+
+                      <div className="fav-actions">
+                        <button
+                          className="outline-btn"
+                          onClick={() => alert(JSON.stringify(a, null, 2))}
+                        >
+                          {t("applicants.action.view")}
+                        </button>
+
+                        <button
+                          className="primary-btn"
+                          onClick={() => onApproveApplicant(a.id)}
+                          disabled={a.status === "approved"}
+                          title={
+                            a.status === "approved"
+                              ? t("applicants.tooltip.approved")
+                              : ""
+                          }
+                        >
+                          {t("applicants.action.approve")}
+                        </button>
+
+                        <button
+                          className="outline-btn"
+                          onClick={() => onRejectApplicant(a.id)}
+                          disabled={a.status === "rejected"}
+                          title={
+                            a.status === "rejected"
+                              ? t("applicants.tooltip.rejected")
+                              : ""
+                          }
+                        >
+                          {t("applicants.action.reject")}
+                        </button>
+
+                        <button
+                          className="danger-btn"
+                          onClick={() => onDeleteApplicant(a.id)}
+                        >
+                          {t("applicants.action.delete")}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 {applicants.length === 0 && (
                   <div className="empty-state">
-                    <div className="empty-title">ยังไม่มีผู้สมัคร</div>
-                    <div className="empty-sub">
-                      กด “สร้าง Mock Data (5)” เพื่อใส่ข้อมูลทดสอบ
-                    </div>
+                    <div className="empty-title">{t("applicants.empty.title")}</div>
+                    <div className="empty-sub">{t("applicants.empty.subtitle")}</div>
                   </div>
                 )}
               </>
@@ -448,8 +416,12 @@ export default function AdminPage() {
             {/* -------- payments / settings -------- */}
             {(tab === "payments" || tab === "settings") && (
               <div className="empty-state">
-                <div className="empty-title">ยังไม่พร้อมใช้งาน</div>
-                <div className="empty-sub">เดี๋ยวพัฒนาต่อในเฟสถัดไป</div>
+                <div className="empty-title">
+                  {t("fallback.notReady.title")}
+                </div>
+                <div className="empty-sub">
+                  {t("fallback.notReady.subtitle")}
+                </div>
               </div>
             )}
           </section>

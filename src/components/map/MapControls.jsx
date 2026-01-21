@@ -1,5 +1,6 @@
 // src/components/map/MapControls.jsx
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import LayersPanel from "../Panels/LayersPanel";
 import SearchPanel from "../Panels/SearchPanel";
 import MapToolsMenu from "./MapToolsMenu";
@@ -51,8 +52,12 @@ export default function MapControls({
   const [baseOpacity, setBaseOpacity] = useState(1);
   const [searchOpen, setSearchOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const { t } = useTranslation("map");
 
-  const layerLabel = useMemo(() => (isSatellite ? "ดาวเทียม" : "แผนที่"), [isSatellite]);
+  const layerLabel = useMemo(
+    () => (isSatellite ? t("layer.satellite") : t("layer.map")),
+    [isSatellite, t]
+  );
 
   // ✅ Drawing visibility rules
   const showDrawing = useMemo(() => {
@@ -144,7 +149,7 @@ export default function MapControls({
                 closeAll();
               }}
             >
-              แผนที่
+              {t("layer.map")}
             </button>
 
             <button
@@ -155,7 +160,7 @@ export default function MapControls({
                 closeAll();
               }}
             >
-              ดาวเทียม
+              {t("layer.satellite")}
             </button>
 
             <button
@@ -166,7 +171,7 @@ export default function MapControls({
                 closeAll();
               }}
             >
-              จราจร
+              {t("layer.traffic")}
             </button>
           </div>
         )}
@@ -193,7 +198,7 @@ export default function MapControls({
           <button
             className="map-fab"
             type="button"
-            title="Search"
+            title={t("common.search")}
             onClick={() => (searchOpen ? closeAll() : openOnly("search"))}
           >
             <span className="material-icon" aria-hidden="true">
@@ -214,7 +219,7 @@ export default function MapControls({
         <button
           className="map-fab"
           type="button"
-          title="Layers"
+          title={t("layers")}
           onClick={() => openOnly("layersPanel")}
         >
           <span className="material-icon" aria-hidden="true">
@@ -225,7 +230,7 @@ export default function MapControls({
         <button
           className="map-fab"
           type="button"
-          title="Filter"
+          title={t("filter")}
           onClick={() => {
             closeAll();
             onOpenFilter?.();
@@ -239,7 +244,7 @@ export default function MapControls({
         <button
           className="map-fab"
           type="button"
-          title="Chat"
+          title={t("chat.open")}
           onClick={() => {
             closeAll();
             onOpenChat?.();
@@ -255,7 +260,7 @@ export default function MapControls({
           <button
             className="map-fab"
             type="button"
-            title="Tools"
+            title={t("tools")}
             onClick={() => (toolsOpen ? closeAll() : openOnly("tools"))}
           >
             <span className="material-icon" aria-hidden="true">
@@ -292,21 +297,36 @@ export default function MapControls({
 
       {/* ================= Zoom controls ================= */}
       <div className="map-zoom-box">
-        <button className="map-zoom-btn" type="button" title="Zoom in" onClick={onZoomIn}>
+        <button
+          className="map-zoom-btn"
+          type="button"
+          title={t("zoomIn")}
+          onClick={onZoomIn}
+        >
           <span className="material-icon" aria-hidden="true">
             add
           </span>
         </button>
-        <button className="map-zoom-btn" type="button" title="Zoom out" onClick={onZoomOut}>
+
+        <button
+          className="map-zoom-btn"
+          type="button"
+          title={t("zoomOut")}
+          onClick={onZoomOut}
+        >
           <span className="material-icon" aria-hidden="true">
             remove
           </span>
         </button>
       </div>
 
+
       {/* ================= Locate ================= */}
       <div className="map-locate-row">
-        <button className="map-target-btn" type="button" title="Locate" onClick={onLocate}>
+        <button className="map-target-btn" 
+          type="button" 
+          title={t("locate")} 
+          onClick={onLocate}>
           <span className="material-icon" aria-hidden="true">
             my_location
           </span>

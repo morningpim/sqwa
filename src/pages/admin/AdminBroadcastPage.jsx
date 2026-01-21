@@ -1,6 +1,7 @@
 // src/pages/admin/AdminBroadcastPage.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import "../../css/admin-broadcast.css";
+import { useTranslation } from "react-i18next";
 
 import {
   readAllBroadcasts,
@@ -10,43 +11,14 @@ import {
   updateBroadcastCampaign,
 } from "../../utils/broadcastStore";
 
-// ✅ ใช้ modal สร้างแคมเปญที่คุณทำไว้แล้ว
 import BroadcastCreateModal from "../../components/map/broadcast/BroadcastCreateModal";
-
-// (optional) ถ้ามี AuthProvider อยู่แล้ว ใช้อันนี้ได้
 import { useAuth } from "../../auth/AuthProvider";
 
-function dayLabel(d) {
-  const map = { MON: "จ", TUE: "อ", WED: "พ", THU: "พฤ", FRI: "ศ", SAT: "ส", SUN: "อา" };
-  return map[d] || d;
-}
-
-function channelLabel(ch) {
-  if (ch === "SQW_WEB") return "เว็บ SQW";
-  if (ch === "LINE_ADS") return "LINE ADs";
-  return ch;
-}
-
-function modeLabel(m) {
-  if (m === "buy_sell") return "ซื้อขายที่ดิน";
-  if (m === "consignment") return "ขายฝากที่ดิน";
-  return m;
-}
-
-function statusLabel(s) {
-  if (s === "draft") return "ร่าง";
-  if (s === "scheduled") return "ตั้งเวลา";
-  if (s === "sent") return "ส่งแล้ว";
-  if (s === "disabled") return "ปิดใช้งาน";
-  return s;
-}
-
 export default function AdminBroadcastPage() {
-  const { role } = useAuth?.() || { role: "admin" }; // fallback
+  const { t } = useTranslation("adminBroadcast");
+  const { role } = useAuth?.() || { role: "admin" };
 
-  // ✅ guard แบบง่าย
   const isAdmin = role === "admin";
-
   const [items, setItems] = useState(() => readAllBroadcasts());
 
   useEffect(() => {
@@ -65,7 +37,7 @@ export default function AdminBroadcastPage() {
 
   // Create modal
   const [createOpen, setCreateOpen] = useState(false);
-  const [preview, setPreview] = useState(null); // campaign object
+  const [preview, setPreview] = useState(null);
 
   const filtered = useMemo(() => {
     const text = q.trim().toLowerCase();
@@ -83,7 +55,7 @@ export default function AdminBroadcastPage() {
   }, [items, q, status, mode, channel]);
 
   const onDisable = (id) => {
-    if (!window.confirm("ต้องการปิดใช้งานแคมเปญนี้?")) return;
+    if (!window.confirm(t("confirm.disable"))) return;
     updateBroadcastCampaign(id, { status: "disabled", updatedAt: new Date().toISOString() });
   };
 
@@ -92,7 +64,7 @@ export default function AdminBroadcastPage() {
   };
 
   const onMarkSent = (id) => {
-    if (!window.confirm("ทำเครื่องหมายว่า 'ส่งแล้ว' ?")) return;
+    if (!window.confirm(t("adminBroadcast.confirm.markSent"))) return;
     updateBroadcastCampaign(id, {
       status: "sent",
       sentAt: new Date().toISOString(),
@@ -101,7 +73,7 @@ export default function AdminBroadcastPage() {
   };
 
   const onDelete = (id) => {
-    if (!window.confirm("ต้องการลบแคมเปญนี้ใช่ไหม?")) return;
+    if (!window.confirm(t("confirm.delete"))) return;
     removeBroadcastCampaign(id);
     if (preview?.id === id) setPreview(null);
   };
@@ -110,8 +82,8 @@ export default function AdminBroadcastPage() {
     return (
       <div className="admin-shell">
         <div className="admin-card">
-          <div className="admin-title">Admin Broadcast</div>
-          <div className="admin-muted">สิทธิ์ไม่เพียงพอ (ต้องเป็น admin)</div>
+          <div className="admin-title">{t("pageTitle")}</div>
+          <div className="admin-muted">{t("noPermission")}</div>
         </div>
       </div>
     );
@@ -119,47 +91,47 @@ export default function AdminBroadcastPage() {
 
   return (
     <div className="admin-shell">
+      {/* TOPBAR */}
       <div className="admin-topbar">
         <div>
-          <div className="admin-title">Boardcast & LINE ADs</div>
-          <div className="admin-muted">
-            จัดการข่าวประชาสัมพันธ์ (เลือกโหมดซื้อขาย/ขายฝาก + ช่องทางเว็บ/LINE)
-          </div>
+          <div className="admin-title">{t("pageTitle")}</div>
+          <div className="admin-muted">{t("subtitle")}</div>
         </div>
 
         <div className="admin-actions">
           <button className="btn primary" onClick={() => setCreateOpen(true)}>
-            + สร้างแคมเปญ
+            + {t("action.create")}
           </button>
         </div>
       </div>
 
+      {/* FILTERS */}
       <div className="admin-filters">
         <input
           className="input"
-          placeholder="ค้นหา: ชื่อ / ข้อความ / ID"
+          placeholder={t("search")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
 
         <select className="select" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="all">สถานะ: ทั้งหมด</option>
-          <option value="draft">ร่าง</option>
-          <option value="scheduled">ตั้งเวลา</option>
-          <option value="sent">ส่งแล้ว</option>
-          <option value="disabled">ปิดใช้งาน</option>
+          <option value="all">{t("filter.statusAll")}</option>
+          <option value="draft">{t("status.draft")}</option>
+          <option value="scheduled">{t("status.scheduled")}</option>
+          <option value="sent">{t("status.sent")}</option>
+          <option value="disabled">{t("status.disabled")}</option>
         </select>
 
         <select className="select" value={mode} onChange={(e) => setMode(e.target.value)}>
-          <option value="all">โหมด: ทั้งหมด</option>
-          <option value="buy_sell">ซื้อขายที่ดิน</option>
-          <option value="consignment">ขายฝากที่ดิน</option>
+          <option value="all">{t("filter.modeAll")}</option>
+          <option value="buy_sell">{t("mode.buy_sell")}</option>
+          <option value="consignment">{t("mode.consignment")}</option>
         </select>
 
         <select className="select" value={channel} onChange={(e) => setChannel(e.target.value)}>
-          <option value="all">ช่องทาง: ทั้งหมด</option>
-          <option value="SQW_WEB">เว็บ SQW</option>
-          <option value="LINE_ADS">LINE ADs</option>
+          <option value="all">{t("filter.channelAll")}</option>
+          <option value="SQW_WEB">{t("channel.SQW_WEB")}</option>
+          <option value="LINE_ADS">{t("channel.LINE_ADS")}</option>
         </select>
       </div>
 
@@ -167,19 +139,21 @@ export default function AdminBroadcastPage() {
         {/* TABLE */}
         <div className="admin-card">
           <div className="card-head">
-            <div className="card-title">รายการแคมเปญ ({filtered.length})</div>
+            <div className="card-title">
+              {t("listTitle", { count: filtered.length })}
+            </div>
           </div>
 
           <div className="table-wrap">
             <table className="table">
               <thead>
                 <tr>
-                  <th>ชื่อ</th>
-                  <th>โหมด</th>
-                  <th>ช่องทาง</th>
-                  <th>วัน/เวลา</th>
-                  <th>สถานะ</th>
-                  <th style={{ textAlign: "right" }}>จัดการ</th>
+                  <th>{t("table.name")}</th>
+                  <th>{t("table.mode")}</th>
+                  <th>{t("table.channel")}</th>
+                  <th>{t("table.schedule")}</th>
+                  <th>{t("table.status")}</th>
+                  <th style={{ textAlign: "right" }}>{t("table.action")}</th>
                 </tr>
               </thead>
 
@@ -187,7 +161,7 @@ export default function AdminBroadcastPage() {
                 {filtered.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="empty">
-                      ยังไม่มีแคมเปญ
+                      {t("empty.campaign")}
                     </td>
                   </tr>
                 ) : (
@@ -199,65 +173,71 @@ export default function AdminBroadcastPage() {
                     return (
                       <tr key={x.id}>
                         <td>
-                          <div className="cell-title" onClick={() => setPreview(x)} role="button" tabIndex={0}>
-                            {x.title || "(ไม่มีชื่อ)"}
+                          <div className="cell-title" onClick={() => setPreview(x)} role="button">
+                            {x.title || t("fallback.noTitle")}
                           </div>
                           <div className="cell-sub">
-                            ID: {x.id} • ที่ดิน: {Array.isArray(x.landIds) ? x.landIds.length : 0} แปลง
+                            ID: {x.id} • {t("landCount", { count: x.landIds?.length || 0 })}
                           </div>
                         </td>
 
-                        <td>{modeLabel(x.mode)}</td>
+                        <td>{t(`mode.${x.mode}`)}</td>
 
                         <td>
                           <div className="chips">
-                            {chs.length ? chs.map((c) => (
-                              <span className="chip" key={c}>{channelLabel(c)}</span>
-                            )) : <span className="muted">-</span>}
+                            {chs.length
+                              ? chs.map((c) => (
+                                  <span className="chip" key={c}>
+                                    {t(`channel.${c}`)}
+                                  </span>
+                                ))
+                              : <span className="muted">-</span>}
                           </div>
                         </td>
 
                         <td>
                           <div className="chips">
-                            {Array.isArray(days) && days.length ? (
-                              days.map((d) => (
-                                <span className="chip soft" key={d}>
-                                  {dayLabel(d)}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="muted">-</span>
-                            )}
+                            {days.length
+                              ? days.map((d) => (
+                                  <span className="chip soft" key={d}>
+                                    {t(`day.${d}`)}
+                                  </span>
+                                ))
+                              : <span className="muted">-</span>}
                             <span className="chip soft">{time}</span>
                           </div>
                         </td>
 
                         <td>
-                          <span className={`pill ${x.status || ""}`}>{statusLabel(x.status)}</span>
+                          <span className={`pill ${x.status}`}>
+                            {t(`status.${x.status}`)}
+                          </span>
                         </td>
 
                         <td style={{ textAlign: "right" }}>
                           <div className="row-actions">
-                            <button className="btn" onClick={() => setPreview(x)}>ดู</button>
+                            <button className="btn" onClick={() => setPreview(x)}>
+                              {t("action.view")}
+                            </button>
 
                             {x.status !== "disabled" ? (
                               <button className="btn warn" onClick={() => onDisable(x.id)}>
-                                ปิด
+                                {t("action.disable")}
                               </button>
                             ) : (
                               <button className="btn" onClick={() => onEnable(x.id)}>
-                                เปิด
+                                {t("action.enable")}
                               </button>
                             )}
 
                             {x.status !== "sent" && (
                               <button className="btn" onClick={() => onMarkSent(x.id)}>
-                                ส่งแล้ว
+                                {t("action.markSent")}
                               </button>
                             )}
 
                             <button className="btn danger" onClick={() => onDelete(x.id)}>
-                              ลบ
+                              {t("action.delete")}
                             </button>
                           </div>
                         </td>
@@ -273,39 +253,25 @@ export default function AdminBroadcastPage() {
         {/* PREVIEW */}
         <div className="admin-card">
           <div className="card-head">
-            <div className="card-title">Preview การ์ดประชาสัมพันธ์</div>
-            <div className="card-sub">คลิกรายการทางซ้ายเพื่อดูรายละเอียด</div>
+            <div className="card-title">{t("preview.title")}</div>
+            <div className="card-sub">{t("preview.subtitle")}</div>
           </div>
 
           {!preview ? (
-            <div className="preview-empty">ยังไม่ได้เลือกรายการ</div>
+            <div className="preview-empty">
+              {t("empty.preview")}
+            </div>
           ) : (
             <div className="preview">
-              <div className="pv-title">{preview.title || "(ไม่มีชื่อ)"}</div>
-              <div className="pv-meta">
-                <span className="chip">{modeLabel(preview.mode)}</span>
-                <span className="chip soft">{statusLabel(preview.status)}</span>
-                {(preview.channel || []).map((c) => (
-                  <span className="chip" key={c}>{channelLabel(c)}</span>
-                ))}
+              <div className="pv-title">
+                {preview.title || t("fallback.noTitle")}
               </div>
 
               <div className="pv-msg">{preview.message || "-"}</div>
 
-              <div className="pv-info">
-                <div><span className="muted">ที่ดินที่เลือก:</span> <b>{Array.isArray(preview.landIds) ? preview.landIds.length : 0}</b> แปลง</div>
-                <div><span className="muted">ตารางส่ง:</span> <b>
-                  {(preview?.schedule?.days || []).map(dayLabel).join(" / ") || "-"}
-                </b> <span className="muted">เวลา</span> <b>{preview?.schedule?.time || "-"}</b></div>
-                <div><span className="muted">แก้ไขล่าสุด:</span> <b>{preview.updatedAt ? String(preview.updatedAt).slice(0, 19).replace("T", " ") : "-"}</b></div>
-              </div>
-
               <div className="pv-cta">
                 <button className="btn" onClick={() => navigator.clipboard.writeText(preview.message || "")}>
-                  คัดลอกข้อความ
-                </button>
-                <button className="btn primary" onClick={() => alert("TODO: ส่งจริงไป LINE / WEB (ต่อ backend/cron)")}>
-                  ส่งจริง (อนาคต)
+                  {t("action.copy")}
                 </button>
               </div>
             </div>
@@ -313,14 +279,13 @@ export default function AdminBroadcastPage() {
         </div>
       </div>
 
-      {/* ✅ Modal สร้างแคมเปญ (ใช้ของเดิมคุณ) */}
       <BroadcastCreateModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        land={null}                 // admin page: สร้างแบบเลือกหลายแปลงภายใน modal หรือทำทีหลัง
+        land={null}
         createdByRole="admin"
         createdByUserId="admin"
-        mode="buy_sell"            // default
+        mode="buy_sell"
         intent={null}
         defaultFeatured={false}
         defaultPriceTHB={0}

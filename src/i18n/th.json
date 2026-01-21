@@ -1,0 +1,676 @@
+{
+  "common": {
+    "close": "ปิด",
+    "search": "ค้นหา",
+    "loading": "กำลังโหลด...",
+    "comingSoon": "ฟีเจอร์นี้กำลังพัฒนา",
+    "unknown": "ไม่ระบุ",
+    "unit": {
+      "baht": "บ."
+    },
+    "field": {
+      "owner": "เจ้าของ",
+      "agent": "นายหน้า",
+      "phone": "โทรศัพท์",
+      "lineId": "LINE ID",
+      "landFrame": "กรอบที่ดิน",
+      "deed": "ข้อมูลโฉนด / ระวาง",
+      "selected": "เลือก:"
+    },
+    "date": {
+      "added": "เพิ่มเมื่อ"
+    },
+    "action": {
+      "cancel": "ยกเลิก",
+      "save": "บันทึก",
+      "edit": "แก้ไข",
+      "delete": "ลบ",
+      "confirm": "ยืนยัน",
+      "view": "ดูรายละเอียด",
+      "copy": "คัดลอก"
+    }
+  },
+  "role": {
+    "change": "เปลี่ยนบทบาท",
+    "picker": {
+      "title": "เลือกบทบาท (Mock)",
+      "label": "บทบาท",
+      "roles": {
+        "buyer": "ผู้ซื้อ",
+        "seller": "ผู้ขาย",
+        "landlord": "เจ้าของที่ดิน",
+        "staff": "เจ้าหน้าที่",
+        "admin": "ผู้ดูแลระบบ"
+      },
+      "action": {
+        "cancel": "ยกเลิก",
+        "save": "บันทึก"
+      }
+    }
+  },
+  "mode": {
+    "buy": "ซื้อ",
+    "sell": "ขาย",
+    "eia": "EIA"
+  },
+  "map": {
+    "layer": {
+      "map": "แผนที่",
+      "satellite": "ดาวเทียม",
+      "traffic": "จราจร"
+    },
+    "layers": "ชั้นข้อมูล",
+    "filter": "ตัวกรอง",
+    "tools": "เครื่องมือ",
+    "zoomIn": "ซูมเข้า",
+    "zoomOut": "ซูมออก",
+    "locate": "ระบุตำแหน่ง",
+    "draw": "วาดขอบเขตที่ดิน",
+    "drawStart": "เริ่มวาด",
+    "drawFinish": "เสร็จสิ้น",
+    "drawClear": "ล้างเส้น",
+    "eiaMode": "โหมด EIA",
+    "normalMode": "โหมดปกติ"
+  },
+  "dashboard": {
+    "totalLand": "ที่ดินทั้งหมด",
+    "totalArea": "พื้นที่รวม",
+    "totalValue": "มูลค่าที่ดินรวม",
+    "unit": {
+      "listing": "ประกาศ",
+      "rai": "ไร่",
+      "ngan": "งาน",
+      "wah": "วา"
+    }
+  },
+  "land": {
+    "postedDate": "วันที่ลงข้อมูล {{date}}",
+    "favorite": {
+      "on": "ถูกใจ",
+      "off": "เลิกถูกใจ"
+    },
+    "ownerFallback": "ไม่ระบุเจ้าของ",
+    "field": {
+      "size": "ขนาดที่ดิน",
+      "rnw": "ไร่-งาน-วา",
+      "frontage": "หน้ากว้างติดถนน",
+      "roadWidth": "ขนาดถนน"
+    },
+    "unit": {
+      "sqw": "ตร.วา",
+      "meter": "ม."
+    },
+    "price": {
+      "perSqw": "ราคา/ตร.วา",
+      "total": "ราคารวม"
+    },
+    "section": {
+      "contact": "ข้อมูลติดต่อ",
+      "member": "สิทธิ์สมาชิก"
+    },
+    "action": {
+      "chatSeller": "แชทกับผู้ขาย",
+      "unlock": "คลิกเพื่อปลดล็อคข้อมูล",
+      "unlockAll": "ดูข้อมูลทั้งหมด (ใช้ 1 ครั้ง)"
+    }
+  },
+  "sale": {
+    "role": "บทบาท",
+    "header": {
+      "sell": "ข้อมูลแปลง (โหมดขาย)",
+      "buy": "ข้อมูลแปลง (โหมดซื้อ)",
+      "default": "ข้อมูลแปลง"
+    },
+    "toggle": {
+      "title": "ซ่อน / แสดงแผงข้อมูล"
+    },
+    "sub": {
+      "drawable": "วาดได้",
+      "notDrawable": "วาดไม่ได้",
+      "editing": "กำลังแก้ไข",
+      "new": "สร้างใหม่",
+      "locked": "ล็อกการแก้ไข"
+    },
+    "section": {
+      "form": "ฟอร์มข้อมูลแปลง",
+      "formSub": "ข้อมูลการประเมินแปลง (ระบบสามารถให้ข้อมูลอัตโนมัติ)",
+      "list": "รายการแปลงของฉัน"
+    },
+    "field": {
+      "sizeSqw": "ขนาดที่ดิน (ตร.วา)",
+      "sizeRNW": "ขนาดที่ดิน (ไร่ / งาน / วา)",
+      "width": "หน้ากว้างติดถนน (ม.)",
+      "road": "ขนาดถนน (ม.)",
+      "pricePerSqw": "ราคาต่อตารางวา",
+      "totalPrice": "ราคารวม",
+      "owner": "เจ้าของ",
+      "agent": "นายหน้า",
+      "phone": "โทรศัพท์",
+      "lineId": "LINE ID",
+      "landFrame": "กรอบที่ดิน",
+      "deed": "ข้อมูลโฉนด / ระวาง"
+    },
+    "placeholder": {
+      "owner": "ชื่อเจ้าของ",
+      "phone": "08x-xxx-xxxx",
+      "lineId": "@lineid หรือ lineid",
+      "rai": "ไร่",
+      "ngan": "งาน",
+      "wah": "วา"
+    },
+    "summary": {
+      "size": "ขนาด",
+      "unitSqw": "ตร.วา",
+      "perSqw": "ราคาต่อตารางวา",
+      "total": "ราคารวม"
+    },
+    "unit": {
+      "baht": "บ."
+    },
+    "action": {
+      "saveNew": "บันทึกแปลงใหม่",
+      "saveEdit": "บันทึกการแก้ไข",
+      "clear": "ล้างฟอร์ม",
+      "delete": "ลบแปลง"
+    },
+    "tooltip": {
+      "editLocked": "แก้ไขได้เมื่อครบ 14 วัน (เหลือ {{days}} วัน)"
+    },
+    "hint": {
+      "notDrawable": "ตอนนี้ไม่สามารถวาดแปลงได้ในโหมดหรือสิทธิ์นี้",
+      "editLocked": "แปลงนี้ยังแก้ไขไม่ได้ ต้องรออีก {{days}} วัน"
+    },
+    "list": {
+      "locked": "ล็อกแก้ไข ({{days}} วัน)",
+      "editLocked": "แก้ไขได้เมื่อครบ 14 วัน (เหลือ {{days}} วัน)",
+      "clickToEdit": "คลิกเพื่อแก้ไข",
+      "agent": "นายหน้า",
+      "unknown": "ไม่ระบุ",
+      "updated": "อัปเดต {{date}}",
+      "size": "ขนาด",
+      "unitSqw": "ตร.วา",
+      "focus": "โฟกัสบนแผนที่",
+      "edit": "แก้ไข",
+      "delete": "ลบ",
+      "empty": "ยังไม่มีข้อมูลแปลง"
+    }
+  },
+  "chat": {
+    "open": "แชท",
+    "header": {
+      "with": "แชทกับ {{name}}",
+      "inbox": "แชท ({{count}} ใหม่)"
+    },
+    "section": {
+      "online": "ออนไลน์",
+      "inbox": "กล่องข้อความ"
+    },
+    "status": {
+      "online": "ออนไลน์"
+    },
+    "userFallback": "ผู้ใช้ {{id}}",
+    "me": "คุณ",
+    "other": "อีกฝ่าย",
+    "placeholder": {
+      "select": "เลือกคนเพื่อเริ่มคุย"
+    },
+    "input": {
+      "placeholder": "พิมพ์ข้อความ..."
+    },
+    "action": {
+      "send": "ส่ง",
+      "delete": "ลบแชท"
+    },
+    "empty": {
+      "online": "ไม่มีคนออนไลน์",
+      "inbox": "ยังไม่มีห้องแชท"
+    },
+    "alert": {
+      "noName": "กรุณาตั้งชื่อผู้ใช้ก่อนส่งข้อความ",
+      "noReceiver": "กรุณาเลือกผู้รับก่อนส่งข้อความ",
+      "sendFail": "ไม่สามารถส่งข้อความได้: {{error}}",
+      "deleteFail": "เกิดข้อผิดพลาด: {{error}}"
+    },
+    "confirm": {
+      "deleteRoom": "ต้องการลบการสนทนากับ \"{{name}}\" หรือไม่?"
+    },
+    "room": "ห้อง"
+  },
+  "sell": {
+    "permissionDenied": "ต้องเป็น Seller, Landlord หรือ Admin เท่านั้นจึงจะใช้โหมด Sell ได้",
+    "pick": {
+      "title": "เลือกประเภทการใช้งาน",
+      "subtitle": "โหมดขายฝากที่ดิน",
+      "seller": "ผู้ขายฝาก",
+      "investor": "นักลงทุน"
+    }
+  },
+  "broadcast": {
+    "selectLandFirst": "กรุณาเลือกที่ดินก่อนสร้าง Broadcast",
+    "fabLabel": "ข่าวประชาสัมพันธ์",
+    "title": "สร้างข่าวประชาสัมพันธ์",
+    "quick": {
+      "adminTitle": "ผู้ดูแลระบบ ข่าวประชาสัมพันธ์/โฆษณา LINE",
+      "adminLabel": "ผู้ดูแลระบบ ข่าวประชาสัมพันธ์",
+      "consignorTitle": "ข่าวประชาสัมพันธ์ 100 บาท (ขายฝาก)",
+      "consignorLabel": "ข่าวประชาสัมพันธ์ 100฿"
+    },
+    "news": {
+      "title": "ข่าวประชาสัมพันธ์",
+      "round": "รอบบอร์ดแคส",
+      "today": "วันนี้",
+      "empty": "ยังไม่มีข่าวที่เผยแพร่"
+    },
+    "badge": {
+      "consignment": "ขายฝาก",
+      "buySell": "ซื้อขาย",
+      "featured": "เด่น",
+      "lineAds": "LINE Ads"
+    },
+    "field": {
+      "agent": "นายหน้า",
+      "size": "ขนาด",
+      "totalPrice": "ราคารวม"
+    },
+    "unit": {
+      "baht": "บ."
+    },
+    "action": {
+      "viewMap": "ดูบนแผนที่",
+      "copyLineAdsLink": "คัดลอกลิงก์ Ads",
+      "copyLink": "คัดลอกลิงก์",
+      "copyText": "คัดลอกข้อความ"
+    },
+    "alert": {
+      "copyLineLink": "คัดลอกลิงก์ LINE Ads แล้ว ✅",
+      "copiedLink": "คัดลอกลิงก์แล้ว ✅",
+      "copiedText": "คัดลอกข้อความแล้ว ✅"
+    },
+    "queue": {
+      "title": "LINE Ads Queue",
+      "subtitle": "รายการที่สร้างไว้สำหรับนำไปตั้งใน LINE Ads Platform",
+      "empty": "ยังไม่มีรายการใน queue"
+    }
+  },
+  "unlock": {
+    "title": "ปลดล็อคข้อมูลที่ดิน",
+    "subtitle": "ใช้สิทธิ์สมาชิกเพื่อปลดล็อคข้อมูลที่ต้องการ",
+    "picker": {
+      "landId": "Land ID: {{id}}",
+      "noLandId": "ยังไม่ได้ส่ง landId เข้ามา (ปุ่มเพิ่มลงตะกร้าจะถูกปิด)",
+      "priceUnit": "บาท",
+      "total": "รวม: {{total}} บาท",
+      "aria": {
+        "close": "ปิดหน้าต่าง"
+      },
+      "action": {
+        "cancel": "ยกเลิก",
+        "addToCart": "เพิ่มลงตะกร้า",
+        "pay": "ดำเนินการชำระเงิน"
+      }
+    }
+  },
+  "investor": {
+    "panel": {
+      "title": "รายการแนะนำที่ดิน",
+      "subtitle": "พบ {{count}} แปลงที่เหมาะกับโปรไฟล์นักลงทุน",
+      "empty": "ยังไม่พบรายการแนะนำ"
+    },
+    "item": {
+      "unknown": "ไม่ระบุชื่อ",
+      "agentSuffix": "(นายหน้า)"
+    },
+    "field": {
+      "size": "ขนาด",
+      "price": "ราคา"
+    },
+    "unit": {
+      "sqw": "ตร.วา",
+      "baht": "บ."
+    },
+    "action": {
+      "focus": "ดูบนแผนที่"
+    },
+    "profile": {
+      "title": "แบบประเมินนักลงทุน",
+      "subtitle": "(SQW Investor Profile)",
+      "question": {
+        "goal": "ข้อที่ 1: กลยุทธ์การทำกำไรที่คุณคาดหวัง?",
+        "gis": "ข้อที่ 2: ปัจจัยเชิงพื้นที่ (GIS) ใดที่คุณให้ความสำคัญที่สุด?",
+        "budget": "ข้อที่ 3: แผนงบประมาณสำหรับการลงทุน?"
+      },
+      "goal": {
+        "flipping": "เก็งกำไรระยะสั้น (Flipping)",
+        "capital_gain": "ถือครองระยะยาว (Capital Gain)",
+        "passive_income": "รายได้สม่ำเสมอ (Passive Income)"
+      },
+      "gis": {
+        "infra": "โครงสร้างพื้นฐาน: ใกล้รถไฟฟ้า/ทางด่วน",
+        "zoning": "ผังเมือง/ข้อกำหนดอสังหา (GIS ของ SQW)",
+        "price_history": "ประวัติราคา: วิเคราะห์ราคาซื้อขายย้อนหลัง"
+      },
+      "budget": {
+        "low": "รายย่อย: ไม่เกิน 5 ล้านบาท",
+        "mid": "ระดับกลาง: 5 – 30 ล้านบาท",
+        "high": "ระดับสถาบัน: 50 ล้านบาทขึ้นไป"
+      },
+      "action": {
+        "reset": "รีเซ็ตจากที่บันทึกไว้",
+        "submit": "ดูผลลัพธ์"
+      },
+      "aria": {
+        "close": "ปิดหน้าต่าง"
+      }
+    }
+  },
+  "payment": {
+    "title": "ชำระเงินเพื่อปลดล็อกข้อมูล",
+    "landId": "Land ID: {{id}}",
+    "section": {
+      "items": "รายการปลดล็อก",
+      "paymentMethod": "เลือกวิธีชำระเงิน"
+    },
+    "empty": {
+      "items": "ยังไม่ได้เลือกรายการ"
+    },
+    "total": {
+      "label": "ยอดชำระ",
+      "unit": "บาท"
+    },
+    "method": {
+      "promptpay": "PromptPay",
+      "card": "บัตรเครดิต / เดบิต",
+      "bank": "โอนผ่านธนาคาร"
+    },
+    "note": {
+      "promptpay": "* PromptPay = แสดง QR ในหน้านี้",
+      "redirect": "* Card / Bank = เปลี่ยนไปหน้าชำระเงิน"
+    },
+    "action": {
+      "cancel": "ยกเลิก",
+      "pay": "ไปชำระเงิน",
+      "generateQr": "สร้าง QR เพื่อชำระเงิน",
+      "confirmPaid": "ยืนยันว่าชำระเงินแล้ว",
+      "close": "ปิด"
+    },
+    "status": {
+      "pending": "รอการชำระเงิน",
+      "paid": "ชำระเงินสำเร็จ",
+      "failed": "การชำระเงินล้มเหลว"
+    },
+    "alert": {
+      "selectMethod": "กรุณาเลือกวิธีชำระเงิน",
+      "notReady": "ระบบยังไม่พร้อมใช้งาน (โหมดจำลอง)",
+      "paymentFail": "ไม่สามารถชำระเงินได้"
+    },
+    "footer": {
+      "mock": "* ขณะนี้ยังไม่เชื่อมต่อระบบชำระเงินจริง (Mock Mode)"
+    },
+    "placeholder": {
+      "selectMethod": "— กรุณาเลือกวิธีชำระเงิน —",
+      "selectMethodHint": "เลือกช่องทางชำระเงินก่อนกดชำระเงิน"
+    },
+    "promptpay": {
+      "title": "สแกนเพื่อชำระเงิน (PromptPay)",
+      "order": "คำสั่งซื้อ",
+      "amountUnit": "บาท",
+      "status": {
+        "paid": "ชำระสำเร็จ ✅ กำลังดำเนินการ...",
+        "failed": "การชำระไม่สำเร็จ ❌ (ลองใหม่หรือเลือกวิธีอื่น)",
+        "pending": "เปิดแอปธนาคาร → สแกน QR → รอระบบยืนยันสถานะ"
+      }
+    },
+    "cart": {
+      "title": "รายการที่เลือกไว้เพื่อปลดล็อกข้อมูล",
+      "subtitle": "PromptPay แสดง QR ในหน้านี้",
+      "empty": {
+        "title": "ยังไม่มีรายการในตะกร้า",
+        "subtitle": "ไปที่หน้าแผนที่แล้วเลือกข้อมูลที่ต้องการ"
+      },
+      "summary": {
+        "title": "สรุปรายการ",
+        "total": "ยอดรวมทั้งหมด"
+      },
+      "action": {
+        "goMap": "ไปหน้าแผนที่",
+        "pay": "ไปชำระเงิน",
+        "generateQr": "สร้าง QR เพื่อชำระเงิน",
+        "mockPay": "ทดสอบปลดล็อกทันที (mock เดิม)",
+        "back": "กลับไปเลือกเพิ่ม"
+      }
+    },
+    "hint": {
+      "postPaid": "ของจริง: หลังชำระแล้ว backend/IPN จะเป็นคนยืนยันและปลดล็อกข้อมูลให้"
+    }
+
+  },
+  "eia": {
+    "badge": "EIA",
+    "projectFallback": "โครงการ EIA",
+    "field": {
+      "projectValue": "มูลค่าโครงการ",
+      "area": "ขนาดที่ดิน",
+      "status": "สถานะ",
+      "owner": "เจ้าของ",
+      "location": "พิกัด"
+    },
+    "unit": {
+      "millionBaht": "ล้านบาท"
+    },
+    "status": {
+      "approved": "ผ่าน EIA",
+      "unknown": "ไม่ระบุ"
+    },
+    "action": {
+      "news": "ลิงก์ข่าวสาร",
+      "detail": "ลิงก์ EIA"
+    },
+    "dashboard": {
+      "total": "โครงการทั้งหมด",
+      "approved": "ผ่าน EIA",
+      "pending": "รอพิจารณา"
+    }
+  },
+  "admin": {
+    "header": {
+      "title": "แผงควบคุมผู้ดูแลระบบ",
+      "subtitle": "ผู้ดูแลระบบ",
+      "manageBroadcast": "จัดการ Broadcast"
+    },
+    "stats": {
+      "lands": "ประกาศทั้งหมด",
+      "pendingApplicants": "ผู้สมัครรออนุมัติ",
+      "transactions": "ธุรกรรม"
+    },
+    "menu": {
+      "title": "เมนูแอดมิน",
+      "dashboard": "แดชบอร์ด",
+      "broadcast": "Broadcast & LINE Ads",
+      "lands": "จัดการประกาศ",
+      "applicants": "อนุมัติผู้สมัคร",
+      "payments": "ธุรกรรม / การชำระเงิน",
+      "settings": "ตั้งค่าระบบ"
+    },
+    "dashboard": {
+      "title": "แดชบอร์ดระบบ",
+      "subtitle": "ภาพรวมข้อมูลของระบบ (MVP จาก localStorage)",
+      "lands": "ประกาศทั้งหมด",
+      "pendingApplicants": "ผู้สมัครรออนุมัติ",
+      "transactions": "ธุรกรรม"
+    },
+    "broadcast": {
+      "title": "Broadcast & LINE Ads",
+      "subtitle": "รายการแคมเปญบอร์ดแคสทั้งหมด",
+      "count": "{{count}} แคมเปญ",
+      "fallbackTitle": "Broadcast",
+      "field": {
+        "mode": "โหมด"
+      },
+      "action": {
+        "viewEdit": "ดู / แก้ไข",
+        "delete": "ลบ"
+      },
+      "confirmDelete": "ต้องการลบแคมเปญบอร์ดแคสนี้ใช่ไหม?"
+    },
+    "lands": {
+      "title": "จัดการประกาศ",
+      "subtitle": "ดู / โฟกัสบนแผนที่ / ทำ Broadcast",
+      "count": "{{count}} รายการ",
+      "field": {
+        "size": "ขนาด",
+        "unitSqw": "ตร.วา"
+      },
+      "action": {
+        "viewMap": "ดูบนแผนที่",
+        "broadcast": "ทำ Broadcast",
+        "delete": "ลบ"
+      },
+      "confirmDelete": "ต้องการลบประกาศนี้ใช่ไหม?",
+      "ownerFallback": "ไม่ระบุชื่อ"
+    },
+    "applicants": {
+      "title": "อนุมัติผู้สมัคร",
+      "subtitle": "ข้อมูล mock จาก localStorage (อนุมัติ / ไม่อนุมัติ)",
+      "seed": "สร้าง Mock Data (5)",
+      "summary": "ทั้งหมด {{total}} / รออนุมัติ {{pending}}",
+      "type": {
+        "seller": "ผู้ขาย",
+        "investor": "นักลงทุน",
+        "general": "ทั่วไป"
+      },
+      "status": {
+        "pending": "รออนุมัติ",
+        "approved": "อนุมัติแล้ว",
+        "rejected": "ไม่อนุมัติ"
+      },
+      "field": {
+        "type": "ประเภท",
+        "status": "สถานะ",
+        "license": "ใบอนุญาต",
+        "riskScore": "คะแนนความเสี่ยง",
+        "reason": "เหตุผล"
+      },
+      "action": {
+        "view": "ดูรายละเอียด",
+        "approve": "อนุมัติ",
+        "reject": "ไม่อนุมัติ",
+        "delete": "ลบ"
+      },
+      "confirm": {
+        "approve": "อนุมัติผู้สมัครรายนี้ใช่ไหม?",
+        "rejectPrompt": "เหตุผลที่ไม่อนุมัติ (ไม่บังคับ):",
+        "delete": "ลบผู้สมัครรายนี้ใช่ไหม?"
+      },
+      "empty": {
+        "title": "ยังไม่มีผู้สมัคร",
+        "subtitle": "กด “สร้าง Mock Data (5)” เพื่อสร้างข้อมูลทดสอบ"
+      },
+      "tooltip": {
+        "approved": "อนุมัติแล้ว",
+        "rejected": "ไม่อนุมัติแล้ว"
+      }
+    },
+    "fallback": {
+      "notReady": {
+        "title": "ยังไม่พร้อมใช้งาน",
+        "subtitle": "ฟีเจอร์นี้จะพัฒนาในเฟสถัดไป"
+      }
+    }
+  },
+  "rolePicker": {
+    "title": "เลือกบทบาท (Mock)",
+    "label": "บทบาท",
+    "roles": {
+      "buyer": "ผู้ซื้อ",
+      "seller": "ผู้ขาย",
+      "landlord": "เจ้าของที่ดิน",
+      "staff": "เจ้าหน้าที่",
+      "admin": "ผู้ดูแลระบบ"
+    },
+    "action": {
+      "cancel": "ยกเลิก",
+      "save": "บันทึก"
+    }
+  },
+  "adminBroadcast": {
+    "pageTitle": "Broadcast & LINE Ads",
+    "subtitle": "รายการแคมเปญบอร์ดแคสทั้งหมด",
+    "noPermission": "ไม่มีสิทธิ์เข้าถึงหน้านี้",
+    "search": "ค้นหา",
+
+    "listTitle": "{{count}} แคมเปญ",
+
+    "filter": {
+      "statusAll": "ทุกสถานะ",
+      "modeAll": "ทุกโหมด",
+      "channelAll": "ทุกช่องทาง"
+    },
+
+    "table": {
+      "name": "ชื่อแคมเปญ",
+      "mode": "โหมด",
+      "channel": "ช่องทาง",
+      "schedule": "ตารางเวลา",
+      "status": "สถานะ",
+      "action": "จัดการ"
+    },
+
+    "mode": {
+      "buy_sell": "ซื้อ / ขาย",
+      "consignment": "ขายฝาก"
+    },
+
+    "channel": {
+      "SQW_WEB": "เว็บไซต์ SQW",
+      "LINE_ADS": "LINE Ads"
+    },
+
+    "day": {
+      "MON": "จันทร์",
+      "TUE": "อังคาร",
+      "WED": "พุธ",
+      "THU": "พฤหัส",
+      "FRI": "ศุกร์",
+      "SAT": "เสาร์",
+      "SUN": "อาทิตย์"
+    },
+
+    "status": {
+      "draft": "ร่าง",
+      "scheduled": "ตั้งเวลา",
+      "sent": "ส่งแล้ว",
+      "disabled": "ปิดใช้งาน"
+    },
+
+    "action": {
+      "create": "สร้างแคมเปญ",
+      "view": "ดู",
+      "disable": "ปิด",
+      "enable": "เปิด",
+      "markSent": "ทำเครื่องหมายว่าส่งแล้ว",
+      "delete": "ลบ",
+      "copy": "คัดลอก"
+    },
+
+    "confirm": {
+      "disable": "ต้องการปิดแคมเปญนี้หรือไม่?",
+      "delete": "ต้องการลบแคมเปญนี้หรือไม่?"
+    },
+
+    "preview": {
+      "title": "ตัวอย่างข้อความ",
+      "subtitle": "ข้อความที่จะถูกส่งออก"
+    },
+
+    "empty": {
+      "campaign": "ยังไม่มีแคมเปญ",
+      "preview": "เลือกแคมเปญเพื่อดูตัวอย่าง"
+    },
+
+    "fallback": {
+      "noTitle": "ไม่มีชื่อแคมเปญ"
+    },
+
+    "landCount": "{{count}} แปลง"
+  }
+}

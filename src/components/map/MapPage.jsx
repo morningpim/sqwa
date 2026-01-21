@@ -5,6 +5,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import ModeDisclaimerModal from "../Common/ModeDisclaimerModal";
 import "../../css/MapPage.css";
 import "../../css/land-popup.css";
+import { useTranslation } from "react-i18next";
+
 
 import MapControls from "./MapControls";
 import FilterPanel from "../Panels/FilterPanel";
@@ -69,6 +71,8 @@ export default function MapPage() {
   // =========================================================================
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+
 
   const mode = params.get("mode") || MAP_MODE.BUY;
   const focusLandId = params.get("focus"); // /map?mode=...&focus=LAND_ID
@@ -134,19 +138,19 @@ export default function MapPage() {
   const [initialPeer, setInitialPeer] = useState(null); // { uid, name }
 
   const openChat = useCallback(() => {
-    if (!currentUid) return alert("กรุณาเข้าสู่ระบบก่อนคุย");
+    if (!currentUid) return alert(t("common.loginRequired"));
     setInitialPeer(null);
     setChatOpen(true);
-  }, [currentUid]);
+  }, [currentUid, t]);
 
   const openChatWith = useCallback(
     (otherUid, otherName = "") => {
       if (!otherUid) return;
-      if (!currentUid) return alert("กรุณาเข้าสู่ระบบก่อนคุย");
+      if (!currentUid) return alert(t("common.loginRequired"));
       setInitialPeer({ uid: otherUid, name: otherName || "" });
       setChatOpen(true);
     },
-    [currentUid]
+    [currentUid, t]
   );
 
   // ✅ กด “แชทผู้ขาย” จาก land (ปรับ field ให้ตรง schema จริงของคุณ)
@@ -168,14 +172,12 @@ export default function MapPage() {
         "";
 
       if (!sellerUid) {
-        alert(
-          "ไม่พบข้อมูลผู้ขายในรายการนี้ (ไม่มี sellerUid/ownerUid/createdByUid)"
-        );
+        alert(t("chat.sellerNotFound"));
         return;
       }
       openChatWith(sellerUid, sellerName);
     },
-    [openChatWith]
+    [openChatWith, t]
   );
 
   // =========================================================================
@@ -218,9 +220,7 @@ export default function MapPage() {
       intent === "seller" &&
       !(role === "seller" || role === "landlord" || role === "admin")
     ) {
-      alert(
-        "ต้องเป็น Seller, Landlord หรือ Admin เท่านั้นถึงจะใช้โหมด Sell (ผู้ขายฝาก) ได้"
-      );
+      alert(t("sell.permissionDenied"));
       navigate("/map?mode=sell&intent=investor", { replace: true });
     }
   }, [mode, intent, role, navigate]);
@@ -649,7 +649,7 @@ export default function MapPage() {
         onLocate={locateMe}
         onOpenFilter={() => setFilterOpen(true)}
         onOpenChat={openChat} // ✅ เปิด Mock Chat
-        onOpenTools={() => alert("TODO")}
+        onOpenTools={() => alert(t("common.comingSoon"))}
       />
 
       {/* ✅ stats ด้านล่าง: ถ้า investor result ให้คิดจากรายการแนะนำ */}
@@ -739,8 +739,8 @@ export default function MapPage() {
       <UnlockPickerModal
         open={accessApi.unlockOpen}
         landId={accessApi.unlockLandId}
-        title="ปลดล็อกข้อมูลที่ดินนี้"
-        subtitle="ข้อมูลติดต่อ"
+        //title={t("picker.title")}
+        //subtitle={t("picker.subtitle")}
         items={accessApi.unlockItems}
         initialSelected={[]}
         onCancel={unlockFlow.onCancelUnlock}
@@ -766,14 +766,14 @@ export default function MapPage() {
         sellIntent={intent}
         onAdminClick={() => {
           if (!selectedLand) {
-            alert("กรุณาเลือกที่ดินก่อนสร้าง Broadcast");
+            alert(t("broadcast.selectLandFirst"));
             return;
           }
           openCreate("admin");
         }}
         onConsignorClick={() => {
           if (!selectedLand) {
-            alert("กรุณาเลือกที่ดินก่อนสร้าง Broadcast");
+            alert(t("broadcast.selectLandFirst"));
             return;
           }
           openCreate("consignor");

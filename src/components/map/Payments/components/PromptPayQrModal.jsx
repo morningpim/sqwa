@@ -1,9 +1,18 @@
-// src/pages/PayModal/components/PromptPayQrModal.jsx
 import React from "react";
 import { createPortal } from "react-dom";
 import { QRCodeCanvas } from "qrcode.react";
+import { useTranslation } from "react-i18next";
 
-export default function PromptPayQrModal({ open, data, status, onClose, onPaid }) {
+export default function PromptPayQrModal({
+  open,
+  data,
+  status,
+  onClose,
+  onPaid,
+}) {
+  const { t } = useTranslation("payment");
+  const { t: tCommon } = useTranslation("common");
+
   if (!open || !data) return null;
 
   const isPaid = status === "PAID";
@@ -11,34 +20,65 @@ export default function PromptPayQrModal({ open, data, status, onClose, onPaid }
   const isPending = !isPaid && !isFailed;
 
   return createPortal(
-    <div className="pm-qr-backdrop" onClick={onClose}>
+    <div
+      className="pm-qr-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="pm-qr-card" onClick={(e) => e.stopPropagation()}>
-        <div className="pm-qr-title">สแกนเพื่อชำระเงิน (PromptPay)</div>
+        {/* ================= TITLE ================= */}
+        <div className="pm-qr-title">
+          {t("promptpay.title")}
+        </div>
 
+        {/* ================= META ================= */}
         <div className="pm-qr-sub">
-          Order: <b>{data.orderId}</b> • <b>{Number(data.amount).toLocaleString("th-TH")}</b> บาท
+          {t("promptpay.order", { id: data.orderId })} •{" "}
+          <b>
+            {Number(data.amount).toLocaleString()}{" "}
+            {t("promptpay.amountUnit")}
+          </b>
         </div>
 
+        {/* ================= QR ================= */}
         <div className="pm-qr-box">
-          <QRCodeCanvas value={String(data.qrText || "")} size={240} />
+          <QRCodeCanvas
+            value={String(data.qrText || "")}
+            size={240}
+          />
         </div>
 
+        {/* ================= STATUS ================= */}
         <div className="pm-qr-hint">
-          {isPaid ? "ชำระสำเร็จ ✅" : isFailed ? "ชำระไม่สำเร็จ ❌" : "เปิดแอปธนาคาร → สแกน QR → กด “ฉันชำระแล้ว”"}
+          {isPaid
+            ? t("promptpay.status.paid")
+            : isFailed
+            ? t("promptpay.status.failed")
+            : t("promptpay.status.pending")}
         </div>
 
-        {/* ✅ actions */}
+        {/* ================= ACTIONS ================= */}
         <div className="pm-qr-actions">
-          <button className="ds-btn ds-btn-outline" onClick={onClose} type="button">
-            ปิด
+          <button
+            className="ds-btn ds-btn-outline"
+            onClick={onClose}
+            type="button"
+            aria-label={tCommon("close")}
+          >
+            {t("action.close")}
           </button>
 
           {/* mock flow: ให้ user กดยืนยันเอง */}
-          {isPending ? (
-            <button className="ds-btn ds-btn-primary" onClick={onPaid} type="button">
-              ฉันชำระแล้ว
+          {isPending && (
+            <button
+              className="ds-btn ds-btn-primary"
+              onClick={onPaid}
+              type="button"
+            >
+              {t("action.confirmPaid")}
             </button>
-          ) : null}
+          )}
         </div>
       </div>
     </div>,
