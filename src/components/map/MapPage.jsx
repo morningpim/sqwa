@@ -41,6 +41,7 @@ import { useLandSelection } from "./hooks/useLandSelection";
 import { useUnlockFlow } from "./hooks/useUnlockFlow";
 import { useLandFilters } from "./hooks/useLandFilters";
 import { useLongdoDrawing } from "./hooks/useLongdoDrawing";
+import { useChatPresence } from "../../hooks/useChatPresence";
 
 import { readFavorites, subscribeFavoritesChanged } from "../../utils/favorites";
 import { DEFAULT_FILTER } from "./constants/filter";
@@ -71,7 +72,7 @@ export default function MapPage() {
   // =========================================================================
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
 
   const mode = params.get("mode") || MAP_MODE.BUY;
@@ -90,46 +91,57 @@ export default function MapPage() {
   const [createLand, setCreateLand] = useState(null);
 
   // =========================================================================
-  // Role (mock) + Auth
-  // =========================================================================
-  const auth = useAuth?.() || {};
-  const role = auth.role;
-  const updateRole = auth.updateRole;
-
-  const [roleOpen, setRoleOpen] = useState(false);
-
-  // =========================================================================
-  // ✅ Mock Identity for Chat (ถ้า auth ไม่มี uid/name)
+  // ✅ Mock Identity for Chat (มาก่อนทุกอย่างที่ใช้มัน)
   // =========================================================================
   const [mockUid] = useState(() => {
-    const existing = localStorage.getItem("mock_uid");
-    if (existing) return existing;
-    const id = `u_${Math.random().toString(16).slice(2)}_${Date.now()}`;
-    localStorage.setItem("mock_uid", id);
-    return id;
+    const key = "mock_uid";
+    let uid = sessionStorage.getItem(key);
+    if (!uid) {
+      uid = "u_" + Math.random().toString(16).slice(2, 8);
+      sessionStorage.setItem(key, uid);
+    }
+    return uid;
   });
 
   const [mockName, setMockName] = useState(() => {
-    const existing = localStorage.getItem("mock_name");
-    if (existing) return existing;
-    const name = `Guest-${Math.random().toString(16).slice(2, 6)}`;
-    localStorage.setItem("mock_name", name);
+    const key = "mock_name";
+    let name = sessionStorage.getItem(key);
+    if (!name) {
+      name = `Guest-${Math.random().toString(16).slice(2, 6)}`;
+      sessionStorage.setItem(key, name);
+    }
     return name;
-  });
+  })
 
-  const currentUid = auth.uid || auth.user?.uid || mockUid;
+  // =========================================================================
+  // ✅ Auth (ต้องมาก่อน currentUid / userProfile)
+  // =========================================================================
+  const auth = useAuth?.() || {};
 
-  const userProfile = useMemo(() => {
-    const p = auth.profile || {};
-    const name =
-      p.name ||
-      p.displayName ||
-      auth.user?.displayName ||
-      mockName ||
-      "Guest";
-    const photoURL = p.photoURL || auth.user?.photoURL || "";
-    return { name, photoURL };
-  }, [auth.profile, auth.user, mockName]);
+  // =========================================================================
+  // ✅ Derived values
+  // =========================================================================
+  const isMock = !auth.uid && !auth.user?.uid;
+
+  const userProfile = auth.profile || {
+    name: mockName,
+    photoURL: "",
+  };
+
+  const currentUid = isMock
+    ? mockUid
+    : auth.uid || auth.user?.uid;
+  // ✅ เปิด presence (online/offline) ให้ chat
+  useChatPresence(currentUid, userProfile);
+
+  // =========================================================================
+  // Role picker modal
+  // =========================================================================
+  const [roleOpen, setRoleOpen] = useState(false);
+
+  const role = auth.role;
+  const updateRole = auth.updateRole;
+
 
   // =========================================================================
   // ✅ Chat state + handlers (Mock)
@@ -159,22 +171,20 @@ export default function MapPage() {
       const sellerUid =
         land?.sellerUid ||
         land?.ownerUid ||
-        land?.userId ||
         land?.createdByUid ||
-        land?.createdByUserId ||
         null;
 
       const sellerName =
         land?.sellerName ||
         land?.ownerName ||
         land?.createdByName ||
-        land?.createdBy ||
         "";
 
       if (!sellerUid) {
         alert(t("chat.sellerNotFound"));
         return;
       }
+
       openChatWith(sellerUid, sellerName);
     },
     [openChatWith, t]
@@ -838,7 +848,7 @@ export default function MapPage() {
             onChange={(e) => {
               const v = e.target.value;
               setMockName(v);
-              localStorage.setItem("mock_name", v);
+              sessionStorage.setItem("mock_name", v);
             }}
             style={{
               border: "1px solid #ddd",
@@ -849,7 +859,6 @@ export default function MapPage() {
             }}
           />
           <div style={{ fontSize: 12, opacity: 0.6 }}>
-            uid: {String(currentUid).slice(0, 10)}…
           </div>
         </div>
       )}

@@ -1,284 +1,222 @@
 // src/services/chatService.mock.js
-// Mock P2P chat using localStorage + BroadcastChannel (sync across tabs)
 
-const CH = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("sqwa_chat_mock") : null;
+const CHANNEL = new BroadcastChannel("mock-chat");
 
-function now() {
-  return Date.now();
-}
+const LS_ONLINE = "mock-online-users";
+const LS_ROOMS = "mock-chat-rooms";
+const LS_MESSAGES = "mock-chat-messages";
 
-function safeJsonParse(s, fallback) {
+/* ---------- helpers ---------- */
+function load(key, fallback) {
   try {
-    return JSON.parse(s);
+    return JSON.parse(localStorage.getItem(key)) ?? fallback;
   } catch {
     return fallback;
   }
 }
 
-function read(key, fallback) {
-  const v = safeJsonParse(localStorage.getItem(key), fallback);
-
-  if (v == null) return fallback;
-
-  // ถ้า fallback เป็น array แต่ v ไม่ใช่ array -> คืน fallback
-  if (Array.isArray(fallback) && !Array.isArray(v)) return fallback;
-
-  // ถ้า fallback เป็น object (ไม่ใช่ array) แต่ v ไม่ใช่ object -> คืน fallback
-  if (
-    fallback &&
-    typeof fallback === "object" &&
-    !Array.isArray(fallback) &&
-    (typeof v !== "object" || Array.isArray(v))
-  ) {
-    return fallback;
-  }
-
-  return v;
-}
-
-function write(key, value) {
+function save(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-function roomIdOf(uidA, uidB) {
+function getRoomId(uidA, uidB) {
   const [a, b] = [uidA, uidB].sort();
   return `room_${a}_${b}`;
 }
 
-function presenceKey() {
-  return `mock_presence`;
-}
-function roomsKey() {
-  return `mock_rooms`;
-}
-function messagesKey(roomId) {
-  return `mock_messages_${roomId}`;
-}
-
-function emit(type, payload) {
-  // trigger same-tab listeners via storage event trick: write a bump key
-  const bumpKey = "__mock_chat_bump__";
-  localStorage.setItem(bumpKey, JSON.stringify({ type, payload, t: now() }));
-
-  if (CH) {
-    CH.postMessage({ type, payload, t: now() });
-  }
-}
-
-function onAnyChange(handler) {
-  const onStorage = (e) => {
-    if (!e.key) return;
-    // listen any relevant keys
-    if (
-      e.key === presenceKey() ||
-      e.key === roomsKey() ||
-      e.key.startsWith("mock_messages_") ||
-      e.key === "__mock_chat_bump__"
-    ) {
-      handler();
-    }
-  };
-  window.addEventListener("storage", onStorage);
-
-  let onMsg = null;
-  if (CH) {
-    onMsg = () => handler();
-    CH.addEventListener("message", onMsg);
-  }
-
-  return () => {
-    window.removeEventListener("storage", onStorage);
-    if (CH && onMsg) CH.removeEventListener("message", onMsg);
-  };
-}
-
-// ---------------- Presence ----------------
-export async function updateUserOnlineStatus(uid, profile) {
+/* =========================================================
+   1) ONLINE USERS
+========================================================= */
+export function updateUserOnlineStatus(uid, profile) {
   if (!uid) return;
 
-  const list = read(presenceKey(), []);
-  const name = profile?.name || `User-${uid.slice(0, 6)}`;
-  const photoURL = profile?.photoURL || "";
+  const online = load(LS_ONLINE, {});
+  const wasOnline = online[uid]?.online === true;
 
-  const idx = list.findIndex((x) => x.uid === uid);
-  const row = { uid, name, photoURL, online: true, lastSeenAt: now() };
+  online[uid] = {
+    uid,
+    name: profile?.name || `User-${uid.slice(0, 6)}`,
+    photoURL: profile?.photoURL || "",
+    online: true,
+    lastSeenAt: Date.now(),
+  };
 
-  if (idx >= 0) list[idx] = { ...list[idx], ...row };
-  else list.push(row);
+  save(LS_ONLINE, online);
 
-  write(presenceKey(), list);
-  emit("presence", { uid });
+  // ยิง event เฉพาะตอนเปลี่ยนสถานะ
+  CHANNEL.postMessage({ type: "online" });
+}
+
+export function setUserOffline(uid) {
+  if (!uid) return;
+
+  const online = load(LS_ONLINE, {});
+  if (!online[uid]) return;
+
+  delete online[uid];
+  save(LS_ONLINE, online);
+
+  CHANNEL.postMessage({ type: "online" });
 }
 
 export function subscribeOnlineUsers(cb) {
-  const refresh = () => {
-    const raw = read(presenceKey(), []);
-    const list = Array.isArray(raw) ? raw : []; // ✅ กัน null/ผิดประเภท
-
-    const t = now();
-    const online = list
-      .filter(Boolean) // ✅ กัน null item
-      .map((u) => ({
-        ...u,
-        online: !!u?.online && (t - (u?.lastSeenAt || 0) < 70000),
-      }))
-      .filter((u) => u.online);
-
-    cb(online);
+  const emit = () => {
+    const raw = load(LS_ONLINE, {});
+    cb(Object.values(raw));
   };
 
-  refresh();
-  const unsub = onAnyChange(refresh);
-  const timer = setInterval(refresh, 5000);
+  emit();
 
-  return () => {
-    unsub?.();
-    clearInterval(timer);
+  const onMsg = (e) => {
+    if (e.data?.type === "online") emit();
   };
+
+  CHANNEL.addEventListener("message", onMsg);
+  return () => CHANNEL.removeEventListener("message", onMsg);
 }
 
+/* =========================================================
+   2) INBOX / ROOMS
+========================================================= */
+export function subscribeP2PChatRooms(currentUid, cb) {
+  const emit = () => {
+    const rooms = Object.values(load(LS_ROOMS, {}))
+      .filter((r) => r.members.includes(currentUid))
+      .sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0));
 
-// ---------------- Rooms (Inbox) ----------------
-function ensureRoom(currentUid, currentName, otherUid, otherName = "") {
-  const rid = roomIdOf(currentUid, otherUid);
-  const rooms = read(roomsKey(), {});
+    cb(
+      rooms.map((r) => {
+        const otherUid = r.members.find((x) => x !== currentUid);
+        return {
+          roomId: r.roomId,
+          otherUid,
+          otherName: r.memberNames?.[otherUid],
+          lastMessage: r.lastMessage || "",
+          lastAt: r.lastAt,
+          unreadCount: r.unread?.[currentUid] || 0,
+        };
+      })
+    );
+  };
 
-  if (!rooms[rid]) {
-    rooms[rid] = {
-      roomId: rid,
+  emit();
+
+  const onMsg = (e) => e.data?.type === "rooms" && emit();
+  CHANNEL.addEventListener("message", onMsg);
+
+  return () => CHANNEL.removeEventListener("message", onMsg);
+}
+
+/* =========================================================
+   3) OPEN ROOM / MESSAGES
+========================================================= */
+export async function subscribeChat(
+  currentUid,
+  currentName,
+  otherUid,
+  otherName,
+  cb
+) {
+  const roomId = getRoomId(currentUid, otherUid);
+  const rooms = load(LS_ROOMS, {});
+
+  if (!rooms[roomId]) {
+    rooms[roomId] = {
+      roomId,
       members: [currentUid, otherUid],
       memberNames: {
         [currentUid]: currentName || `User-${currentUid.slice(0, 6)}`,
         [otherUid]: otherName || `User-${otherUid.slice(0, 6)}`,
       },
       lastMessage: "",
-      lastAt: now(),
+      lastAt: Date.now(),
       unread: { [currentUid]: 0, [otherUid]: 0 },
     };
-    write(roomsKey(), rooms);
-  } else {
-    // update names
-    rooms[rid].memberNames = {
-      ...(rooms[rid].memberNames || {}),
-      [currentUid]:
-        currentName ||
-        rooms[rid].memberNames?.[currentUid] ||
-        `User-${currentUid.slice(0, 6)}`,
-      [otherUid]:
-        otherName ||
-        rooms[rid].memberNames?.[otherUid] ||
-        `User-${otherUid.slice(0, 6)}`,
-    };
-    write(roomsKey(), rooms);
+    save(LS_ROOMS, rooms);
+    CHANNEL.postMessage({ type: "rooms" });
   }
 
-  return rooms[rid];
-}
-
-export function subscribeP2PChatRooms(currentUid, cb) {
-  const refresh = () => {
-    const roomsMap = read(roomsKey(), {});
-    const all = Object.values(roomsMap);
-
-    const rooms = all
-      .filter((r) => (r.members || []).includes(currentUid))
-      .map((r) => {
-        const otherUid = (r.members || []).find((x) => x !== currentUid) || null;
-        const otherName =
-          r.memberNames?.[otherUid] || (otherUid ? `User-${otherUid.slice(0, 6)}` : "Unknown");
-        const unreadCount = r.unread?.[currentUid] || 0;
-
-        return {
-          id: r.roomId,
-          roomId: r.roomId,
-          otherUid,
-          otherName,
-          lastMessage: r.lastMessage || "",
-          lastAt: r.lastAt || 0,
-          unreadCount,
-        };
-      })
-      .sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0));
-
-    cb(rooms);
+  const emit = () => {
+    const messages = load(LS_MESSAGES, {})[roomId] || [];
+    cb({ roomId, messages });
   };
 
-  refresh();
-  return onAnyChange(refresh);
+  emit();
+
+  const onMsg = (e) =>
+    e.data?.type === "message" && e.data.roomId === roomId && emit();
+
+  CHANNEL.addEventListener("message", onMsg);
+  return () => CHANNEL.removeEventListener("message", onMsg);
 }
 
-// ---------------- Messages ----------------
-export async function subscribeChat(currentUid, currentName, otherUid, otherName, cb) {
-  // ensure room exists
-  const room = ensureRoom(currentUid, currentName, otherUid, otherName);
-  const rid = room.roomId;
+/* =========================================================
+   4) SEND MESSAGE
+========================================================= */
+export async function sendChatMessage(
+  text,
+  currentUid,
+  currentName,
+  otherUid,
+  otherName = ""
+) {
+  if (!text?.trim()) return;
 
-  const refresh = () => {
-    const msgs = read(messagesKey(rid), []);
-    cb({ roomId: rid, messages: msgs });
-  };
+  const roomId = getRoomId(currentUid, otherUid);
 
-  refresh();
-  const unsub = onAnyChange(refresh);
-  return unsub;
-}
+  const messages = load(LS_MESSAGES, {});
+  const list = messages[roomId] || [];
 
-export async function sendChatMessage(text, currentUid, currentName, otherUid, otherName = "") {
-  const clean = (text || "").trim();
-  if (!clean) return;
-
-  const room = ensureRoom(currentUid, currentName, otherUid, otherName);
-  const rid = room.roomId;
-
-  const msg = {
-    id: `m_${now()}_${Math.random().toString(16).slice(2)}`,
-    text: clean,
+  list.push({
+    id: Date.now() + Math.random(),
+    text: text.trim(),
     fromUid: currentUid,
     fromName: currentName || `User-${currentUid.slice(0, 6)}`,
     toUid: otherUid,
-    createdAt: now(),
-  };
+    createdAt: Date.now(),
+  });
 
-  const msgs = read(messagesKey(rid), []);
-  msgs.push(msg);
-  write(messagesKey(rid), msgs);
+  messages[roomId] = list;
+  save(LS_MESSAGES, messages);
 
-  // update room meta + unread for recipient
-  const rooms = read(roomsKey(), {});
-  const r = rooms[rid] || room;
+  const rooms = load(LS_ROOMS, {});
+  const room = rooms[roomId];
 
-  r.lastMessage = clean;
-  r.lastAt = now();
-  r.unread = r.unread || {};
-  r.unread[otherUid] = (r.unread[otherUid] || 0) + 1;
+  room.lastMessage = text.trim();
+  room.lastAt = Date.now();
+  room.unread[otherUid] = (room.unread[otherUid] || 0) + 1;
 
-  rooms[rid] = r;
-  write(roomsKey(), rooms);
+  save(LS_ROOMS, rooms);
 
-  emit("message", { roomId: rid });
+  CHANNEL.postMessage({ type: "message", roomId });
+  CHANNEL.postMessage({ type: "rooms" });
 }
 
+/* =========================================================
+   5) READ / DELETE
+========================================================= */
 export async function markMessagesAsRead(currentUid, otherUid) {
-  const rid = roomIdOf(currentUid, otherUid);
-  const rooms = read(roomsKey(), {});
-  const r = rooms[rid];
-  if (!r) return;
+  const roomId = getRoomId(currentUid, otherUid);
+  const rooms = load(LS_ROOMS, {});
+  if (!rooms[roomId]) return;
 
-  r.unread = r.unread || {};
-  r.unread[currentUid] = 0;
+  rooms[roomId].unread[currentUid] = 0;
+  save(LS_ROOMS, rooms);
 
-  rooms[rid] = r;
-  write(roomsKey(), rooms);
-  emit("read", { roomId: rid });
+  CHANNEL.postMessage({ type: "rooms" });
 }
 
 export async function deleteChatRoom(currentUid, otherUid) {
-  const rid = roomIdOf(currentUid, otherUid);
+  const roomId = getRoomId(currentUid, otherUid);
 
-  const rooms = read(roomsKey(), {});
-  delete rooms[rid];
-  write(roomsKey(), rooms);
+  const rooms = load(LS_ROOMS, {});
+  const messages = load(LS_MESSAGES, {});
 
-  localStorage.removeItem(messagesKey(rid));
-  emit("delete", { roomId: rid });
+  delete rooms[roomId];
+  delete messages[roomId];
+
+  save(LS_ROOMS, rooms);
+  save(LS_MESSAGES, messages);
+
+  CHANNEL.postMessage({ type: "rooms" });
 }
