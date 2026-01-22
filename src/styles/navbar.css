@@ -212,3 +212,34 @@
   background:#f3fff6;
   border:1px solid rgba(26,143,58,.18);
 }
+
+.nav-lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 12px;
+  font-size: 13px;
+}
+
+.nav-lang-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  opacity: 0.6;
+  font-weight: 500;
+}
+
+.nav-lang-btn.active {
+  opacity: 1;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.nav-lang-btn:hover {
+  opacity: 1;
+}
+
+.nav-lang-sep {
+  opacity: 0.4;
+}

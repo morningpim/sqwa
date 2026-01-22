@@ -1,0 +1,22 @@
+{
+  "title": "Sign Up",
+  "step": {
+    "common": "General information",
+    "verify": "Identity verification",
+    "specific": "Specific details"
+  },
+  "userType": {
+    "general": "General user",
+    "seller": "Seller",
+    "investor": "Investor"
+  },
+  "sellerRole": {
+    "agent": "Agent",
+    "landlord": "Landowner"
+  },
+  "success": {
+    "title": "Registration Complete",
+    "message": "Your account has been successfully created. Redirecting to login.",
+    "confirm": "Confirm"
+  }
+}

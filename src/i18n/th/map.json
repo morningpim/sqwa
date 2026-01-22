@@ -1,0 +1,19 @@
+{
+  "layer": {
+    "map": "แผนที่",
+    "satellite": "ดาวเทียม",
+    "traffic": "จราจร"
+  },
+  "layers": "ชั้นข้อมูล",
+  "filter": "ตัวกรอง",
+  "tools": "เครื่องมือ",
+  "zoomIn": "ซูมเข้า",
+  "zoomOut": "ซูมออก",
+  "locate": "ระบุตำแหน่ง",
+  "draw": "วาดขอบเขตที่ดิน",
+  "drawStart": "เริ่มวาด",
+  "drawFinish": "เสร็จสิ้น",
+  "drawClear": "ล้างเส้น",
+  "eiaMode": "โหมด EIA",
+  "normalMode": "โหมดปกติ"
+}

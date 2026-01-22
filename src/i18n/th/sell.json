@@ -1,0 +1,9 @@
+{
+  "permissionDenied": "ต้องเป็น Seller, Landlord หรือ Admin เท่านั้นจึงจะใช้โหมด Sell ได้",
+  "pick": {
+    "title": "เลือกประเภทการใช้งาน",
+    "subtitle": "โหมดขายฝากที่ดิน",
+    "seller": "ผู้ขายฝาก",
+    "investor": "นักลงทุน"
+  }
+}

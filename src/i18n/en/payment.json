@@ -1,0 +1,80 @@
+{
+  "title": "Unlock Payment",
+  "landId": "Land ID: {{id}}",
+  "section": {
+    "items": "Unlock items",
+    "paymentMethod": "Select payment method"
+  },
+  "empty": {
+    "items": "No items selected"
+  },
+  "total": {
+    "label": "Total amount",
+    "unit": "THB"
+  },
+  "method": {
+    "promptpay": "PromptPay",
+    "card": "Credit / Debit Card",
+    "bank": "Bank Transfer"
+  },
+  "note": {
+    "promptpay": "* PromptPay shows QR on this page",
+    "redirect": "* Card / Bank redirects to payment page"
+  },
+  "action": {
+    "cancel": "Cancel",
+    "pay": "Proceed to payment",
+    "generateQr": "Generate QR",
+    "confirmPaid": "Confirm payment",
+    "close": "Close"
+  },
+  "status": {
+    "pending": "Pending",
+    "paid": "Paid",
+    "failed": "Failed"
+  },
+  "alert": {
+    "selectMethod": "Please select a payment method",
+    "notReady": "Payment system not ready (Mock mode)",
+    "paymentFail": "Payment failed"
+  },
+  "footer": {
+    "mock": "* Payment gateway not connected (Mock Mode)"
+  },
+  "placeholder": {
+    "selectMethod": "— Select payment method —",
+    "selectMethodHint": "Choose payment method before proceeding"
+  },
+  "promptpay": {
+    "title": "Scan to Pay (PromptPay)",
+    "order": "Order",
+    "amountUnit": "THB",
+    "status": {
+      "paid": "Payment successful ✅ Processing...",
+      "failed": "Payment failed ❌",
+      "pending": "Open banking app → Scan QR → Await confirmation"
+    }
+  },
+  "cart": {
+    "title": "Selected Unlock Items",
+    "subtitle": "PromptPay QR available on this page",
+    "empty": {
+      "title": "Cart is empty",
+      "subtitle": "Go to map and select data to unlock"
+    },
+    "summary": {
+      "title": "Summary",
+      "total": "Grand total"
+    },
+    "action": {
+      "goMap": "Go to map",
+      "pay": "Proceed to payment",
+      "generateQr": "Generate QR",
+      "mockPay": "Instant unlock (mock)",
+      "back": "Back"
+    }
+  },
+  "hint": {
+    "postPaid": "In production, backend/IPN confirms and unlocks data"
+  }
+}

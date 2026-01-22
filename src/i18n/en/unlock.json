@@ -1,0 +1,18 @@
+{
+  "title": "Unlock Land Information",
+  "subtitle": "Use membership credits to unlock information",
+  "picker": {
+    "landId": "Land ID: {{id}}",
+    "noLandId": "Land ID not provided (Add to cart disabled)",
+    "priceUnit": "THB",
+    "total": "Total: {{total}} THB",
+    "aria": {
+      "close": "Close dialog"
+    },
+    "action": {
+      "cancel": "Cancel",
+      "addToCart": "Add to cart",
+      "pay": "Proceed to payment"
+    }
+  }
+}

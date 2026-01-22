@@ -1,0 +1,27 @@
+{
+  "badge": "EIA",
+  "projectFallback": "โครงการ EIA",
+  "field": {
+    "projectValue": "มูลค่าโครงการ",
+    "area": "ขนาดที่ดิน",
+    "status": "สถานะ",
+    "owner": "เจ้าของ",
+    "location": "พิกัด"
+  },
+  "unit": {
+    "millionBaht": "ล้านบาท"
+  },
+  "status": {
+    "approved": "ผ่าน EIA",
+    "unknown": "ไม่ระบุ"
+  },
+  "action": {
+    "news": "ลิงก์ข่าวสาร",
+    "detail": "ลิงก์ EIA"
+  },
+  "dashboard": {
+    "total": "โครงการทั้งหมด",
+    "approved": "ผ่าน EIA",
+    "pending": "รอพิจารณา"
+  }
+}

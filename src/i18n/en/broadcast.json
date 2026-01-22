@@ -1,0 +1,47 @@
+{
+  "selectLandFirst": "Please select land before creating a broadcast",
+  "fabLabel": "Broadcast",
+  "title": "Create Broadcast",
+  "quick": {
+    "adminTitle": "Admin Broadcast / LINE Ads",
+    "adminLabel": "Admin Broadcast",
+    "consignorTitle": "Broadcast 100 THB (Consignment)",
+    "consignorLabel": "Broadcast 100 THB"
+  },
+  "news": {
+    "title": "Broadcast News",
+    "round": "Broadcast round",
+    "today": "Today",
+    "empty": "No published broadcasts"
+  },
+  "badge": {
+    "consignment": "Consignment",
+    "buySell": "Buy / Sell",
+    "featured": "Featured",
+    "lineAds": "LINE Ads"
+  },
+  "field": {
+    "agent": "Agent",
+    "size": "Size",
+    "totalPrice": "Total price"
+  },
+  "unit": {
+    "baht": "THB"
+  },
+  "action": {
+    "viewMap": "View on map",
+    "copyLineAdsLink": "Copy Ads link",
+    "copyLink": "Copy link",
+    "copyText": "Copy text"
+  },
+  "alert": {
+    "copyLineLink": "LINE Ads link copied ✅",
+    "copiedLink": "Link copied ✅",
+    "copiedText": "Text copied ✅"
+  },
+  "queue": {
+    "title": "LINE Ads Queue",
+    "subtitle": "Campaigns prepared for LINE Ads Platform",
+    "empty": "Queue is empty"
+  }
+}

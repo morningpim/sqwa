@@ -1,12 +1,10 @@
-// src/pages/ProfilePage.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../css/profile.css";
 
 import { readFavorites, removeFavorite, subscribeFavoritesChanged } from "../utils/favorites";
 import { readPurchases, removePurchase, subscribePurchasesChanged } from "../utils/purchases";
-
-// ✅ เพิ่ม: landsLocal เพื่อดึง “ประกาศของฉัน”
 import { readAllLands, removeLand, subscribeLandsChanged } from "../utils/landsLocal";
 
 function useQuery() {
@@ -16,13 +14,12 @@ function useQuery() {
 
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation("profile");
   const q = useQuery();
   const tab = (q.get("tab") || "info").toLowerCase();
 
   const [favorites, setFavorites] = useState(() => readFavorites());
   const [purchases, setPurchases] = useState(() => readPurchases());
-
-  // ✅ เพิ่ม: posts (ประกาศของฉัน)
   const [posts, setPosts] = useState(() => readAllLands());
 
   useEffect(() => {
@@ -37,18 +34,17 @@ export default function ProfilePage() {
     return unsub;
   }, []);
 
-  // ✅ subscribe “ประกาศของฉัน”
   useEffect(() => {
     setPosts(readAllLands());
     const unsub = subscribeLandsChanged(() => setPosts(readAllLands()));
     return unsub;
   }, []);
 
-  const goTab = (t) => navigate(`/profile?tab=${t}`);
+  const goTab = (tname) => navigate(`/profile?tab=${tname}`);
 
   const onDeletePost = (id) => {
     if (!id) return;
-    if (!window.confirm("ต้องการลบประกาศนี้ใช่ไหม?")) return;
+    if (!window.confirm(t("posts.confirmDelete"))) return;
     removeLand(id);
   };
 
@@ -60,27 +56,26 @@ export default function ProfilePage() {
           <div className="profile-avatar">P</div>
           <div className="profile-meta">
             <div className="profile-name">Pimpa Naree</div>
-            <div className="profile-sub">สมาชิก</div>
+            <div className="profile-sub">{t("header.member")}</div>
           </div>
           <button className="profile-edit-btn" type="button">
-            แก้ไขโปรไฟล์
+            {t("header.editProfile")}
           </button>
         </div>
 
         {/* stats */}
         <div className="profile-stats">
           <div className="stat-card">
-            {/* ✅ เปลี่ยน 12 เป็นจำนวนประกาศจริง */}
             <div className="stat-num">{posts.length}</div>
-            <div className="stat-label">ประกาศ</div>
+            <div className="stat-label">{t("stats.posts")}</div>
           </div>
           <div className="stat-card">
             <div className="stat-num">{favorites.length}</div>
-            <div className="stat-label">รายการโปรด</div>
+            <div className="stat-label">{t("stats.favorites")}</div>
           </div>
           <div className="stat-card">
             <div className="stat-num">{purchases.length}</div>
-            <div className="stat-label">ประวัติการซื้อ</div>
+            <div className="stat-label">{t("stats.purchases")}</div>
           </div>
         </div>
 
@@ -88,34 +83,26 @@ export default function ProfilePage() {
         <div className="profile-grid">
           {/* left menu */}
           <aside className="profile-side">
-            <div className="side-title">เมนูโปรไฟล์</div>
+            <div className="side-title">{t("menu.title")}</div>
 
-            <button className={`side-item ${tab === "info" ? "active" : ""}`} onClick={() => goTab("info")} type="button">
-              ข้อมูลส่วนตัว
+            <button className={`side-item ${tab === "info" ? "active" : ""}`} onClick={() => goTab("info")}>
+              {t("menu.info")}
             </button>
 
-            <button className={`side-item ${tab === "fav" ? "active" : ""}`} onClick={() => goTab("fav")} type="button">
-              รายการโปรด
+            <button className={`side-item ${tab === "fav" ? "active" : ""}`} onClick={() => goTab("fav")}>
+              {t("menu.favorites")}
             </button>
 
-            <button
-              className={`side-item ${tab === "purchase" ? "active" : ""}`}
-              onClick={() => goTab("purchase")}
-              type="button"
-            >
-              ประวัติการซื้อ
+            <button className={`side-item ${tab === "purchase" ? "active" : ""}`} onClick={() => goTab("purchase")}>
+              {t("menu.purchases")}
             </button>
 
-            <button className={`side-item ${tab === "posts" ? "active" : ""}`} onClick={() => goTab("posts")} type="button">
-              ประกาศของฉัน
+            <button className={`side-item ${tab === "posts" ? "active" : ""}`} onClick={() => goTab("posts")}>
+              {t("menu.posts")}
             </button>
 
-            <button
-              className={`side-item ${tab === "settings" ? "active" : ""}`}
-              onClick={() => goTab("settings")}
-              type="button"
-            >
-              ตั้งค่า
+            <button className={`side-item ${tab === "settings" ? "active" : ""}`} onClick={() => goTab("settings")}>
+              {t("menu.settings")}
             </button>
           </aside>
 
@@ -125,18 +112,18 @@ export default function ProfilePage() {
               <>
                 <div className="content-head">
                   <div>
-                    <div className="content-title">ประกาศของฉัน</div>
-                    <div className="content-sub">ประกาศที่คุณวาดและบันทึกจากหน้าแผนที่</div>
+                    <div className="content-title">{t("posts.title")}</div>
+                    <div className="content-sub">{t("posts.subtitle")}</div>
                   </div>
-                  <div className="content-pill">{posts.length} รายการ</div>
+                  <div className="content-pill">{posts.length}</div>
                 </div>
 
                 {posts.length === 0 ? (
                   <div className="empty-state">
-                    <div className="empty-title">ยังไม่มีประกาศ</div>
-                    <div className="empty-sub">ไปที่หน้าแผนที่ แล้ววาด + บันทึกเพื่อสร้างประกาศ</div>
-                    <button className="outline-btn" type="button" onClick={() => navigate(`/map?mode=buy`)}>
-                      ไปหน้าแผนที่ (โหมดลงขาย)
+                    <div className="empty-title">{t("posts.emptyTitle")}</div>
+                    <div className="empty-sub">{t("posts.emptySub")}</div>
+                    <button className="outline-btn" onClick={() => navigate(`/map?mode=buy`)}>
+                      {t("posts.goMapSell")}
                     </button>
                   </div>
                 ) : (
@@ -145,44 +132,39 @@ export default function ProfilePage() {
                       <div key={p.id} className="purchase-card">
                         <div className="purchase-top">
                           <div className="purchase-title">
-                            {p.owner || (p.agent ? `${p.agent} (นายหน้า)` : "") || "ไม่ระบุชื่อ"}
+                            {p.owner || p.agent || t("common.unknown")}
                           </div>
                           <span className="purchase-status paid">
-                            {p.updatedAt ? `อัปเดต ${p.updatedAt}` : "ประกาศ"}
+                            {p.updatedAt
+                              ? t("posts.updated", { date: p.updatedAt })
+                              : t("stats.posts")}
                           </span>
                         </div>
 
                         <div className="fav-row">
-                          <span className="muted">ขนาด</span>
-                          <b>{Number(p.size || 0).toLocaleString("th-TH")} ตร.วา</b>
+                          <span className="muted">{t("posts.size")}</span>
+                          <b>{Number(p.size || 0).toLocaleString("th-TH")}</b>
                         </div>
 
                         <div className="fav-row">
-                          <span className="muted">ราคารวม</span>
-                          <b>{Number(p.totalPrice || 0).toLocaleString("th-TH")} บ.</b>
+                          <span className="muted">{t("posts.price")}</span>
+                          <b>{Number(p.totalPrice || 0).toLocaleString("th-TH")}</b>
                         </div>
 
                         <div className="fav-row">
-                          <span className="muted">โทร</span>
+                          <span className="muted">{t("posts.phone")}</span>
                           <b>{p.phone || "-"}</b>
                         </div>
 
                         <div className="fav-actions">
-                          {/* ✅ กดแล้วโฟกัสแปลงนั้นบนแผนที่ */}
-                          <button
-                            className="outline-btn"
-                            type="button"
-                            onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}
-                          >
-                            ดูบนแผนที่
+                          <button className="outline-btn" onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}>
+                            {t("posts.viewMap")}
                           </button>
-
-                          <button className="primary-btn" type="button" onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}>
-                            แก้ไขประกาศ
+                          <button className="primary-btn" onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}>
+                            {t("posts.edit")}
                           </button>
-
-                          <button className="danger-btn" type="button" onClick={() => onDeletePost(p.id)}>
-                            ลบประกาศ
+                          <button className="danger-btn" onClick={() => onDeletePost(p.id)}>
+                            {t("posts.delete")}
                           </button>
                         </div>
                       </div>
@@ -192,21 +174,20 @@ export default function ProfilePage() {
               </>
             ) : tab === "fav" ? (
               <>
-                {/* ===== ของเดิมคุณ (fav) ===== */}
                 <div className="content-head">
                   <div>
-                    <div className="content-title">รายการโปรด</div>
-                    <div className="content-sub">รายการที่คุณกดหัวใจไว้จากหน้าแผนที่</div>
+                    <div className="content-title">{t("favorites.title")}</div>
+                    <div className="content-sub">{t("favorites.subtitle")}</div>
                   </div>
-                  <div className="content-pill">{favorites.length} รายการ</div>
+                  <div className="content-pill">{favorites.length}</div>
                 </div>
 
                 {favorites.length === 0 ? (
                   <div className="empty-state">
-                    <div className="empty-title">ยังไม่มีรายการโปรด</div>
-                    <div className="empty-sub">ไปที่หน้าแผนที่ แล้วกดหัวใจที่แปลงที่สนใจ</div>
-                    <button className="outline-btn" type="button" onClick={() => navigate(`/map?mode=buy`)}>
-                      เปิดแผนที่
+                    <div className="empty-title">{t("favorites.emptyTitle")}</div>
+                    <div className="empty-sub">{t("favorites.emptySub")}</div>
+                    <button className="outline-btn" onClick={() => navigate(`/map?mode=buy`)}>
+                      {t("favorites.openMap")}
                     </button>
                   </div>
                 ) : (
@@ -217,41 +198,33 @@ export default function ProfilePage() {
                           <div className="fav-owner">{f.owner || "—"}</div>
                           <button
                             className="fav-remove"
-                            type="button"
+                            title={t("favorites.removeTitle")}
                             onClick={() => removeFavorite(f.id)}
-                            title="ลบออกจากรายการโปรด"
                           >
-                            ลบ
+                            {t("favorites.remove")}
                           </button>
                         </div>
 
                         <div className="fav-row">
-                          <span className="muted">วันที่ลงข้อมูล</span>
+                          <span className="muted">{t("favorites.date")}</span>
                           <b>{f.updatedAt || "-"}</b>
                         </div>
 
                         <div className="fav-row">
-                          <span className="muted">ขนาด</span>
-                          <b>
-                            {f.area || "-"} ตร.วา{" "}
-                            <span className="muted" style={{ fontWeight: 600 }}>
-                              ({f.raw || "-"})
-                            </span>
-                          </b>
+                          <span className="muted">{t("favorites.area")}</span>
+                          <b>{f.area || "-"}</b>
                         </div>
 
                         <div className="fav-row">
-                          <span className="muted">ราคารวม</span>
-                          <b>{f.totalPrice || "-"} บ.</b>
+                          <span className="muted">{t("favorites.price")}</span>
+                          <b>{f.totalPrice || "-"}</b>
                         </div>
 
                         <div className="fav-actions">
-                          <button className="outline-btn" type="button" onClick={() => navigate(`/map?mode=buy`)}>
-                            เปิดแผนที่
+                          <button className="outline-btn" onClick={() => navigate(`/map?mode=buy`)}>
+                            {t("favorites.openMap")}
                           </button>
-                          <button className="primary-btn" type="button">
-                            แชทผู้ขาย
-                          </button>
+                          <button className="primary-btn">{t("favorites.chat")}</button>
                         </div>
                       </div>
                     ))}
@@ -260,67 +233,51 @@ export default function ProfilePage() {
               </>
             ) : tab === "purchase" ? (
               <>
-                {/* ===== ของเดิมคุณ (purchase) ===== */}
                 <div className="content-head">
                   <div>
-                    <div className="content-title">ประวัติการซื้อ</div>
-                    <div className="content-sub">รายการที่คุณทำรายการชำระเงินไว้</div>
+                    <div className="content-title">{t("purchases.title")}</div>
+                    <div className="content-sub">{t("purchases.subtitle")}</div>
                   </div>
-                  <div className="content-pill">{purchases.length} รายการ</div>
+                  <div className="content-pill">{purchases.length}</div>
                 </div>
 
                 {purchases.length === 0 ? (
                   <div className="empty-state">
-                    <div className="empty-title">ยังไม่มีประวัติการซื้อ</div>
-                    <div className="empty-sub">เมื่อคุณชำระเงินสำเร็จ ระบบจะบันทึกไว้ที่นี่</div>
-                    <button className="outline-btn" type="button" onClick={() => navigate(`/map?mode=buy`)}>
-                      ไปหน้าแผนที่
-                    </button>
+                    <div className="empty-title">{t("purchases.emptyTitle")}</div>
+                    <div className="empty-sub">{t("purchases.emptySub")}</div>
                   </div>
                 ) : (
                   <div className="purchase-grid">
                     {purchases.map((p) => (
                       <div key={p.id} className="purchase-card">
                         <div className="purchase-top">
-                          <div className="purchase-title">{p.title || "รายการสั่งซื้อ"}</div>
+                          <div className="purchase-title">{p.title || "-"}</div>
                           <span className={`purchase-status ${p.status || "paid"}`}>
-                            {p.status === "pending"
-                              ? "รอชำระ"
-                              : p.status === "cancelled"
-                              ? "ยกเลิก"
-                              : p.status === "refunded"
-                              ? "คืนเงิน"
-                              : "ชำระแล้ว"}
+                            {t(`purchases.status.${p.status || "paid"}`)}
                           </span>
                         </div>
 
                         <div className="fav-row">
-                          <span className="muted">ผู้ขาย</span>
+                          <span className="muted">{t("purchases.seller")}</span>
                           <b>{p.seller || "-"}</b>
                         </div>
 
                         <div className="fav-row">
-                          <span className="muted">วันที่ชำระ</span>
+                          <span className="muted">{t("purchases.paidAt")}</span>
                           <b>{p.paidAt || "-"}</b>
                         </div>
 
                         <div className="fav-row">
-                          <span className="muted">ยอดรวม</span>
-                          <b>{Number(p.totalPrice || 0).toLocaleString("th-TH")} บ.</b>
+                          <span className="muted">{t("purchases.total")}</span>
+                          <b>{p.totalPrice || "-"}</b>
                         </div>
 
-                        {p.note ? <div className="purchase-note">{p.note}</div> : null}
-
                         <div className="fav-actions">
-                          <button
-                            className="outline-btn"
-                            type="button"
-                            onClick={() => navigate(`/map?mode=buy${p.landId ? `&focus=${p.landId}` : ""}`)}
-                          >
-                            ดูแปลง
+                          <button className="outline-btn" onClick={() => navigate(`/map?mode=buy`)}>
+                            {t("purchases.viewLand")}
                           </button>
-                          <button className="danger-btn" type="button" onClick={() => removePurchase(p.id)}>
-                            ลบประวัติ
+                          <button className="danger-btn" onClick={() => removePurchase(p.id)}>
+                            {t("purchases.delete")}
                           </button>
                         </div>
                       </div>
@@ -330,46 +287,39 @@ export default function ProfilePage() {
               </>
             ) : tab === "info" ? (
               <>
-                {/* ===== ของเดิมคุณ (info) ===== */}
                 <div className="content-head">
                   <div>
-                    <div className="content-title">ข้อมูลส่วนตัว</div>
-                    <div className="content-sub">จัดการข้อมูลของคุณในหน้าโปรไฟล์</div>
+                    <div className="content-title">{t("info.title")}</div>
+                    <div className="content-sub">{t("info.subtitle")}</div>
                   </div>
                 </div>
 
                 <div className="info-card">
                   <div className="info-row">
-                    <div className="k">ชื่อ</div>
+                    <div className="k">{t("info.name")}</div>
                     <div className="v">Pimpa Naree</div>
                   </div>
                   <div className="info-row">
-                    <div className="k">เบอร์โทร</div>
+                    <div className="k">{t("info.phone")}</div>
                     <div className="v">081-234-5678</div>
                   </div>
                   <div className="info-row">
-                    <div className="k">LINE ID</div>
+                    <div className="k">{t("info.line")}</div>
                     <div className="v">bee.land</div>
                   </div>
                   <div className="info-row">
-                    <div className="k">สถานะ</div>
+                    <div className="k">{t("info.status")}</div>
                     <div className="v">
-                      <span className="badge">สมาชิก</span>
+                      <span className="badge">{t("header.member")}</span>
                     </div>
                   </div>
                 </div>
               </>
             ) : (
               <>
-                <div className="content-head">
-                  <div>
-                    <div className="content-title">กำลังทำอยู่</div>
-                    <div className="content-sub">แท็บนี้ยังไม่เปิดใช้งาน</div>
-                  </div>
-                </div>
                 <div className="empty-state">
-                  <div className="empty-title">ยังไม่พร้อมใช้งาน</div>
-                  <div className="empty-sub">เดี๋ยวเราทำต่อให้ได้เลย</div>
+                  <div className="empty-title">{t("common.notReady")}</div>
+                  <div className="empty-sub">{t("common.comingSoon")}</div>
                 </div>
               </>
             )}

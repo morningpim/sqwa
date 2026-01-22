@@ -1,0 +1,68 @@
+{
+  "pageTitle": "Broadcast & LINE Ads",
+  "subtitle": "All broadcast campaigns",
+  "noPermission": "Access denied",
+  "search": "Search",
+  "listTitle": "{{count}} campaigns",
+  "filter": {
+    "statusAll": "All statuses",
+    "modeAll": "All modes",
+    "channelAll": "All channels"
+  },
+  "table": {
+    "name": "Campaign name",
+    "mode": "Mode",
+    "channel": "Channel",
+    "schedule": "Schedule",
+    "status": "Status",
+    "action": "Manage"
+  },
+  "mode": {
+    "buy_sell": "Buy / Sell",
+    "consignment": "Consignment"
+  },
+  "channel": {
+    "SQW_WEB": "SQW Website",
+    "LINE_ADS": "LINE Ads"
+  },
+  "day": {
+    "MON": "Monday",
+    "TUE": "Tuesday",
+    "WED": "Wednesday",
+    "THU": "Thursday",
+    "FRI": "Friday",
+    "SAT": "Saturday",
+    "SUN": "Sunday"
+  },
+  "status": {
+    "draft": "Draft",
+    "scheduled": "Scheduled",
+    "sent": "Sent",
+    "disabled": "Disabled"
+  },
+  "action": {
+    "create": "Create campaign",
+    "view": "View",
+    "disable": "Disable",
+    "enable": "Enable",
+    "markSent": "Mark as sent",
+    "delete": "Delete",
+    "copy": "Copy"
+  },
+  "confirm": {
+    "disable": "Disable this campaign?",
+    "delete": "Delete this campaign?"
+  },
+  "preview": {
+    "title": "Message preview",
+    "subtitle": "Content to be sent"
+  },
+  "empty": {
+    "campaign": "No campaigns",
+    "preview": "Select a campaign to preview"
+  },
+  "fallback": {
+    "noTitle": "Untitled campaign"
+  },
+  "landCount": "{{count}} lands"
+}

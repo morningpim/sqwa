@@ -1,0 +1,47 @@
+{
+  "selectLandFirst": "กรุณาเลือกที่ดินก่อนสร้าง Broadcast",
+  "fabLabel": "ข่าวประชาสัมพันธ์",
+  "title": "สร้างข่าวประชาสัมพันธ์",
+  "quick": {
+    "adminTitle": "ผู้ดูแลระบบ ข่าวประชาสัมพันธ์/โฆษณา LINE",
+    "adminLabel": "ผู้ดูแลระบบ ข่าวประชาสัมพันธ์",
+    "consignorTitle": "ข่าวประชาสัมพันธ์ 100 บาท (ขายฝาก)",
+    "consignorLabel": "ข่าวประชาสัมพันธ์ 100฿"
+  },
+  "news": {
+    "title": "ข่าวประชาสัมพันธ์",
+    "round": "รอบบอร์ดแคส",
+    "today": "วันนี้",
+    "empty": "ยังไม่มีข่าวที่เผยแพร่"
+  },
+  "badge": {
+    "consignment": "ขายฝาก",
+    "buySell": "ซื้อขาย",
+    "featured": "เด่น",
+    "lineAds": "LINE Ads"
+  },
+  "field": {
+    "agent": "นายหน้า",
+    "size": "ขนาด",
+    "totalPrice": "ราคารวม"
+  },
+  "unit": {
+    "baht": "บ."
+  },
+  "action": {
+    "viewMap": "ดูบนแผนที่",
+    "copyLineAdsLink": "คัดลอกลิงก์ Ads",
+    "copyLink": "คัดลอกลิงก์",
+    "copyText": "คัดลอกข้อความ"
+  },
+  "alert": {
+    "copyLineLink": "คัดลอกลิงก์ LINE Ads แล้ว ✅",
+    "copiedLink": "คัดลอกลิงก์แล้ว ✅",
+    "copiedText": "คัดลอกข้อความแล้ว ✅"
+  },
+  "queue": {
+    "title": "LINE Ads Queue",
+    "subtitle": "รายการที่สร้างไว้สำหรับนำไปตั้งใน LINE Ads Platform",
+    "empty": "ยังไม่มีรายการใน queue"
+  }
+}

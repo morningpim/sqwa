@@ -1,4 +1,6 @@
-/* Overlay */
+/* =========================================================
+   Overlay
+   ========================================================= */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -10,7 +12,9 @@
   z-index: 5000;
 }
 
-/* Box */
+/* =========================================================
+   Modal Box
+   ========================================================= */
 .modal-box {
   width: 420px;
   max-width: 90%;
@@ -20,24 +24,41 @@
   text-align: center;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border);
+
+  animation: modalFadeIn 0.18s ease-out;
 }
 
-/* Icon */
+/* =========================================================
+   Icon
+   ========================================================= */
 .modal-icon {
   font-size: 42px;
   margin-bottom: var(--space-sm);
 }
 
-/* Text */
+/* =========================================================
+   Text
+   ========================================================= */
 .modal-text {
   font-family: var(--font-th);
   font-size: 15px;
-  color: #b22222; /* warning text (ตั้งใจให้เด่นกว่าปกติ) */
   margin-bottom: var(--space-lg);
   line-height: 1.6;
 }
 
-/* Button base */
+/* step: normal disclaimer */
+.modal-text.normal {
+  color: #374151; /* gray-700 */
+}
+
+/* step: PDPA warning */
+.modal-text.warning {
+  color: #b22222; /* firebrick */
+}
+
+/* =========================================================
+   Buttons
+   ========================================================= */
 .btn {
   padding: 10px 22px;
   border-radius: var(--r-md);
@@ -46,6 +67,7 @@
   font-family: var(--font-th);
   font-size: 14px;
   font-weight: 600;
+  transition: all 0.15s ease;
 }
 
 /* Primary */
@@ -56,4 +78,64 @@
 
 .btn-primary:hover {
   background: var(--primary-700);
+}
+
+/* Secondary (Cancel) */
+.btn-secondary {
+  background: #e5e7eb; /* gray-200 */
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+/* =========================================================
+   Button Layout (2 buttons)
+   ========================================================= */
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+/* =========================================================
+   Step Indicator (Optional)
+   ========================================================= */
+.modal-step {
+  font-size: 12px;
+  font-family: var(--font-th);
+  color: #6b7280;
+  margin-bottom: var(--space-xs);
+}
+
+/* =========================================================
+   Animation
+   ========================================================= */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 480px) {
+  .modal-box {
+    padding: var(--space-lg);
+  }
+
+  .modal-icon {
+    font-size: 36px;
+  }
+
+  .modal-text {
+    font-size: 14px;
+  }
 }

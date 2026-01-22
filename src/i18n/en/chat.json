@@ -1,0 +1,41 @@
+{
+  "open": "Chat",
+  "header": {
+    "with": "Chat with {{name}}",
+    "inbox": "Chats ({{count}} new)"
+  },
+  "section": {
+    "online": "Online",
+    "inbox": "Inbox"
+  },
+  "status": {
+    "online": "Online"
+  },
+  "userFallback": "User {{id}}",
+  "me": "You",
+  "other": "Other",
+  "placeholder": {
+    "select": "Select a user to start chatting"
+  },
+  "input": {
+    "placeholder": "Type a message..."
+  },
+  "action": {
+    "send": "Send",
+    "delete": "Delete chat"
+  },
+  "empty": {
+    "online": "No users online",
+    "inbox": "No chat rooms yet"
+  },
+  "alert": {
+    "noName": "Please set your username before sending messages",
+    "noReceiver": "Please select a receiver before sending",
+    "sendFail": "Unable to send message: {{error}}",
+    "deleteFail": "An error occurred: {{error}}"
+  },
+  "confirm": {
+    "deleteRoom": "Do you want to delete the conversation with \"{{name}}\"?"
+  },
+  "room": "Room"
+}

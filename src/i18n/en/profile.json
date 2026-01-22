@@ -1,0 +1,77 @@
+{
+  "header": {
+    "editProfile": "Edit profile",
+    "member": "Member"
+  },
+  "stats": {
+    "posts": "Listings",
+    "favorites": "Favorites",
+    "purchases": "Purchase history"
+  },
+  "menu": {
+    "title": "Profile Menu",
+    "info": "Personal information",
+    "favorites": "Favorites",
+    "purchases": "Purchase history",
+    "posts": "My listings",
+    "settings": "Settings"
+  },
+  "posts": {
+    "title": "My listings",
+    "subtitle": "Listings created and saved from the map",
+    "emptyTitle": "No listings yet",
+    "emptySub": "Go to the map and draw + save to create listings",
+    "goMapSell": "Go to map (Sell mode)",
+    "confirmDelete": "Delete this listing?",
+    "updated": "Updated {{date}}",
+    "size": "Size",
+    "price": "Total price",
+    "phone": "Phone",
+    "viewMap": "View on map",
+    "edit": "Edit listing",
+    "delete": "Delete listing"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "subtitle": "Land listings you liked from the map",
+    "emptyTitle": "No favorites yet",
+    "emptySub": "Go to the map and like land listings",
+    "openMap": "Open map",
+    "remove": "Remove",
+    "removeTitle": "Remove from favorites",
+    "owner": "Owner",
+    "area": "Size",
+    "price": "Total price",
+    "date": "Posted date",
+    "chat": "Chat seller"
+  },
+  "purchases": {
+    "title": "Purchase history",
+    "subtitle": "Your completed payment records",
+    "emptyTitle": "No purchase history",
+    "emptySub": "Successful payments will appear here",
+    "seller": "Seller",
+    "paidAt": "Paid on",
+    "total": "Total",
+    "viewLand": "View land",
+    "delete": "Delete record",
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    }
+  },
+  "info": {
+    "title": "Personal information",
+    "subtitle": "Manage your profile information",
+    "name": "Name",
+    "phone": "Phone",
+    "line": "LINE ID",
+    "status": "Status"
+  },
+  "common": {
+    "notReady": "Not available",
+    "comingSoon": "Coming soon"
+  }
+}

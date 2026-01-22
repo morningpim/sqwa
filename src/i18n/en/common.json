@@ -1,0 +1,82 @@
+{
+  "close": "Close",
+  "search": "Search",
+  "loading": "Loading...",
+  "comingSoon": "This feature is coming soon",
+  "unknown": "Unknown",
+  "unit": {
+    "baht": "THB"
+  },
+  "field": {
+    "owner": "Owner",
+    "agent": "Agent",
+    "phone": "Phone",
+    "lineId": "LINE ID",
+    "landFrame": "Land boundary",
+    "deed": "Deed / Parcel info",
+    "selected": "Selected:"
+  },
+  "date": {
+    "added": "Added on"
+  },
+  "action": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "view": "View details",
+    "copy": "Copy"
+  },
+  "nav": {
+    "home": "Home",
+    "news": "News",
+    "guide": "User Guide",
+    "contact": "Contact",
+
+    "login": "Login",
+    "logout": "Logout",
+    "profile": "Profile",
+    "favorites": "Favorites",
+    "purchases": "Purchase History",
+
+    "mode": {
+      "buy": "Land Trading Mode",
+      "sell": "Land Consignment Mode",
+      "eia": "Future Project & EIA Base Map"
+    },
+    "admin": {
+      "go": "Go to Admin",
+      "section": "Admin Tools",
+      "dashboard": "Admin Dashboard",
+      "broadcast": "Broadcast & LINE Ads",
+      "lands": "Manage Listings"
+    }
+  },
+  "hero": {
+    "title": "SQW Land Management Platform",
+    "subtitle": "Please select land information to explore",
+    "sell": "Sell Land",
+    "buy": "Buy & Sell Land",
+    "eia": "Future Project & EIA Base Map"
+  },
+  "footer": {
+    "subtitle": "SQW - Land Management Platform",
+    "description": "A smart land management platform\nDesigned for landowners, investors, and general users\nTo store, analyze, and explore land data efficiently"
+  },
+  "disclaimer": {
+    "mode": {
+      "line1": "This information is provided for displaying land plot locations",
+      "line2": "and for reference with Google Maps only.",
+      "line3": "It is not a legal document or legal evidence.",
+      "confirm": "Acknowledge"
+    },
+    "pdpa": {
+      "line1": "Warning: You are about to process personal data.",
+      "line2": "You are responsible under the Personal Data Protection Act (PDPA).",
+      "line3": "If you do not wish to proceed, please click “Cancel”.",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    }
+  }
+}

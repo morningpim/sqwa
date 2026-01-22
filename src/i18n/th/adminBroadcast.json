@@ -1,0 +1,35 @@
+{
+  "pageTitle": "Broadcast & LINE Ads",
+  "subtitle": "รายการแคมเปญบอร์ดแคสทั้งหมด",
+  "noPermission": "ไม่มีสิทธิ์เข้าถึงหน้านี้",
+  "search": "ค้นหา",
+  "listTitle": "{{count}} แคมเปญ",
+  "filter": {
+    "statusAll": "ทุกสถานะ",
+    "modeAll": "ทุกโหมด",
+    "channelAll": "ทุกช่องทาง"
+  },
+  "table": {
+    "name": "ชื่อแคมเปญ",
+    "mode": "โหมด",
+    "channel": "ช่องทาง",
+    "schedule": "ตารางเวลา",
+    "status": "สถานะ",
+    "action": "จัดการ"
+  },
+  "status": {
+    "draft": "ร่าง",
+    "scheduled": "ตั้งเวลา",
+    "sent": "ส่งแล้ว",
+    "disabled": "ปิดใช้งาน"
+  },
+  "action": {
+    "create": "สร้างแคมเปญ",
+    "view": "ดู",
+    "disable": "ปิด",
+    "enable": "เปิด",
+    "markSent": "ทำเครื่องหมายว่าส่งแล้ว",
+    "delete": "ลบ",
+    "copy": "คัดลอก"
+  }
+}

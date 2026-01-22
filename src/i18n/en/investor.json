@@ -1,0 +1,53 @@
+{
+  "panel": {
+    "title": "Recommended Land Listings",
+    "subtitle": "{{count}} listings match your investor profile",
+    "empty": "No recommendations found"
+  },
+  "item": {
+    "unknown": "Unnamed",
+    "agentSuffix": "(Agent)"
+  },
+  "field": {
+    "size": "Size",
+    "price": "Price"
+  },
+  "unit": {
+    "sqw": "Sq.Wah",
+    "baht": "THB"
+  },
+  "action": {
+    "focus": "View on map"
+  },
+  "profile": {
+    "title": "Investor Assessment",
+    "subtitle": "(SQW Investor Profile)",
+    "question": {
+      "goal": "1) What is your expected profit strategy?",
+      "gis": "2) Which GIS factor is most important to you?",
+      "budget": "3) What is your investment budget plan?"
+    },
+    "goal": {
+      "flipping": "Short-term flipping",
+      "capital_gain": "Long-term capital gain",
+      "passive_income": "Passive income"
+    },
+    "gis": {
+      "infra": "Infrastructure (Transit / Expressway)",
+      "zoning": "Zoning & regulations",
+      "price_history": "Historical price analysis"
+    },
+    "budget": {
+      "low": "Small investor: under 5M THB",
+      "mid": "Mid-level: 5–30M THB",
+      "high": "Institutional: 50M+ THB"
+    },
+    "action": {
+      "reset": "Reset saved answers",
+      "submit": "View results"
+    },
+    "aria": {
+      "close": "Close dialog"
+    }
+  }
+}

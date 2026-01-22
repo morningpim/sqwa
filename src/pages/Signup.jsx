@@ -4,7 +4,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import InvestorRiskQuiz from "../components/InvestorRiskQuiz";
 import { addApplicant } from "../utils/applicantsLocal";
+import { useTranslation } from "react-i18next";
 import "../css/Signup.css";
+
+import StepVerify from "./Signup/steps/StepVerify";
+import StepCommon from "./Signup/steps/StepCommon";
+import StepSpecific from "./Signup/steps/StepSpecific";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOW_TYPES = ["image/jpeg", "image/png", "image/jpg"];
@@ -17,6 +22,7 @@ function useQuery() {
 export default function Signup() {
   const navigate = useNavigate();
   const query = useQuery();
+  const { t } = useTranslation("signup");
 
   // ===== type from query =====
   const userType = (query.get("type") || "general").toLowerCase(); // general | seller | investor
@@ -130,27 +136,26 @@ export default function Signup() {
 
   // ===== validations =====
   const validateStep1 = () => {
-    if (!form.name || !form.lastname) return "กรุณากรอกชื่อ-นามสกุล";
-    if (!form.email) return "กรุณากรอกอีเมล";
-    if (!form.password || !form.confirmPassword) return "กรุณากรอกรหัสผ่านให้ครบ";
+    if (!form.name || !form.lastname) return t("error.nameRequired");
+    if (!form.email) return t("error.emailRequired");
+    if (!form.password || !form.confirmPassword) return t("error.passwordRequired");
     if (form.password !== form.confirmPassword)
-      return "Password และ Confirm Password ไม่ตรงกัน";
+      return t("error.passwordMismatch");
     return null;
   };
 
   const validateStep3 = () => {
     if (isSeller) {
-      if (!form.shopName) return "กรุณากรอกชื่อร้าน/ชื่อผู้ขาย";
-      if (!form.bankAccount) return "กรุณากรอกเลขบัญชีธนาคาร";
-
+      if (!form.shopName) return t("error.shopNameRequired");
+      if (!form.bankAccount) return t("error.bankAccountRequired");
       // ✅ Agent ต้องมี license
       if (isAgent && !form.agentLicense)
-        return "กรุณากรอกเลขที่ใบอนุญาต (License) ของ Agent";
+        return t("error.agentLicenseRequired");
     }
 
     if (isInvestor) {
       if (!investorAllAnswered)
-        return "กรุณาตอบแบบประเมินความเสี่ยงให้ครบทั้ง 10 ข้อ";
+        return t("error.investorQuizRequired");
     }
 
     return null;
@@ -172,6 +177,10 @@ export default function Signup() {
     }
 
     if (isGeneral) {
+      const payload = {
+        type: userType,
+        ...form,
+      };
       addApplicant(payload);
       setShowSuccess(true);
       return;
@@ -232,7 +241,7 @@ export default function Signup() {
           <div className={`step-item ${step === 1 ? "active" : ""}`}>
             <div className="step-circle">1</div>
             <span className="step-label">
-              ข้อมูลทั่วไป
+              {t("step.common")}
               <br />({typeLabel})
             </span>
           </div>
@@ -241,7 +250,7 @@ export default function Signup() {
 
           <div className={`step-item ${step === 2 ? "active" : ""}`}>
             <div className="step-circle">2</div>
-            <span className="step-label">ยืนยันตัวตน</span>
+            <span className="step-label">{t("step.verify")}</span>
           </div>
 
           {showStep3 && (
@@ -250,7 +259,7 @@ export default function Signup() {
               <div className={`step-item ${step === 3 ? "active" : ""}`}>
                 <div className="step-circle">3</div>
                 <span className="step-label">
-                  ข้อมูลเฉพาะ
+                  {t("step.specific")}
                   <br />({typeLabel})
                 </span>
               </div>
@@ -260,287 +269,51 @@ export default function Signup() {
 
         {/* ===== STEP 1: Common ===== */}
         {step === 1 && (
-          <>
-            <h1 className="signup-title">Sign up</h1>
-
-            <form className="signup-form" onSubmit={goNextFromStep1}>
-              <div className="signup-grid">
-                <div className="field">
-                  <label>Name</label>
-                  <input type="text" value={form.name} onChange={updateForm("name")} />
-                </div>
-
-                <div className="field">
-                  <label>Lastname</label>
-                  <input
-                    type="text"
-                    value={form.lastname}
-                    onChange={updateForm("lastname")}
-                  />
-                </div>
-
-                <div className="field">
-                  <label>Phone</label>
-                  <input type="tel" value={form.phone} onChange={updateForm("phone")} />
-                </div>
-
-                <div className="field">
-                  <label>E-mail</label>
-                  <input type="email" value={form.email} onChange={updateForm("email")} />
-                </div>
-
-                <div className="field">
-                  <label>Line id</label>
-                  <input type="text" value={form.lineId} onChange={updateForm("lineId")} />
-                </div>
-
-                <div className="field">
-                  <label>Address</label>
-                  <input type="text" value={form.address} onChange={updateForm("address")} />
-                </div>
-
-                <div className="field">
-                  <label>Password</label>
-                  <div className="password-group">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      className="password-input"
-                      value={form.password}
-                      onChange={updateForm("password")}
-                    />
-                    <button
-                      type="button"
-                      className="password-toggle"
-                      onClick={() => setShowPassword((p) => !p)}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? (
-                        <AiOutlineEyeInvisible size={18} />
-                      ) : (
-                        <AiOutlineEye size={18} />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="field">
-                  <label>Confirm Password</label>
-                  <div className="password-group">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      className="password-input"
-                      value={form.confirmPassword}
-                      onChange={updateForm("confirmPassword")}
-                    />
-                    <button
-                      type="button"
-                      className="password-toggle"
-                      onClick={() => setShowConfirmPassword((p) => !p)}
-                      aria-label={
-                        showConfirmPassword
-                          ? "Hide confirm password"
-                          : "Show confirm password"
-                      }
-                    >
-                      {showConfirmPassword ? (
-                        <AiOutlineEyeInvisible size={18} />
-                      ) : (
-                        <AiOutlineEye size={18} />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="signup-actions">
-                <button type="button" className="btn-outline" onClick={handleCancel}>
-                  ยกเลิก
-                </button>
-                <button type="submit" className="btn-primary">
-                  ถัดไป
-                </button>
-              </div>
-            </form>
-          </>
+          <StepCommon
+            form={form}
+            updateForm={updateForm}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+            showConfirmPassword={showConfirmPassword}
+            setShowConfirmPassword={setShowConfirmPassword}
+            onNext={goNextFromStep1}
+            onCancel={handleCancel}
+            t={t}
+          />
         )}
 
         {/* ===== STEP 2: Verify ===== */}
         {step === 2 && (
-          <form className="signup-form" onSubmit={goNextFromStep2}>
-            <div className="verify-section">
-              <p className="verify-heading">ถ่ายรูปบัตรประชาชน</p>
-
-              <div className="verify-row">
-                <label className="upload-box">
-                  {idFront ? (
-                    <img
-                      src={URL.createObjectURL(idFront)}
-                      alt="ID Front"
-                      className="upload-preview"
-                    />
-                  ) : (
-                    <>
-                      <div className="upload-icon">📷</div>
-                      <span className="upload-label">ด้านหน้า</span>
-                      <span className="upload-hint">กดเพื่ออัปโหลด</span>
-                    </>
-                  )}
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e.target.files[0], "front")}
-                  />
-                </label>
-
-                <label className="upload-box">
-                  {idBack ? (
-                    <img
-                      src={URL.createObjectURL(idBack)}
-                      alt="ID Back"
-                      className="upload-preview"
-                    />
-                  ) : (
-                    <>
-                      <div className="upload-icon">📷</div>
-                      <span className="upload-label">ด้านหลัง</span>
-                      <span className="upload-hint">กดเพื่ออัปโหลด</span>
-                    </>
-                  )}
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e.target.files[0], "back")}
-                  />
-                </label>
-              </div>
-
-              <p className="verify-heading">ถ่ายหน้าตัวเองพร้อมกับบัตรประชาชน</p>
-
-              <div className="verify-row single">
-                <label className="upload-box">
-                  {selfie ? (
-                    <img
-                      src={URL.createObjectURL(selfie)}
-                      alt="Selfie"
-                      className="upload-preview"
-                    />
-                  ) : (
-                    <>
-                      <div className="upload-icon">🤳</div>
-                      <span className="upload-hint">กดเพื่ออัปโหลดรูปหน้าตัวเอง</span>
-                    </>
-                  )}
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e.target.files[0], "selfie")}
-                  />
-                </label>
-              </div>
-
-              {Object.values(errors).map(
-                (err, i) =>
-                  err && (
-                    <div key={i} className="upload-error">
-                      {err}
-                    </div>
-                  )
-              )}
-            </div>
-
-            <div className="signup-actions">
-              <button type="button" className="btn-outline" onClick={goBack}>
-                ย้อนกลับ
-              </button>
-              <button type="submit" className="btn-primary" disabled={!canVerify}>
-                {isGeneral ? "ยืนยันและสมัคร" : "ถัดไป"}
-              </button>
-            </div>
-          </form>
+          <StepVerify
+            idFront={idFront}
+            idBack={idBack}
+            selfie={selfie}
+            errors={errors}
+            canVerify={canVerify}
+            onFileChange={handleFileChange}
+            onNext={goNextFromStep2}
+            onBack={goBack}
+            isGeneral={isGeneral}
+            t={t}
+          />
         )}
 
         {/* ===== STEP 3: Type-specific ===== */}
         {step === 3 && !isGeneral && (
-          <>
-            <h1 className="signup-title">ข้อมูล {typeLabel}</h1>
-
-            <form className="signup-form" onSubmit={goNextFromStep3}>
-              <div className="signup-grid">
-                {isSeller && (
-                  <>
-                    <div className="field">
-                      <label>Seller Role</label>
-                      <input value={sellerRoleLabel} disabled />
-                    </div>
-
-                    <div className="field">
-                      <label>Shop Name</label>
-                      <input value={form.shopName} onChange={updateForm("shopName")} />
-                    </div>
-
-                    <div className="field">
-                      <label>Business Type</label>
-                      <input
-                        value={form.businessType}
-                        onChange={updateForm("businessType")}
-                        placeholder="เช่น นายหน้า / บริษัท / เจ้าของที่ดิน"
-                      />
-                    </div>
-
-                    {/* ✅ Agent only */}
-                    {isAgent && (
-                      <div className="field">
-                        <label>Agent License (Required)</label>
-                        <input
-                          value={form.agentLicense}
-                          onChange={updateForm("agentLicense")}
-                          placeholder="เช่น 12345/2567"
-                        />
-                      </div>
-                    )}
-
-                    <div className="field">
-                      <label>ID / Tax ID</label>
-                      <input value={form.idOrTax} onChange={updateForm("idOrTax")} />
-                    </div>
-
-                    <div className="field">
-                      <label>Bank Name</label>
-                      <input value={form.bankName} onChange={updateForm("bankName")} />
-                    </div>
-
-                    <div className="field">
-                      <label>Bank Account</label>
-                      <input value={form.bankAccount} onChange={updateForm("bankAccount")} />
-                    </div>
-                  </>
-                )}
-
-                {isInvestor && (
-                  <InvestorRiskQuiz value={investorQuiz} onChange={setInvestorQuiz} />
-                )}
-              </div>
-
-              <div className="signup-actions">
-                <button type="button" className="btn-outline" onClick={goBack}>
-                  ย้อนกลับ
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  disabled={isInvestor ? !investorAllAnswered : false}
-                  title={
-                    isInvestor && !investorAllAnswered ? "กรุณาตอบให้ครบทั้ง 10 ข้อ" : ""
-                  }
-                >
-                  ยืนยันและสมัคร
-                </button>
-              </div>
-            </form>
-          </>
+          <StepSpecific
+            isSeller={isSeller}
+            isInvestor={isInvestor}
+            isAgent={isAgent}
+            sellerRoleLabel={sellerRoleLabel}
+            form={form}
+            updateForm={updateForm}
+            investorQuiz={investorQuiz}
+            setInvestorQuiz={setInvestorQuiz}
+            investorAllAnswered={investorAllAnswered}
+            onSubmit={goNextFromStep3}
+            onBack={goBack}
+            t={t}
+          />
         )}
       </div>
 
@@ -548,14 +321,10 @@ export default function Signup() {
       {showSuccess && (
         <div className="signup-success-backdrop" onClick={handleSuccessConfirm}>
           <div className="signup-success-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="success-title">สมัครสมาชิกเสร็จสิ้น</h2>
-            <p className="success-text">
-              ท่านได้สมัครสมาชิกเสร็จสิ้นแล้ว
-              <br />
-              ระบบจะพาไปหน้าเข้าสู่ระบบ
-            </p>
+            <h2 className="success-title">{t("success.title")}</h2>
+            <p className="success-text">{t("success.message")}</p>
             <button type="button" className="success-btn" onClick={handleSuccessConfirm}>
-              ยืนยัน
+              {t("success.confirm")}
             </button>
           </div>
         </div>

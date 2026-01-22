@@ -1,0 +1,34 @@
+{
+  "header": {
+    "title": "Admin Control Panel",
+    "subtitle": "Administrator",
+    "manageBroadcast": "Manage Broadcast"
+  },
+  "stats": {
+    "lands": "Total listings",
+    "pendingApplicants": "Pending applicants",
+    "transactions": "Transactions"
+  },
+  "menu": {
+    "title": "Admin Menu",
+    "dashboard": "Dashboard",
+    "broadcast": "Broadcast & LINE Ads",
+    "lands": "Manage Listings",
+    "applicants": "Approve Applicants",
+    "payments": "Transactions / Payments",
+    "settings": "System Settings"
+  },
+  "dashboard": {
+    "title": "System Dashboard",
+    "subtitle": "System overview (MVP from localStorage)",
+    "lands": "Total listings",
+    "pendingApplicants": "Pending applicants",
+    "transactions": "Transactions"
+  },
+  "fallback": {
+    "notReady": {
+      "title": "Not available",
+      "subtitle": "This feature will be implemented in the next phase"
+    }
+  }
+}

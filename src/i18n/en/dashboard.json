@@ -1,0 +1,11 @@
+{
+  "totalLand": "Total Lands",
+  "totalArea": "Total Area",
+  "totalValue": "Total Land Value",
+  "unit": {
+    "listing": "Listings",
+    "rai": "Rai",
+    "ngan": "Ngan",
+    "wah": "Sq.Wah"
+  }
+}

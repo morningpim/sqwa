@@ -1,0 +1,9 @@
+{
+  "permissionDenied": "Only Seller, Landlord, or Admin can access Sell mode",
+  "pick": {
+    "title": "Select usage type",
+    "subtitle": "Land consignment mode",
+    "seller": "Consignor",
+    "investor": "Investor"
+  }
+}

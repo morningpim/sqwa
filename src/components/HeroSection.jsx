@@ -1,33 +1,41 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";  
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../css/HeroSection.css";
 
 export default function HeroSection() {
-
-  const navigate = useNavigate();   
+  const navigate = useNavigate();
+  const { t } = useTranslation("common");
 
   return (
     <section className="hero-section">
       <div className="hero-overlay" />
 
       <div className="hero-content">
-        <h1 className="hero-title">SQW Land Management Platform</h1>
-        <p className="hero-subtitle" lang="th">กรุณาเลือกดูข้อมูลที่ดิน</p>
+        <h1 className="hero-title">
+          {t("hero.title")}
+        </h1>
+
+        <p className="hero-subtitle">
+          {t("hero.subtitle")}
+        </p>
 
         <div className="hero-buttons">
-
           {/* ฝากขายที่ดิน */}
           <div className="hero-item">
-            <button className="hero-circle-btn" 
-              onClick={() => navigate("/map?mode=sell")}>
+            <button
+              className="hero-circle-btn"
+              onClick={() => navigate("/map?mode=sell")}
+              aria-label={t("hero.sell")}
+            >
               <img
                 src="/sell-land.png"
-                alt="ฝากขายที่ดิน"
+                alt={t("hero.sell")}
                 className="hero-img-icon"
               />
             </button>
-            <span className="hero-btn-label" lang="th">
-              ฝากขายที่ดิน
+            <span className="hero-btn-label">
+              {t("hero.sell")}
             </span>
           </div>
 
@@ -36,35 +44,36 @@ export default function HeroSection() {
             <button
               className="hero-circle-btn"
               onClick={() => navigate("/map?mode=buy")}
+              aria-label={t("hero.buy")}
             >
               <img
                 src="/buy-land.png"
-                alt="ซื้อขายที่ดิน"
+                alt={t("hero.buy")}
                 className="hero-img-icon"
               />
             </button>
-            <span className="hero-btn-label" lang="th">
-              ซื้อขายที่ดิน
+            <span className="hero-btn-label">
+              {t("hero.buy")}
             </span>
           </div>
 
+          {/* EIA */}
           <div className="hero-item">
             <button
               className="hero-circle-btn"
               onClick={() => navigate("/map?mode=eia")}
+              aria-label={t("hero.eia")}
             >
               <img
                 src="/eia.png"
-                alt="EIA"
+                alt={t("hero.eia")}
                 className="hero-img-icon hero-img-eia"
               />
             </button>
-            <span className="hero-btn-label" lang="th">
-              Future Project 
-              & EIA base map 
+            <span className="hero-btn-label">
+              {t("hero.eia")}
             </span>
           </div>
-
         </div>
       </div>
     </section>

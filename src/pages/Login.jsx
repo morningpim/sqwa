@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
+import { useTranslation } from "react-i18next";
 import "../css/Login.css";
 
 export default function Login() {
@@ -12,6 +13,7 @@ export default function Login() {
   const [selectedType, setSelectedType] = useState(null);
   const [sellerRole, setSellerRole] = useState(null); // ✅ เพิ่ม agent | landlord
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslation("auth");
 
   const navigate = useNavigate();
 
@@ -59,20 +61,14 @@ export default function Login() {
   const handleCancelTerms = () => setShowTermsModal(false);
 
   const handleForgotPassword = () => {
-    alert("ยังไม่ได้ทำหน้า Forgot Password");
+    alert(t("alert.forgotNotReady"));
   };
 
-  const getUserTypeLabel = () => {
-    if (selectedType === "investor") return "Investor";
-    if (selectedType === "seller") return "Seller";
-    return "บุคคลทั่วไป";
-  };
+  const getUserTypeLabel = () =>
+  t(`userType.${selectedType || "general"}`);
 
-  const getSellerRoleLabel = () => {
-    if (sellerRole === "agent") return "Agent";
-    if (sellerRole === "landlord") return "Landlord";
-    return "-";
-  };
+  const getSellerRoleLabel = () =>
+  sellerRole ? t(`sellerRole.${sellerRole}`) : "-";
 
   return (
     <div className="login-wrapper">
@@ -82,22 +78,22 @@ export default function Login() {
           <div className="login-logo">SQW</div>
 
           <div className="login-form-block">
-            <h1 className="login-title">Log in</h1>
+            <h1 className="login-title">{t("login.title")}</h1>
 
-            <label className="login-label">E-mail</label>
+            <label className="login-label">{t("field.email")}</label>
             <input type="email" className="login-input" />
 
-            <label className="login-label">Password</label>
+            <label className="login-label">{t("field.password")}</label>
             <div className="password-group">
               <input
                 type={showPassword ? "text" : "password"}
                 className="password-input"
-                placeholder="Password"
+                placeholder={t("field.password")}
               />
               <button
                 className="password-toggle"
                 type="button"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-label={showPassword ? t("aria.hidePassword") : t("aria.showPassword")}
                 onClick={() => setShowPassword((prev) => !prev)}
               >
                 {showPassword ? (
@@ -110,11 +106,11 @@ export default function Login() {
 
             <div className="login-row">
               <label className="remember">
-                <input type="checkbox" /> <span>Remember me</span>
+                <input type="checkbox" /> <span>{t("action.remember")}</span>
               </label>
 
               <button type="button" className="forgot" onClick={handleForgotPassword}>
-                Forgot Password?
+                {t("action.forgotPassword")}
               </button>
             </div>
 
@@ -123,16 +119,16 @@ export default function Login() {
               type="button"
               onClick={() => navigate("/map")}
             >
-              เข้าสู่ระบบ
+              {t("login.submit")}
             </button>
 
             <button className="google-btn" type="button">
               <FcGoogle size={22} />
-              <span>Continue with Google</span>
+              <span>{t("login.google")}</span>
             </button>
 
             <div className="divider">
-              <span>OR</span>
+              <span>{t("login.or")}</span>
             </div>
 
             <button
@@ -140,7 +136,7 @@ export default function Login() {
               type="button"
               onClick={() => setShowUserTypeModal(true)}
             >
-              Sign in
+              {t("login.signup")}
             </button>
           </div>
         </div>
@@ -155,11 +151,9 @@ export default function Login() {
       {showUserTypeModal && (
         <div className="user-type-backdrop" onClick={() => setShowUserTypeModal(false)}>
           <div className="user-type-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="user-type-title">เลือกประเภทการใช้งาน</h2>
+            <h2 className="user-type-title">{t("userType.title")}</h2>
             <p className="user-type-subtitle">
-              กรุณาเลือกให้ตรงกับคุณมากที่สุด
-              <br />
-              เพื่อสมัครสมาชิกและใช้งานระบบ
+              {t("userType.subtitle")}
             </p>
 
             <div className="user-type-buttons">
@@ -169,14 +163,14 @@ export default function Login() {
                     contacts_product
                   </span>
                 </div>
-                <span className="user-type-label">บุคคลทั่วไป</span>
+                <span className="user-type-label">{t("userType.general")}</span>
               </button>
 
               <button className="user-type-card" onClick={() => handleSelectType("seller")}>
                 <div className="user-type-icon-circle">
                   <span className="material-symbols-outlined user-type-icon">store</span>
                 </div>
-                <span className="user-type-label">Seller</span>
+                <span className="user-type-label">{t("userType.seller")}</span>
               </button>
 
               <button className="user-type-card" onClick={() => handleSelectType("investor")}>
@@ -185,7 +179,7 @@ export default function Login() {
                     account_balance
                   </span>
                 </div>
-                <span className="user-type-label">Investor</span>
+                <span className="user-type-label">{t("userType.investor")}</span>
               </button>
             </div>
           </div>
@@ -196,11 +190,9 @@ export default function Login() {
       {showSellerRoleModal && (
         <div className="user-type-backdrop" onClick={() => setShowSellerRoleModal(false)}>
           <div className="user-type-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="user-type-title">เลือกบทบาท Seller</h2>
+            <h2 className="user-type-title">{t("sellerRole.title")}</h2>
             <p className="user-type-subtitle">
-              กรุณาเลือกบทบาทให้ตรงกับคุณ
-              <br />
-              เพื่อสมัครสมาชิกและใช้งานระบบ
+                  {t("userType.subtitle")}
             </p>
 
             <div className="user-type-buttons">
@@ -208,7 +200,7 @@ export default function Login() {
                 <div className="user-type-icon-circle">
                   <span className="material-symbols-outlined user-type-icon">support_agent</span>
                 </div>
-                <span className="user-type-label">Agent</span>
+                <span className="user-type-label">{t("sellerRole.agent")}</span>
               </button>
 
               <button
@@ -218,7 +210,7 @@ export default function Login() {
                 <div className="user-type-icon-circle">
                   <span className="material-symbols-outlined user-type-icon">home</span>
                 </div>
-                <span className="user-type-label">Landlord</span>
+                <span className="user-type-label">{t("sellerRole.landlord")}</span>
               </button>
             </div>
           </div>
@@ -229,42 +221,36 @@ export default function Login() {
       {showTermsModal && (
         <div className="user-type-backdrop" onClick={handleCancelTerms}>
           <div className="terms-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="terms-title">ข้อกำหนดในการสมัครใช้งาน</h2>
+            <h2 className="terms-title">{t("terms.title")}</h2>
             <p className="terms-subtitle">
-              ประเภทผู้ใช้งาน:&nbsp;{getUserTypeLabel()}
+              {t("userType.types")} {getUserTypeLabel()}
               {selectedType === "seller" && (
                 <>
-                  &nbsp;|&nbsp;บทบาท:&nbsp;{getSellerRoleLabel()}
+                  &nbsp;|&nbsp;{t("terms.role")} {getSellerRoleLabel()}
                 </>
               )}
             </p>
 
             <div className="terms-body">
               <p>
-                ก่อนสมัครใช้งาน SQW Land Management Platform
-                กรุณาอ่านและยอมรับเงื่อนไขต่อไปนี้:
+                {t("terms.intro")}
               </p>
               <ul>
-                <li>ข้อมูลที่ใช้ลงทะเบียนเป็นข้อมูลที่ถูกต้องและเป็นปัจจุบัน</li>
-                <li>
-                  ผู้ใช้งานยินยอมให้ระบบจัดเก็บและประมวลผลข้อมูล
-                  ตามนโยบายความเป็นส่วนตัวของแพลตฟอร์ม
-                </li>
-                <li>ห้ามใช้บัญชีผู้ใช้งานเพื่อกระทำการที่ผิดกฎหมาย หรือขัดต่อจริยธรรม</li>
-                <li>ทางระบบสามารถระงับการใช้งานชั่วคราว หรือถาวรได้ หากพบการใช้งานผิดเงื่อนไข</li>
+                {t("terms.rules", { returnObjects: true }).map((r, i) => (
+                  <li key={i}>{r}</li>
+                ))}
               </ul>
               <p>
-                หากคุณยอมรับข้อกำหนดทั้งหมด ให้กดปุ่ม “ยอมรับและสมัครต่อ”
-                เพื่อดำเนินการในขั้นตอนถัดไป
+                {t("terms.footer")}
               </p>
             </div>
 
             <div className="terms-actions">
               <button type="button" className="terms-btn secondary" onClick={handleCancelTerms}>
-                ยกเลิก
+                {(t("action.cancel"))}
               </button>
               <button type="button" className="terms-btn primary" onClick={handleAcceptTerms}>
-                ยอมรับและสมัครต่อ
+                {(t("action.accept"))}
               </button>
             </div>
           </div>

@@ -1,0 +1,31 @@
+{
+  "postedDate": "Posted on {{date}}",
+  "favorite": {
+    "on": "Liked",
+    "off": "Unliked"
+  },
+  "ownerFallback": "Owner not specified",
+  "field": {
+    "size": "Land size",
+    "rnw": "Rai–Ngan–Wah",
+    "frontage": "Road frontage",
+    "roadWidth": "Road width"
+  },
+  "unit": {
+    "sqw": "Sq.Wah",
+    "meter": "m"
+  },
+  "price": {
+    "perSqw": "Price per Sq.Wah",
+    "total": "Total price"
+  },
+  "section": {
+    "contact": "Contact information",
+    "member": "Membership access"
+  },
+  "action": {
+    "chatSeller": "Chat with seller",
+    "unlock": "Click to unlock information",
+    "unlockAll": "Unlock all information (1 credit)"
+  }
+}

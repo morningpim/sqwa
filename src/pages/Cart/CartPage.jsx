@@ -144,9 +144,9 @@ export default function CartPage() {
                       <span className="cart-fields-text">
                         {tCommon("field.selected")}
                         {fields
-                          .map((k) => tCommon(FIELD_I18N_KEY[k] || "unknown"))
-                          .join(", ")
-                        }
+                        .map((k) => tCommon(FIELD_I18N_KEY[k] || "unknown"))
+                        .join(", ")
+                      }
                       </span>
                     </div>
 
@@ -207,7 +207,7 @@ export default function CartPage() {
 
             {/* Payment method (Custom Dropdown) */}
             <div className="pm-wrap">
-              <div className="pm-head">{t("cart.paymentMethod")}</div>
+              <div className="pm-head">{t("section.paymentMethod")}</div>
 
               <PaymentMethodDropdown
                 value={paymentMethod}

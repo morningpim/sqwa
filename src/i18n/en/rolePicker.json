@@ -1,0 +1,15 @@
+{
+  "title": "Select Role (Mock)",
+  "label": "Role",
+  "roles": {
+    "buyer": "Buyer",
+    "seller": "Seller",
+    "landlord": "Landowner",
+    "staff": "Staff",
+    "admin": "Administrator"
+  },
+  "action": {
+    "cancel": "Cancel",
+    "save": "Save"
+  }
+}

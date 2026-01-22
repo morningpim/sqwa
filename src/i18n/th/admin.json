@@ -1,0 +1,27 @@
+{
+  "header": {
+    "title": "แผงควบคุมผู้ดูแลระบบ",
+    "subtitle": "ผู้ดูแลระบบ",
+    "manageBroadcast": "จัดการ Broadcast"
+  },
+  "stats": {
+    "lands": "ประกาศทั้งหมด",
+    "pendingApplicants": "ผู้สมัครรออนุมัติ",
+    "transactions": "ธุรกรรม"
+  },
+  "menu": {
+    "title": "เมนูแอดมิน",
+    "dashboard": "แดชบอร์ด",
+    "broadcast": "Broadcast & LINE Ads",
+    "lands": "จัดการประกาศ",
+    "applicants": "อนุมัติผู้สมัคร",
+    "payments": "ธุรกรรม / การชำระเงิน",
+    "settings": "ตั้งค่าระบบ"
+  },
+  "fallback": {
+    "notReady": {
+      "title": "ยังไม่พร้อมใช้งาน",
+      "subtitle": "ฟีเจอร์นี้จะพัฒนาในเฟสถัดไป"
+    }
+  }
+}

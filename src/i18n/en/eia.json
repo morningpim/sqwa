@@ -1,0 +1,27 @@
+{
+  "badge": "EIA",
+  "projectFallback": "EIA Project",
+  "field": {
+    "projectValue": "Project value",
+    "area": "Land area",
+    "status": "Status",
+    "owner": "Owner",
+    "location": "Location"
+  },
+  "unit": {
+    "millionBaht": "Million THB"
+  },
+  "status": {
+    "approved": "EIA Approved",
+    "unknown": "Unknown"
+  },
+  "action": {
+    "news": "News link",
+    "detail": "EIA detail link"
+  },
+  "dashboard": {
+    "total": "Total projects",
+    "approved": "Approved",
+    "pending": "Pending"
+  }
+}
