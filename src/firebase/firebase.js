@@ -3,9 +3,9 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBFRDGM55x_QCG7O6E9RSCvYBdeIIdCxTw",
-  authDomain: "sqwa-58501.firebaseapp.com",
-  projectId: "sqwa-58501",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
 };
 
 export const app = initializeApp(firebaseConfig);
