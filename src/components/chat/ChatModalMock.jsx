@@ -9,7 +9,7 @@ import {
   deleteChatRoom,
   updateUserOnlineStatus,
   setUserOffline,
-} from "../../services/chatService.mock";
+} from "../../services/chatService.firebase";
 
 export default function ChatModalMock({
   open,

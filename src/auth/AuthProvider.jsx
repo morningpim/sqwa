@@ -1,6 +1,20 @@
 // src/auth/AuthProvider.jsx
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getMe, setMockRole } from "./authClient";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { auth, db } from "../firebase/firebase.js";
+import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
 const AuthContext = createContext(null);
 
@@ -8,26 +22,52 @@ export function AuthProvider({ children }) {
   const [me, setMe] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const refresh = async () => {
-    setLoading(true);
-    try {
-      const data = await getMe();
-      setMe(data);
-    } catch {
-      setMe(null);
-    } finally {
-      setLoading(false);
-    }
+  // 🔐 Google Login
+  const login = async () => {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  };
+
+  // 🚪 Logout
+  const logout = async () => {
+    await signOut(auth);
   };
 
   useEffect(() => {
-    refresh();
-  }, []);
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
 
-  const updateRole = async (role) => {
-    await setMockRole(role);
-    await refresh();
-  };
+      if (!user) {
+        setMe(null);
+        setLoading(false);
+        return;
+      }
+
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+
+      // 🆕 first login → create user doc
+      if (!snap.exists()) {
+        const newUser = {
+          uid: user.uid,
+          name: user.displayName || "User",
+          email: user.email,
+          photoURL: user.photoURL || "",
+          role: "buyer", // default role
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+        await setDoc(ref, newUser);
+        setMe(newUser);
+      } else {
+        setMe(snap.data());
+      }
+
+      setLoading(false);
+    });
+
+    return () => unsub();
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -35,13 +75,17 @@ export function AuthProvider({ children }) {
       loading,
       role: me?.role || "buyer",
       isLoggedIn: !!me,
-      refresh,
-      updateRole,
+      login,
+      logout,
     }),
     [me, loading]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
