@@ -103,3 +103,59 @@
   justify-content: flex-end;
   gap: 12px;
 }
+
+/* =======================
+   MODAL – MOTION
+======================= */
+
+.user-type-modal,
+.terms-modal{
+  animation: modalIn .18s ease-out;
+}
+
+@keyframes modalIn{
+  from{
+    opacity: 0;
+    transform: translateY(8px) scale(.98);
+  }
+  to{
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =======================
+   MODAL – SCROLL SAFE
+======================= */
+
+.terms-body{
+  padding-right: 6px; /* กัน scrollbar ชน text */
+}
+
+/* =======================
+   MODAL – MOBILE
+======================= */
+
+@media (max-width: 640px){
+
+  .user-type-modal{
+    padding: 24px 20px 28px;
+  }
+
+  .user-type-buttons{
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .user-type-card{
+    width: 100%;
+    max-width: 260px;
+  }
+
+  .terms-modal{
+    max-height: calc(100vh - 24px);
+    padding: 20px 18px;
+  }
+}
+

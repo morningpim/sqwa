@@ -1,8 +1,8 @@
 /* ให้ชิดขวาแบบในภาพ (ตอนนี้อยู่ซ้าย) */
 .layers-panel{
-  position: absolute;
-  top: calc(var(--nav-h) + var(--gap));
-  right: 335px;   
+  position: fixed; 
+  top: calc(var(--nav-h) + var(--gap) + 148px);
+  right: 86px;   
   left: auto;
   z-index: 90;
 
@@ -109,4 +109,47 @@
 
 .layers-check input{
   display: none;
+}
+
+/* =========================
+   Layers Panel Responsive
+========================= */
+
+/* tablet */
+@media (max-width: 1024px){
+
+  .layers-panel{
+    right: 20px;
+    width: min(520px, calc(100% - 40px));
+  }
+}
+
+/* mobile */
+@media (max-width: 640px){
+
+  .layers-panel{
+    right: 12px;
+    left: 12px;
+    width: auto;
+    top: calc(var(--nav-h) + 12px);
+  }
+
+  .layers-title{
+    font-size: 18px;
+  }
+
+  .layers-tabs{
+    grid-template-columns: 1fr;
+  }
+
+  .layers-row{
+    grid-template-columns: 80px 1fr 50px;
+    gap: 8px;
+  }
+
+  .layers-close{
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
 }

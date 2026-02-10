@@ -370,3 +370,51 @@
     "opsz" 24;
 }
 
+/* =========================
+   SQW POPUP Responsive
+========================= */
+
+/* tablet */
+@media (max-width: 768px){
+
+  .sqw-popup{
+    width: 280px;
+    padding: 12px 12px 14px;
+  }
+
+  .sqw-pill{
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .sqw-box-v{
+    font-size: 16px;
+  }
+}
+
+/* mobile small */
+@media (max-width: 480px){
+
+  .sqw-popup{
+    width: 92vw;
+    max-width: 300px;
+  }
+
+  .sqw-actions{
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .sqw-btn{
+    padding: 12px;
+  }
+
+  .sqw-kv{
+    grid-template-columns: 100px 1fr;
+  }
+
+  .sqw-contact-row{
+    grid-template-columns: 60px 20px 1fr;
+  }
+}
+

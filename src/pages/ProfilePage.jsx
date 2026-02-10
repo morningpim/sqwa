@@ -58,7 +58,7 @@ export default function ProfilePage() {
             <div className="profile-name">Pimpa Naree</div>
             <div className="profile-sub">{t("header.member")}</div>
           </div>
-          <button className="profile-edit-btn" type="button">
+          <button className="ds-btn ds-btn-outline" type="button">
             {t("header.editProfile")}
           </button>
         </div>
@@ -156,11 +156,11 @@ export default function ProfilePage() {
                           <b>{p.phone || "-"}</b>
                         </div>
 
-                        <div className="fav-actions">
-                          <button className="outline-btn" onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}>
+                        <div className="fav-actions fav-actions--row fav-actions--lg">
+                          <button className="ds-btn ds-btn-outline ds-btn-block" onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}>
                             {t("posts.viewMap")}
                           </button>
-                          <button className="primary-btn" onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}>
+                          <button className="ds-btn ds-btn-primary ds-btn-block" onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}>
                             {t("posts.edit")}
                           </button>
                           <button className="danger-btn" onClick={() => onDeletePost(p.id)}>
@@ -196,35 +196,44 @@ export default function ProfilePage() {
                       <div key={f.id} className="fav-card">
                         <div className="fav-top">
                           <div className="fav-owner">{f.owner || "—"}</div>
+
                           <button
-                            className="fav-remove"
+                            className="fav-delete-icon"
                             title={t("favorites.removeTitle")}
-                            onClick={() => removeFavorite(f.id)}
+                            onClick={() => {
+                              if (window.confirm(t("favorites.confirmRemove"))) {
+                                removeFavorite(f.id);
+                              }
+                            }}
                           >
-                            {t("favorites.remove")}
+                            ✕
                           </button>
                         </div>
 
-                        <div className="fav-row">
-                          <span className="muted">{t("favorites.date")}</span>
-                          <b>{f.updatedAt || "-"}</b>
-                        </div>
+                        <div className="fav-body">
+                          <div className="fav-row">
+                            <span className="muted">{t("favorites.date")}</span>
+                            <b>{f.updatedAt || "-"}</b>
+                          </div>
 
-                        <div className="fav-row">
-                          <span className="muted">{t("favorites.area")}</span>
-                          <b>{f.area || "-"}</b>
-                        </div>
+                          <div className="fav-row">
+                            <span className="muted">{t("favorites.area")}</span>
+                            <b>{f.area || "-"}</b>
+                          </div>
 
-                        <div className="fav-row">
-                          <span className="muted">{t("favorites.price")}</span>
-                          <b>{f.totalPrice || "-"}</b>
-                        </div>
+                          <div className="fav-row">
+                            <span className="muted">{t("favorites.price")}</span>
+                            <b>{f.totalPrice || "-"}</b>
+                          </div>
 
-                        <div className="fav-actions">
-                          <button className="outline-btn" onClick={() => navigate(`/map?mode=buy`)}>
-                            {t("favorites.openMap")}
-                          </button>
-                          <button className="primary-btn">{t("favorites.chat")}</button>
+                          <div className="fav-actions fav-actions--row fav-actions--lg">
+                            <button className="ds-btn ds-btn-primary">
+                              💬 {t("favorites.chat")}
+                            </button>
+                            <button className="ds-btn ds-btn-outline">
+                              🗺️ {t("favorites.openMap")}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -272,11 +281,11 @@ export default function ProfilePage() {
                           <b>{p.totalPrice || "-"}</b>
                         </div>
 
-                        <div className="fav-actions">
-                          <button className="outline-btn" onClick={() => navigate(`/map?mode=buy`)}>
+                        <div className="fav-actions fav-actions--row fav-actions--lg">
+                          <button className="ds-btn ds-btn-primary" onClick={() => navigate(`/map?mode=buy`)}>
                             {t("purchases.viewLand")}
                           </button>
-                          <button className="danger-btn" onClick={() => removePurchase(p.id)}>
+                          <button className="ds-btn ds-btn-outline" onClick={() => removePurchase(p.id)}>
                             {t("purchases.delete")}
                           </button>
                         </div>

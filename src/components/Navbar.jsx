@@ -45,6 +45,9 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
+  const [modeOpen, setModeOpen] = useState(false);
+  const modeRef = useRef(null);
+
   const currentLang = i18n.language || getCurrentLanguage();
 
   // cart sync
@@ -76,6 +79,16 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  useEffect(() => {
+    const onClick = (e) => {
+      if (!modeRef.current?.contains(e.target)) {
+        setModeOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
   const go = useCallback(
     (to) => {
       setOpen(false);
@@ -89,6 +102,12 @@ export default function Navbar() {
     [location.pathname]
   );
 
+  const currentMode = useMemo(() => {
+    const sp = new URLSearchParams(location.search || "");
+    return sp.get("mode") || DEFAULT_MODE;
+  }, [location.search]);
+
+
   // MODE LABEL (i18n)
   const modeLabel = useMemo(() => {
     if (!isMap) return "";
@@ -99,11 +118,61 @@ export default function Navbar() {
 
   const avatarLetter = (user?.name?.[0] || "U").toUpperCase();
 
+  const changeMode = (mode) => {
+    const sp = new URLSearchParams(location.search || "");
+    sp.set("mode", mode);
+
+    navigate(`${location.pathname}?${sp.toString()}`, {
+      replace: true
+    });
+
+    setModeOpen(false);
+  };
+
+
+
   return (
     <header className="nav">
       <Link to="/" className="nav-logo">SQW</Link>
 
-      {isMap && <div className="nav-mode-pill">{modeLabel}</div>}
+      {isMap && (
+        <div className="nav-mode" ref={modeRef}>
+          <button
+            type="button"
+            className="nav-mode-pill clickable"
+            onClick={() => setModeOpen(v => !v)}
+            aria-expanded={modeOpen}
+          >
+            {modeLabel}
+            <span className="chevron">▾</span>
+          </button>
+
+          {modeOpen && (
+            <div className="nav-mode-menu">
+              <button
+                className={currentMode === "buy" ? "active" : ""}
+                onClick={() => changeMode("buy")}
+              >
+                {t("nav.mode.buy")}
+              </button>
+
+              <button
+                className={currentMode === "sell" ? "active" : ""}
+                onClick={() => changeMode("sell")}
+              >
+                {t("nav.mode.sell")}
+              </button>
+
+              <button
+                className={currentMode === "eia" ? "active" : ""}
+                onClick={() => changeMode("eia")}
+              >
+                {t("nav.mode.eia")}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="nav-right">
         <nav className="nav-menu">

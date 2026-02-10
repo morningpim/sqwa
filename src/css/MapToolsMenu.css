@@ -203,3 +203,34 @@
     transform: none;
   }
 }
+
+/* =========================================
+   Production mobile safe positioning
+========================================= */
+
+/* small phones */
+@media (max-width: 420px){
+
+  /* ให้ popover กว้างเต็ม usable width */
+  .tools-pop-wrap .mtm-pop{
+    right: 0;
+    left: auto;
+    width: min(200px, calc(100vw - 24px));
+  }
+
+  .mtm-drawCard,
+  .mtm-list{
+    width: 100%;
+  }
+}
+
+/* very small height screens (landscape phones) */
+@media (max-height: 520px){
+
+  /* ถ้าหน้าจอเตี้ย ให้เปิดด้านข้างแทนด้านล่าง */
+  .tools-pop-wrap .mtm-pop{
+    right: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}

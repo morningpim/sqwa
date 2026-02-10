@@ -1,18 +1,53 @@
-/* small helpers */
-.text-sub { color: var(--text-sub); }
-.text-muted { color: var(--text-muted); }
-.text-primary { color: var(--primary-dark); }
-.bg-soft { background: var(--bg-soft); }
-.shadow-soft { box-shadow: var(--shadow-soft); }
-.round-md { border-radius: var(--r-md); }
-.round-lg { border-radius: var(--r-lg); }
+/* =======================
+   TEXT
+======================= */
 
-.material-icon {
+.text-sub{
+  color: var(--text-sub);
+}
+
+.text-muted{
+  color: var(--text-muted);
+}
+
+.text-primary{
+  color: var(--primary-dark);
+}
+
+/* =======================
+   BACKGROUND / SHADOW
+======================= */
+
+.bg-soft{
+  background: var(--bg-soft);
+}
+
+.shadow-soft{
+  box-shadow: var(--shadow-soft);
+}
+
+/* =======================
+   RADIUS
+======================= */
+
+.round-md{
+  border-radius: var(--r-md);
+}
+
+.round-lg{
+  border-radius: var(--r-lg);
+}
+
+/* =======================
+   ICON
+======================= */
+
+.material-icon{
   font-family: "Material Symbols Outlined" !important;
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;
-  line-height: 1;
+  font-size: var(--icon-size);
+  line-height: var(--icon-lh);
 
   display: inline-flex;
   align-items: center;
@@ -20,3 +55,14 @@
 
   user-select: none;
 }
+
+/* =======================
+   Z INDEX
+======================= */
+
+.z-map{ z-index: var(--z-map); }
+.z-nav{ z-index: var(--z-nav); }
+.z-dropdown{ z-index: var(--z-dropdown); }
+.z-panel{ z-index: var(--z-panel); }
+.z-popover{ z-index: var(--z-popover); }
+.z-modal{ z-index: var(--z-modal); }

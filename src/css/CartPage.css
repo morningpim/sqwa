@@ -444,3 +444,82 @@
   .cart-summary { padding-right: 0; }
   .cart-summary-box { margin-bottom: 80px; }
 }
+
+/* =========================================
+   Responsive – Cart
+========================================= */
+
+/* Tablet */
+@media (max-width: 1024px){
+
+  .cart-layout{
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .cart-summary{
+    padding-right: 0;
+  }
+
+  .cart-summary-box{
+    position: relative;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px){
+
+  .cart-page{
+    padding-bottom: 160px;
+  }
+
+  .cart-item{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .cart-item-right{
+    width: 100%;
+    text-align: left;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 0;
+  }
+
+  .cart-price-amount{
+    font-size: 15px;
+  }
+
+  .cart-fields-text{
+    white-space: normal;
+  }
+
+  .summary-total{
+    padding: 14px 14px;
+  }
+
+  .summary-total-value{
+    font-size: 18px;
+  }
+
+  .pm-dd-btn{
+    padding: 11px 11px;
+  }
+
+  .summary-actions{
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.12);
+  }
+
+  .summary-actions .ds-btn{
+    width: 100%;
+  }
+}

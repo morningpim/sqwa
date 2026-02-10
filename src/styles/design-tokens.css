@@ -4,6 +4,7 @@
   --primary-dark: #065f46;
   --primary-700: #11863b;
   --primary-light: #a7f3d0;
+  --danger: #ef4444;
 
   /* Accent */
   --accent: #83CD20;
@@ -48,6 +49,8 @@
   --space-xl: 32px;
   --space-2xl: 48px;
 
+  --nav-h: 64px;
+
   /* Auth layout (Login/Signup shared) */
   --auth-card-max: 1200px;
   --auth-card-minh: 680px;
@@ -65,4 +68,171 @@
   --text: var(--text-main);
   --muted: var(--text-muted);
   --shadow: var(--shadow-soft);
+
+
+  /* Font sizes */
+  --fs-xxs: 11px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-base: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --fs-3xl: 36px;
+
+  /* Line heights */
+  --lh-tight: 1.2;
+  --lh-base: 1.4;
+  --lh-loose: 1.6;
+
+  /* Semantic typography */
+  --fs-title: var(--fs-lg);
+  --fs-subtitle: var(--fs-md);
+  --fs-body: var(--fs-base);
+  --fs-label: var(--fs-xs);
+  --fs-caption: var(--fs-xxs);
+
+  /* Glass surface */
+  --glass-bg: color-mix(in srgb, var(--surface) 92%, transparent);
+  --glass-border: var(--border);
+  --glass-blur: blur(6px);
+
+  /* Elevation */
+  --elev-cart: var(--shadow-md);
+
+  /* Cart sizes */
+  --cart-summary-w: 380px;
+  --cart-sticky-gap: var(--space-sm);
+
+  /* =========================
+    Button Design Tokens
+  ========================= */
+
+  /* heights */
+  --btn-h-sm: 32px;
+  --btn-h-md: 40px;
+  --btn-h-lg: 48px;
+  --btn-h-xl: 56px;
+
+  /* padding (x-axis) */
+  --btn-px-sm: 12px;
+  --btn-px-md: 16px;
+  --btn-px-lg: 20px;
+  --btn-px-xl: 24px;
+
+  /* font-size */
+  --btn-fs-sm: 13px;
+  --btn-fs-md: 14px;
+  --btn-fs-lg: 15px;
+  --btn-fs-xl: 17px;
+
+  /* radius */
+  --btn-r-sm: 10px;
+  --btn-r-md: 12px;
+  --btn-r-lg: 14px;
+  --btn-r-xl: 16px;
+
+  /* font-weight */
+  --btn-fw: 900;
+
+  /* motion */
+  --btn-transition: transform .14s ease, box-shadow .14s ease, opacity .14s ease;
+  /* =========================
+   Layout / Stack Tokens
+========================= */
+
+/* navbar safe offset */
+--nav-safe-offset: 64px;
+
+/* right toolbar offset (map) */
+--right-toolbar-offset: -72px;
+
+/* =========================
+   Z-INDEX SYSTEM
+========================= */
+
+--z-base: 1;
+--z-map: 10;
+
+--z-map-controls: 100;
+--z-map-panels: 200;
+--z-map-popups: 300;
+
+--z-nav: 500;
+
+--z-dropdown: 700;
+--z-toast: 800;
+
+--z-backdrop: 1000;
+--z-modal: 1100;
+
+--z-critical: 2000;
+
+/* =========================
+   Container widths
+========================= */
+
+--container-xl: 1200px;
+--container-lg: 1000px;
+--container-md: 720px;
+
+/* =========================
+   Motion tokens
+========================= */
+
+--ease-standard: cubic-bezier(.2,.8,.2,1);
+--duration-fast: .14s;
+--duration-md: .22s;
+--duration-slow: .32s;
+
+
 }
+/* =========================
+   Responsive Token Scaling
+========================= */
+
+/* tablet */
+@media (max-width: 1024px){
+
+  :root{
+
+    /* spacing */
+    --space-xl: 28px;
+    --space-2xl: 40px;
+
+    /* typography */
+    --fs-3xl: 32px;
+    --fs-2xl: 26px;
+
+    /* auth */
+    --auth-pad-x: 56px;
+  }
+}
+
+/* mobile */
+@media (max-width: 640px){
+
+  :root{
+
+    /* spacing */
+    --space-lg: 20px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
+
+    /* typography */
+    --fs-3xl: 28px;
+    --fs-2xl: 24px;
+    --fs-xl: 20px;
+
+    /* button */
+    --btn-h-lg: 46px;
+    --btn-h-xl: 52px;
+
+    /* auth layout */
+    --auth-pad-x: 28px;
+    --auth-pad-y: 32px;
+  }
+}
+
+

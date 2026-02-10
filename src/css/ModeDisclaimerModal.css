@@ -139,3 +139,43 @@
     font-size: 14px;
   }
 }
+
+/* =========================
+   Modal Mobile UX
+========================= */
+
+@media (max-width: 640px){
+
+  .modal-overlay{
+    padding: 16px;
+    align-items: flex-end; /* mobile = slide-up feel */
+  }
+
+  .modal-box{
+    width: 100%;
+    max-width: 100%;
+    border-radius: 18px 18px 12px 12px;
+    padding: var(--space-lg);
+  }
+
+  .modal-actions{
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .modal-actions .btn{
+    width: 100%;
+  }
+}
+
+/* small phones */
+@media (max-width: 420px){
+
+  .modal-icon{
+    font-size: 32px;
+  }
+
+  .modal-text{
+    font-size: 13px;
+  }
+}

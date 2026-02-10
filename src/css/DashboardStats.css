@@ -2,59 +2,114 @@
 .dashbar{
   position: fixed;
   left: 50%;
-  bottom: 18px;
+  bottom: var(--space-sm);
   transform: translateX(-50%);
   z-index: 60;
 
   display: flex;
-  gap: 16px;
+  gap: var(--space-md);
   align-items: stretch;
   justify-content: center;
 
-  pointer-events: none; /* ไม่ไปบังการลากแผนที่ */
+  pointer-events: none; /* ไม่บังการลากแผนที่ */
 }
 
 .dashcard{
   pointer-events: auto;
   min-width: 170px;
-  padding: 10px 14px;
+  padding: var(--space-xs) var(--space-sm);
 
-  background: #fff;
-  border: 2px solid rgba(26,143,58,.55);
-  border-radius: 14px;
-  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-soft);
 
   text-align: center;
+  backdrop-filter: blur(6px);
 }
 
 .dashlabel{
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 900;
-  color: #111827;
+  color: var(--text-main);
 }
 
 .dashvalue{
   margin-top: 4px;
-  font-size: 18px;
+  font-size: var(--fs-lg);
   font-weight: 1000;
-  color: #0f5132;
+  color: var(--primary-dark);
 }
 
 .dashunit{
   margin-top: 2px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 900;
-  opacity: .8;
+  color: var(--text-muted);
 }
 
-/* responsive: หน้าจอเล็กให้เรียงลง */
+.dashcard-sm{
+  min-width: 140px;
+}
+
+.dashcard-lg{
+  min-width: 220px;
+}
+
+/* ---------- Responsive ---------- */
+
 @media (max-width: 720px){
   .dashbar{
     flex-direction: column;
-    gap: 10px;
-    bottom: 12px;
+    gap: var(--space-xs);
+    bottom: var(--space-xs);
   }
+
   .dashcard{
     min-width: 200px;
+  }
+}
+
+/* ===== Mobile Compact ===== */
+@media (max-width: 720px){
+
+  .dashbar{
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-xs);
+    width: calc(100% - 24px);
+  }
+
+  .dashcard{
+    min-width: auto;
+    flex: 1 1 calc(50% - 6px);
+    padding: 8px 10px;
+  }
+
+  .dashcard-lg{
+    flex: 1 1 100%;
+  }
+
+  .dashvalue{
+    font-size: var(--fs-md);
+  }
+}
+
+/* ===== Small phones ===== */
+@media (max-width: 420px){
+
+  .dashcard{
+    flex: 1 1 100%;
+  }
+
+  .dashlabel{
+    font-size: 11px;
+  }
+
+  .dashvalue{
+    font-size: 15px;
   }
 }

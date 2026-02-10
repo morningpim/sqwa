@@ -43,7 +43,8 @@
     "area": "Size",
     "price": "Total price",
     "date": "Posted date",
-    "chat": "Chat seller"
+    "chat": "Chat seller",
+    "confirmRemove": "Remove this land from favorites?"
   },
   "purchases": {
     "title": "Purchase history",

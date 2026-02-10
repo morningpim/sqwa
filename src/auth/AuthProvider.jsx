@@ -33,6 +33,24 @@ export function AuthProvider({ children }) {
     await signOut(auth);
   };
 
+  const updateRole = async (newRole) => {
+    if (!me?.uid) return;
+
+    const ref = doc(db, "users", me.uid);
+
+    await setDoc(
+      ref,
+      {
+        role: newRole,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    // ✅ สำคัญที่สุด: update local state
+    setMe((prev) => (prev ? { ...prev, role: newRole } : prev));
+  };
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
@@ -77,6 +95,7 @@ export function AuthProvider({ children }) {
       isLoggedIn: !!me,
       login,
       logout,
+      updateRole, 
     }),
     [me, loading]
   );

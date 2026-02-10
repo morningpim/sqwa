@@ -52,10 +52,9 @@ export function useMapAccess() {
   const openUnlockPicker = useCallback(
     (landId) => {
       const id = String(landId || "");
-      if (!id) return;
+      if (!id || !access) return;
 
-      const cur = loadAccess();
-      const arr = cur?.unlockedFields?.[id];
+      const arr = access.unlockedFields?.[id];
       const unlockedSet = new Set(Array.isArray(arr) ? arr : []);
 
       const remaining = ALL_UNLOCK_KEYS.filter((k) => !unlockedSet.has(k));
@@ -68,43 +67,47 @@ export function useMapAccess() {
       setUnlockLandId(id);
       setUnlockOpen(true);
     },
-    [loadAccess]
+    [access]
   );
 
   const unlockAllForMember = useCallback(
     (landId) => {
       const id = String(landId || "");
-      if (!id) return null;
+      if (!id || !access) return null;
 
-      const cur = loadAccess();
-      if (!cur.isMember) return null;
+      if (!access.isMember) return null;
 
-      if (cur.quotaUsed >= QUOTA_LIMIT) {
+      if (access.quotaUsed >= QUOTA_LIMIT) {
         alert(`โควตาการดูข้อมูลวันนี้ครบ ${QUOTA_LIMIT} ครั้งแล้ว`);
         return null;
       }
 
-      const used = cur.quotaUsed + 1;
+      const used = access.quotaUsed + 1;
 
-      const unlockedFields = { ...(cur.unlockedFields ?? {}) };
+      const unlockedFields = { ...(access.unlockedFields ?? {}) };
       unlockedFields[id] = ALL_UNLOCK_KEYS;
 
-      const saved = { dateKey: todayKeyTH(), isMember: true, quotaUsed: used, unlockedFields };
+      const saved = {
+        dateKey: todayKeyTH(),
+        isMember: true,
+        quotaUsed: used,
+        unlockedFields,
+      };
+
       saveAccess(saved);
       setAccess(saved);
       return saved;
     },
-    [loadAccess, saveAccess]
+    [access, saveAccess]
   );
 
-  return {
-    // access
+  const api = useMemo(
+  () => ({
     access,
     setAccess,
     loadAccess,
     saveAccess,
 
-    // unlock modal
     unlockOpen,
     setUnlockOpen,
     unlockLandId,
@@ -112,5 +115,18 @@ export function useMapAccess() {
     unlockItems,
     openUnlockPicker,
     unlockAllForMember,
-  };
+  }),
+  [
+    access,
+    unlockOpen,
+    unlockLandId,
+    unlockItems,
+    loadAccess,
+    saveAccess,
+    openUnlockPicker,
+    unlockAllForMember,
+  ]
+);
+
+return api;
 }

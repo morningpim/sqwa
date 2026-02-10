@@ -416,3 +416,67 @@
   width:18px;
   height:18px;
 }
+
+/* =========================
+   Signup Mobile UX
+========================= */
+
+@media (max-width: 640px){
+
+  .signup-wrapper{
+    padding: var(--space-lg) var(--space-sm);
+  }
+
+  .signup-card{
+    border-radius: var(--r-md);
+  }
+
+  /* steps compact */
+  .signup-steps{
+    gap: var(--space-xs);
+  }
+
+  .step-item{
+    min-width: 64px;
+  }
+
+  .step-line{
+    width: 60px;
+  }
+
+  .signup-title{
+    font-size: 28px;
+  }
+
+  /* verify upload */
+  .verify-row{
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .upload-box{
+    height: 150px;
+  }
+
+  /* success modal → bottom sheet feel */
+  .signup-success-backdrop{
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .signup-success-modal{
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: var(--space-lg);
+    animation: signupSheetUp .22s ease;
+  }
+
+  .success-btn{
+    width: 100%;
+  }
+}
+
+@keyframes signupSheetUp{
+  from{ transform: translateY(100%); }
+  to{ transform: translateY(0); }
+}

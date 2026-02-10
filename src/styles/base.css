@@ -1,30 +1,124 @@
-#root{ width:100%; max-width:none; margin:0; padding:0; }
+#root{
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
 
-html, body{ height:100%; }
+html, body{
+  height: 100%;
+}
+
 body{
-  margin:0;
+  margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-en);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   min-height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-:lang(th){ font-family: var(--font-th) !important; }
+:lang(th){
+  font-family: var(--font-th) !important;
+}
 
-*, *::before, *::after{ box-sizing:border-box; }
+*, *::before, *::after{
+  box-sizing: border-box;
+}
 
-img{ max-width:100%; display:block; }
-a{ color: inherit; text-decoration:none; }
+img{
+  max-width: 100%;
+  display: block;
+}
 
-.ds-h1{ font-size:64px; line-height:1.1; margin:0; }
-.ds-h2{ font-size:50px; line-height:1.2; margin:0; }
-.ds-h3{ font-size:36px; line-height:1.25; margin:0; }
+a{
+  color: inherit;
+  text-decoration: none;
+}
 
-.ds-p{ font-size:16px; line-height:1.6; margin:0; color: var(--text-sub); }
+/* ---------- Design System Typography ---------- */
 
-@media (max-width: 960px){
-  .ds-h1{ font-size:44px; }
-  .ds-h2{ font-size:34px; }
+.ds-h1{
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  margin: 0;
+}
+
+.ds-h2{
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  margin: 0;
+}
+
+.ds-h3{
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  margin: 0;
+}
+
+.ds-p{
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  margin: 0;
+  color: var(--text-sub);
+}
+
+/* =========================
+   Global Responsive Type Scale
+========================= */
+
+/* tablet */
+@media (max-width: 1024px){
+
+  body{
+    font-size: calc(var(--fs-body) - 1px);
+  }
+
+  .ds-h1{
+    font-size: calc(var(--fs-h1) * 0.88);
+  }
+
+  .ds-h2{
+    font-size: calc(var(--fs-h2) * 0.9);
+  }
+
+  .ds-h3{
+    font-size: calc(var(--fs-h3) * 0.92);
+  }
+}
+
+/* mobile */
+@media (max-width: 640px){
+
+  body{
+    font-size: calc(var(--fs-body) - 2px);
+  }
+
+  .ds-h1{
+    font-size: calc(var(--fs-h1) * 0.72);
+    line-height: 1.2;
+  }
+
+  .ds-h2{
+    font-size: calc(var(--fs-h2) * 0.78);
+  }
+
+  .ds-h3{
+    font-size: calc(var(--fs-h3) * 0.85);
+  }
+}
+
+/* small phones */
+@media (max-width: 420px){
+
+  .ds-h1{
+    font-size: calc(var(--fs-h1) * 0.66);
+  }
+
+  .ds-h2{
+    font-size: calc(var(--fs-h2) * 0.72);
+  }
 }

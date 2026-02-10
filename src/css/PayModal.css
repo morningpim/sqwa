@@ -390,3 +390,55 @@
   .pay-actions{ flex-direction: column; }
   .pay-btn{ width: 100%; }
 }
+
+/* =========================
+   PayModal Responsive UX
+========================= */
+
+/* tablet */
+@media (max-width: 1024px){
+
+  .pay-card{
+    width: 440px;
+  }
+
+  .pay-backdrop.is-left .pay-card{
+    margin-left: 12px;
+  }
+}
+
+/* mobile → bottom sheet */
+@media (max-width: 640px){
+
+  .pay-backdrop{
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .pay-backdrop.is-left{
+    justify-content: center;
+  }
+
+  .pay-card{
+    width: 100%;
+    max-width: 100%;
+    border-radius: 18px 18px 0 0;
+    padding: 14px;
+    margin-left: 0;
+    animation: paySheetUp .22s ease;
+  }
+
+  .pay-actions{
+    flex-direction: column;
+  }
+
+  .pay-btn{
+    width: 100%;
+  }
+}
+
+@keyframes paySheetUp{
+  from{ transform: translateY(100%); }
+  to{ transform: translateY(0); }
+}

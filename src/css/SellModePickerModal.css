@@ -90,3 +90,53 @@
   .smp-grid{ grid-template-columns: 1fr; }
   .smp-option{ width: 100%; max-width: 320px; height: 220px; }
 }
+
+/* =========================
+   SellModePicker Mobile UX
+========================= */
+
+@media (max-width: 640px){
+
+  .smp-backdrop{
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .smp-card{
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 18px 16px 16px;
+    animation: smpSheetUp .22s ease;
+  }
+
+  .smp-grid{
+    gap: 16px;
+  }
+
+  .smp-option{
+    width: 100%;
+    max-width: none;
+    height: 180px;
+  }
+
+  .smp-icon{
+    font-size: 56px;
+  }
+
+  .smp-label{
+    font-size: 18px;
+  }
+
+  .smp-actions{
+    margin-top: 14px;
+  }
+
+  .smp-cancel{
+    width: 100%;
+  }
+}
+
+@keyframes smpSheetUp{
+  from{ transform: translateY(100%); }
+  to{ transform: translateY(0); }
+}

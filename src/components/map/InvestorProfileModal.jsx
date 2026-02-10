@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "../../css/InvestorProfileModal.css";
-import { loadInvestorProfile, saveInvestorProfile } from "../../utils/investorProfile";
+import { loadInvestorProfile, saveInvestorProfile, defaultInvestorProfile } from "../../utils/investorProfile";
 
 function Card({ title, options, value, onChange }) {
   return (
@@ -102,7 +102,7 @@ export default function InvestorProfileModal({ open, onClose, onDone }) {
           <button
             type="button"
             className="ip-btn ghost"
-            onClick={() => setModel(loadInvestorProfile())}
+            onClick={() => setModel(defaultInvestorProfile())}
           >
             {t("profile.action.reset")}
           </button>

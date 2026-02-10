@@ -142,3 +142,60 @@
 .ip-btn.ghost{
   background: #f7f7f7;
 }
+
+
+/* =========================
+   Investor Profile Modal Responsive
+========================= */
+
+/* tablet */
+@media (max-width: 1024px){
+
+  .ip-modal{
+    width: min(900px, 96vw);
+  }
+
+  .ip-grid{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* mobile */
+@media (max-width: 640px){
+
+  .ip-backdrop{
+    padding: 10px;
+  }
+
+  .ip-modal{
+    width: 100%;
+    border-radius: 14px;
+  }
+
+  .ip-head{
+    padding: 14px;
+  }
+
+  .ip-title{
+    font-size: 18px;
+  }
+
+  .ip-grid{
+    padding: 14px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .ip-foot{
+    flex-direction: column;
+    padding: 14px;
+  }
+
+  .ip-btn{
+    width: 100%;
+  }
+
+  .ip-btn.primary{
+    min-width: 0;
+  }
+}

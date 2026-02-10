@@ -99,7 +99,7 @@ export default function AdminBroadcastPage() {
         </div>
 
         <div className="admin-actions">
-          <button className="btn primary" onClick={() => setCreateOpen(true)}>
+          <button className="ds-btn ds-btn-primary" onClick={() => setCreateOpen(true)}>
             + {t("action.create")}
           </button>
         </div>
@@ -108,13 +108,13 @@ export default function AdminBroadcastPage() {
       {/* FILTERS */}
       <div className="admin-filters">
         <input
-          className="input"
+          className="ds-input"
           placeholder={t("search")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
 
-        <select className="select" value={status} onChange={(e) => setStatus(e.target.value)}>
+        <select className="ds-select" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="all">{t("filter.statusAll")}</option>
           <option value="draft">{t("status.draft")}</option>
           <option value="scheduled">{t("status.scheduled")}</option>
@@ -122,13 +122,13 @@ export default function AdminBroadcastPage() {
           <option value="disabled">{t("status.disabled")}</option>
         </select>
 
-        <select className="select" value={mode} onChange={(e) => setMode(e.target.value)}>
+        <select className="ds-select" value={mode} onChange={(e) => setMode(e.target.value)}>
           <option value="all">{t("filter.modeAll")}</option>
           <option value="buy_sell">{t("mode.buy_sell")}</option>
           <option value="consignment">{t("mode.consignment")}</option>
         </select>
 
-        <select className="select" value={channel} onChange={(e) => setChannel(e.target.value)}>
+        <select className="ds-select" value={channel} onChange={(e) => setChannel(e.target.value)}>
           <option value="all">{t("filter.channelAll")}</option>
           <option value="SQW_WEB">{t("channel.SQW_WEB")}</option>
           <option value="LINE_ADS">{t("channel.LINE_ADS")}</option>
@@ -191,7 +191,7 @@ export default function AdminBroadcastPage() {
                                     {t(`channel.${c}`)}
                                   </span>
                                 ))
-                              : <span className="muted">-</span>}
+                              : <span className="text-muted">-</span>}
                           </div>
                         </td>
 
@@ -203,7 +203,7 @@ export default function AdminBroadcastPage() {
                                     {t(`day.${d}`)}
                                   </span>
                                 ))
-                              : <span className="muted">-</span>}
+                              : <span className="text-muted">-</span>}
                             <span className="chip soft">{time}</span>
                           </div>
                         </td>
@@ -216,27 +216,27 @@ export default function AdminBroadcastPage() {
 
                         <td style={{ textAlign: "right" }}>
                           <div className="row-actions">
-                            <button className="btn" onClick={() => setPreview(x)}>
+                            <button className="ds-btn ds-btn-outline" onClick={() => setPreview(x)}>
                               {t("action.view")}
                             </button>
 
                             {x.status !== "disabled" ? (
-                              <button className="btn warn" onClick={() => onDisable(x.id)}>
+                              <button className="ds-btn ds-btn-outline" onClick={() => onDisable(x.id)}>
                                 {t("action.disable")}
                               </button>
                             ) : (
-                              <button className="btn" onClick={() => onEnable(x.id)}>
+                              <button className="ds-btn ds-btn-outline" onClick={() => onEnable(x.id)}>
                                 {t("action.enable")}
                               </button>
                             )}
 
                             {x.status !== "sent" && (
-                              <button className="btn" onClick={() => onMarkSent(x.id)}>
+                              <button className="ds-btn ds-btn-outline" onClick={() => onMarkSent(x.id)}>
                                 {t("action.markSent")}
                               </button>
                             )}
 
-                            <button className="btn danger" onClick={() => onDelete(x.id)}>
+                            <button className="ds-btn ds-btn-outline" onClick={() => onDelete(x.id)}>
                               {t("action.delete")}
                             </button>
                           </div>

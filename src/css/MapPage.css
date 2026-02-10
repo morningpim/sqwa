@@ -484,3 +484,92 @@
   line-height: 1.35;
 }
 
+/* =========================
+   Map Page Responsive
+========================= */
+
+/* tablet */
+@media (max-width: 1024px){
+
+  .map-search{
+    width: 340px;
+  }
+
+  .map-right-stack{
+    right: 12px;
+  }
+
+  .map-stats{
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+}
+
+/* mobile */
+@media (max-width: 640px){
+
+  .map-topbar{
+    top: calc(var(--nav-h) + 10px);
+  }
+
+  .map-search{
+    width: calc(100% - 24px);
+  }
+
+  .map-right-stack{
+    right: 10px;
+    gap: 10px;
+  }
+
+  .map-fab{
+    width: 42px;
+    height: 42px;
+  }
+
+  .map-zoom-btn,
+  .map-target-btn{
+    width: 42px;
+    height: 42px;
+  }
+
+  .map-my-location{
+    height: 36px;
+    padding: 0 12px;
+  }
+
+  /* stats -> compact bottom cards */
+  .map-stats{
+    bottom: 10px;
+    grid-template-columns: repeat(3, minmax(90px, 1fr));
+    gap: 8px;
+    width: calc(100% - 20px);
+  }
+
+  .stat-card{
+    padding: 10px 8px;
+    border-radius: 14px;
+  }
+
+  .stat-value{
+    font-size: 20px;
+  }
+
+  /* search popup ไม่ให้ล้น */
+  .search-pop{
+    width: calc(100vw - 24px);
+    right: 12px;
+    left: auto;
+    transform: none;
+    top: auto;
+    bottom: 70px;
+  }
+}
+
+/* small phones */
+@media (max-width: 420px){
+
+  .map-stats{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+

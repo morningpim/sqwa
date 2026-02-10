@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import "../../css/FilterPanel.css";
 
 export default function FilterPanel({
@@ -9,6 +9,16 @@ export default function FilterPanel({
   onApply,
   onClear,
 }) {
+
+  useEffect(() => {
+    const onEsc = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [onClose]);
+
   if (!open) return null;
 
   const update = (patch) => onChange?.({ ...value, ...patch });
@@ -187,7 +197,7 @@ export default function FilterPanel({
         {/* Footer (ไม่เลื่อน) */}
         <div className="filter-footer">
           <button
-            className="btn-outline"
+            className="ds-btn ds-btn-outline ds-btn-sm"
             type="button"
             onClick={() => {
               onClear?.();
@@ -196,7 +206,12 @@ export default function FilterPanel({
           >
             ล้าง
           </button>
-          <button className="btn-primary" type="button" onClick={() => onApply?.()}>
+
+          <button
+            className="ds-btn ds-btn-primary ds-btn-sm"
+            type="button"
+            onClick={() => onApply?.()}
+          >
             ใช้ตัวกรอง
           </button>
         </div>

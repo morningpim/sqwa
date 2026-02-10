@@ -1,0 +1,182 @@
+/* ==================================================
+   Button – Design System
+================================================== */
+
+.ds-btn {
+  /* layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  white-space: nowrap;
+
+  /* base */
+  font-family: inherit;
+  font-weight: var(--btn-fw);
+  border: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+
+  /* motion */
+  transition: var(--btn-transition);
+}
+
+/* ---------- Sizes ---------- */
+
+.ds-btn-sm {
+  height: var(--btn-h-sm);
+  padding: 0 var(--btn-px-sm);
+  font-size: var(--btn-fs-sm);
+  border-radius: var(--btn-r-sm);
+}
+
+.ds-btn-md {
+  height: var(--btn-h-md);
+  padding: 0 var(--btn-px-md);
+  font-size: var(--btn-fs-md);
+  border-radius: var(--btn-r-md);
+}
+
+.ds-btn-lg {
+  height: var(--btn-h-lg);
+  padding: 0 var(--btn-px-lg);
+  font-size: var(--btn-fs-lg);
+  border-radius: var(--btn-r-lg);
+}
+
+.ds-btn-xl {
+  height: var(--btn-h-xl);
+  padding: 0 var(--btn-px-xl);
+  font-size: var(--btn-fs-xl);
+  border-radius: var(--btn-r-xl);
+}
+
+/* ---------- Variants ---------- */
+
+/* Primary */
+.ds-btn-primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: var(--shadow-soft);
+}
+
+.ds-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.ds-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Outline */
+.ds-btn-outline {
+  background: transparent;
+  color: var(--primary-dark);
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+}
+
+.ds-btn-outline:hover {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+/* Ghost */
+.ds-btn-ghost {
+  background: transparent;
+  color: var(--text-main);
+}
+
+.ds-btn-ghost:hover {
+  background: color-mix(in srgb, var(--text-main) 6%, transparent);
+}
+
+/* Danger */
+.ds-btn-danger {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+}
+
+.ds-btn-danger:hover {
+  background: color-mix(in srgb, var(--danger) 18%, transparent);
+}
+
+/* ---------- Utilities ---------- */
+
+.ds-btn-block {
+  width: 100%;
+}
+
+.ds-btn-icon {
+  padding: 0;
+  width: var(--btn-h-md);
+}
+
+/* ---------- States ---------- */
+
+.ds-btn:disabled,
+.ds-btn.is-disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---------- Icon inside button ---------- */
+
+.ds-btn .material-icon {
+  font-size: 1.1em;
+  line-height: 1;
+  color: currentColor;
+}
+
+/* =========================
+   DS Button Responsive
+========================= */
+
+/* tablet */
+@media (max-width: 1024px){
+
+  .ds-btn-md{
+    height: calc(var(--btn-h-md) + 2px);
+  }
+
+  .ds-btn-lg{
+    height: calc(var(--btn-h-lg) + 2px);
+  }
+}
+
+/* mobile */
+@media (max-width: 640px){
+
+  /* CTA buttons เต็มความกว้างโดยใช้ class นี้ */
+  .ds-btn-mobile-block{
+    width: 100%;
+  }
+
+  /* เพิ่ม tap comfort */
+  .ds-btn-sm{
+    height: calc(var(--btn-h-sm) + 2px);
+  }
+
+  .ds-btn-md{
+    height: calc(var(--btn-h-md) + 4px);
+  }
+
+  .ds-btn-lg{
+    height: calc(var(--btn-h-lg) + 4px);
+  }
+
+  .ds-btn-xl{
+    height: calc(var(--btn-h-xl) + 4px);
+  }
+}
+
+/* small phones */
+@media (max-width: 420px){
+
+  .ds-btn{
+    font-size: calc(var(--btn-fs-md) - 1px);
+  }
+}
