@@ -7,6 +7,7 @@ import { addApplicant } from "../utils/applicantsLocal";
 import { useTranslation } from "react-i18next";
 import "../css/Signup.css";
 
+
 import StepVerify from "./Signup/steps/StepVerify";
 import StepCommon from "./Signup/steps/StepCommon";
 import StepSpecific from "./Signup/steps/StepSpecific";
@@ -74,8 +75,9 @@ export default function Signup() {
   // ===== form state =====
   const [form, setForm] = useState({
     // step 1
-    name: "",
-    lastname: "",
+    firstName: "",
+    lastName: "",
+    idCard: "",
     phone: "",
     email: "",
     lineId: "",
@@ -100,6 +102,7 @@ export default function Signup() {
   const [idFront, setIdFront] = useState(null);
   const [idBack, setIdBack] = useState(null);
   const [selfie, setSelfie] = useState(null);
+  const [agentLicenseImage, setAgentLicenseImage] = useState(null);
   const [errors, setErrors] = useState({});
 
   // ===== basic handlers =====
@@ -136,11 +139,18 @@ export default function Signup() {
 
   // ===== validations =====
   const validateStep1 = () => {
-    if (!form.name || !form.lastname) return t("error.nameRequired");
-    if (!form.email) return t("error.emailRequired");
-    if (!form.password || !form.confirmPassword) return t("error.passwordRequired");
+    if (!form.firstName || !form.lastName)
+      return t("error.nameRequired");
+
+    if (!form.email)
+      return t("error.emailRequired");
+
+    if (!form.password || !form.confirmPassword)
+      return t("error.passwordRequired");
+
     if (form.password !== form.confirmPassword)
       return t("error.passwordMismatch");
+
     return null;
   };
 
@@ -151,6 +161,8 @@ export default function Signup() {
       // ✅ Agent ต้องมี license
       if (isAgent && !form.agentLicense)
         return t("error.agentLicenseRequired");
+      if (isAgent && !agentLicenseImage)
+        return t("error.agentLicenseImageRequired");
     }
 
     if (isInvestor) {
@@ -159,6 +171,26 @@ export default function Signup() {
     }
 
     return null;
+  };
+
+  const buildPayload = () => {
+    const roleToSave = isSeller
+      ? (role || form.sellerRole || "")
+      : userType;
+
+    return {
+      role: roleToSave,
+      email: form.email,
+      password: form.password,
+      first_name: form.firstName,
+      last_name: form.lastName,
+      phone: form.phone,
+      line_id: form.lineId,
+      address: form.address,
+      number_id_card: form.idCard.replace(/-/g, ""),
+      investorQuiz: isInvestor ? investorQuiz : null,
+      investorScore: isInvestor ? investorScore : null,
+    };
   };
 
   // ===== next/back =====
@@ -171,57 +203,47 @@ export default function Signup() {
 
   const goNextFromStep2 = (e) => {
     e.preventDefault();
+
     if (!canVerify) {
       alert("กรุณาอัปโหลดเอกสารยืนยันตัวตนให้ครบถ้วน");
       return;
     }
 
-    if (isGeneral) {
-      const payload = {
-        type: userType,
-        ...form,
-      };
+    // General และ Landlord สมัครเสร็จที่ Step2
+    if (isGeneral || isLandlord) {
+      const payload = buildPayload();
+
       addApplicant(payload);
       setShowSuccess(true);
       return;
     }
 
+    // Agent / Investor ไป Step3
     setStep(3);
   };
 
   const goNextFromStep3 = (e) => {
     e.preventDefault();
+
     const err = validateStep3();
     if (err) return alert(err);
 
-    const payload = {
-      type: userType,
-
-      // ✅ ส่ง role สำหรับ seller
-      role: isSeller ? (role || form.sellerRole || "") : null,
-
-      // form
-      ...form,
-
-      // investor
-      investorQuiz: isInvestor ? investorQuiz : null,
-      investorScore: isInvestor ? investorScore : null,
-    };
+    const payload = buildPayload();
 
     const formData = new FormData();
     formData.append("payload", JSON.stringify(payload));
-    formData.append("id_front", idFront);
-    formData.append("id_back", idBack);
+    formData.append("id_card_image_front", idFront);
+    formData.append("id_card_image_back", idBack);
     formData.append("selfie", selfie);
 
-    console.log("READY TO SUBMIT payload:", payload);
-    console.log("READY TO SUBMIT formData:", formData);
+    if (isAgent && agentLicenseImage) {
+      formData.append("agent_license_image", agentLicenseImage);
+    }
 
-    // TODO: ส่ง API จริง (Django)
-    // await fetch("/api/signup", { method:"POST", body: formData })
     addApplicant(payload);
     setShowSuccess(true);
   };
+
 
   const goBack = () => {
     if (step === 3) return setStep(2);
@@ -229,7 +251,7 @@ export default function Signup() {
   };
 
   // ===== Step bar logic =====
-  const showStep3 = !isGeneral;
+  const shouldHaveStep3 = isAgent || isInvestor;
 
   return (
     <div className="signup-wrapper">
@@ -253,7 +275,7 @@ export default function Signup() {
             <span className="step-label">{t("step.verify")}</span>
           </div>
 
-          {showStep3 && (
+          {shouldHaveStep3 && (
             <>
               <div className="step-line" />
               <div className={`step-item ${step === 3 ? "active" : ""}`}>
@@ -278,7 +300,6 @@ export default function Signup() {
             setShowConfirmPassword={setShowConfirmPassword}
             onNext={goNextFromStep1}
             onCancel={handleCancel}
-            t={t}
           />
         )}
 
@@ -294,12 +315,13 @@ export default function Signup() {
             onNext={goNextFromStep2}
             onBack={goBack}
             isGeneral={isGeneral}
-            t={t}
+            form={form}
+            updateForm={updateForm}
           />
         )}
 
         {/* ===== STEP 3: Type-specific ===== */}
-        {step === 3 && !isGeneral && (
+        {step === 3 && shouldHaveStep3 && (
           <StepSpecific
             isSeller={isSeller}
             isInvestor={isInvestor}
@@ -313,6 +335,8 @@ export default function Signup() {
             onSubmit={goNextFromStep3}
             onBack={goBack}
             t={t}
+            agentLicenseImage={agentLicenseImage}
+            setAgentLicenseImage={setAgentLicenseImage}
           />
         )}
       </div>

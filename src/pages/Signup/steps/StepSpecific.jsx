@@ -14,6 +14,8 @@ export default function StepSpecific({
   onSubmit,
   onBack,
   t,
+  agentLicenseImage,
+  setAgentLicenseImage,
 }) {
   return (
     <>
@@ -31,7 +33,7 @@ export default function StepSpecific({
 
               {/* Shop / Seller Name */}
               <div className="field">
-                <label>{t("seller.shopName")}</label>
+                <label>{t("seller.shopNamePlaceholder")}</label>
                 <input
                   value={form.shopName}
                   onChange={updateForm("shopName")}
@@ -39,17 +41,37 @@ export default function StepSpecific({
                 />
               </div>
 
-              {/* Agent only */}
               {isAgent && (
+              <>
                 <div className="field">
-                  <label>{t("seller.agentLicense")}</label>
+                  <label>{t("seller.agentLicensePlaceholder")}</label>
                   <input
                     value={form.agentLicense}
                     onChange={updateForm("agentLicense")}
                     placeholder={t("seller.agentLicensePlaceholder")}
                   />
                 </div>
-              )}
+
+                <div className="field ">
+                  <label className="center">{t("seller.agentLicenseImage")}</label>
+
+                  <label className="upload-box center">
+                    {agentLicenseImage ? (
+                      <img src={URL.createObjectURL(agentLicenseImage)} alt="" />
+                    ) : (
+                      <span>{t("seller.uploadLicense")}</span>
+                    )}
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      onChange={(e) => setAgentLicenseImage(e.target.files[0])}
+                    />
+                  </label>
+                </div>
+              </>
+)}
+
             </>
           )}
 

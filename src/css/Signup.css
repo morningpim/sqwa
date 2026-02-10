@@ -101,11 +101,10 @@
   gap: var(--space-lg) var(--space-xl);
 }
 
-.field label {
-  display: block;
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: var(--space-xxs);
+.field label{
+  font-size: 14px;               /* ขนาดเดียวกันทั้งระบบ */
+  font-weight: 600;
+  color: var(--text-main);       /* สีเดียวกัน */
 }
 
 .field input,
@@ -327,11 +326,10 @@
   margin: 0 auto var(--space-xl); /* จัดกลาง */
 }
 
-.verify-heading {
-  font-size: 16px;
+.verify-heading{
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-main);
-  margin-bottom: var(--space-md);
 }
 
 /* row กล่องอัปโหลด */
@@ -346,6 +344,11 @@
   grid-template-columns: 1fr;
 }
 
+.verify-input{
+  max-width: 720px;
+  margin: 0 auto var(--space-lg);
+}
+
 .upload-box {
   height: 180px;
   border-radius: var(--r-lg);
@@ -358,6 +361,8 @@
   gap: var(--space-xs);
   cursor: pointer;
   transition: border-color .15s ease, background .15s ease;
+  overflow: hidden;
+  position: relative;
 }
 
 .upload-box:hover {
@@ -380,11 +385,12 @@
   text-align: center;
 }
 
-.upload-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--r-lg);
+.upload-preview{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
 .upload-error {
@@ -416,6 +422,18 @@
   width:18px;
   height:18px;
 }
+
+.field.full{
+  grid-column: 1 / -1;
+}
+
+.upload-box.center{
+  margin:auto;
+  text-align:center;
+  justify-content:center;
+  align-items:center;
+}
+
 
 /* =========================
    Signup Mobile UX

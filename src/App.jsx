@@ -12,6 +12,10 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import CartPage from "./pages/Cart/CartPage";
 import ProfilePage from "./pages/ProfilePage";
+import ForgotPassword from "./pages/ForgotPassword";
+import OtpVerification from "./pages/OtpVerification";
+import ResetPassword from "./pages/ResetPassword";
+import ResetPasswordSuccess from "./pages/ResetPasswordSuccess";
 
 import AdminPage from "./pages/admin/AdminPage";
 import AdminBroadcastPage from "./pages/admin/AdminBroadcastPage";
@@ -36,15 +40,22 @@ export default function App() {
 
   // ✅ ไม่ซ่อน Navbar ใน /admin แล้ว
   const hideNavbar =
-    location.pathname === "/login" ||
-    location.pathname === "/signup";
+  location.pathname === "/login" ||
+  location.pathname === "/signup" ||
+  location.pathname === "/forgot-password" ||
+  location.pathname === "/otp-verification" ||
+  location.pathname === "/reset-password" ||
+  location.pathname === "/reset-password-success";
 
   const hideFooter =
     location.pathname === "/map" ||
     location.pathname === "/cart" ||
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
-    location.pathname === "/profile" ||
+    location.pathname === "/forgot-password" ||
+    location.pathname === "/otp-verification" ||
+    location.pathname === "/reset-password" ||
+    location.pathname === "/reset-password-success" ||
     location.pathname.startsWith("/admin");
 
   return (
@@ -56,9 +67,13 @@ export default function App() {
           <Route path="/" element={<><HeroSection /><NewsSection /></>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />  
           <Route path="/map" element={<MapPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/otp-verification" element={<OtpVerification />} />   
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password-success" element={<ResetPasswordSuccess />} />
 
           <Route
             path="/admin"

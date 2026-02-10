@@ -33,14 +33,12 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { role } = useAuth();
+  const { user, role, logout } = useAuth();
+  const isLoggedIn = !!user;
   const isAdmin = role === "admin";
 
   const [cartCount, setCartCount] = useState(readCartCount);
   const [favCount, setFavCount] = useState(() => readFavorites().length);
-
-  const [isLoggedIn] = useState(true);
-  const [user] = useState(MOCK_USER);
 
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -129,8 +127,6 @@ export default function Navbar() {
     setModeOpen(false);
   };
 
-
-
   return (
     <header className="nav">
       <Link to="/" className="nav-logo">SQW</Link>
@@ -194,76 +190,101 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Profile */}
-        <div className="nav-profile" ref={ref}>
-          <button
-            className="nav-avatar"
-            type="button"
-            onClick={() => setOpen(v => !v)}
-            aria-expanded={open}
-          >
-            {user.avatarUrl ? <img src={user.avatarUrl} alt="avatar" /> : <span>{avatarLetter}</span>}
-          </button>
-
-          {open && (
-            <div className="nav-profile-menu">
-              <div className="nav-profile-name">{user.name}</div>
-
-              <button onClick={() => go("/profile")}>{t("nav.profile")}</button>
-              <button onClick={() => go("/profile?tab=fav")}>
-                {t("nav.favorites")} {favCount > 0 && `(${favCount})`}
-              </button>
-              <button onClick={() => go("/profile?tab=purchase")}>
-                {t("nav.purchases")}
+        {/* Profile / Auth */}
+          {isLoggedIn ? (
+            <div className="nav-profile" ref={ref}>
+              <button
+                className="nav-avatar"
+                type="button"
+                onClick={() => setOpen(v => !v)}
+                aria-expanded={open}
+              >
+                {user?.avatarUrl
+                  ? <img src={user.avatarUrl} alt="avatar" />
+                  : <span>{avatarLetter}</span>
+                }
               </button>
 
-              {isAdmin && (
-                <>
+              {open && (
+                <div className="nav-profile-menu">
+                  <div className="nav-profile-name">{user?.name}</div>
+
+                  <button onClick={() => go("/profile")}>{t("nav.profile")}</button>
+                  <button onClick={() => go("/profile?tab=fav")}>
+                    {t("nav.favorites")} {favCount > 0 && `(${favCount})`}
+                  </button>
+                  <button onClick={() => go("/profile?tab=purchase")}>
+                    {t("nav.purchases")}
+                  </button>
+
+                  {isAdmin && (
+                    <>
+                      <div className="nav-profile-divider" />
+                      <div className="nav-profile-section">
+                        <div className="nav-profile-section-title">
+                          <ShieldCheck size={16} />
+                          {t("nav.admin.section")}
+                        </div>
+                        <button onClick={() => go("/admin?tab=dashboard")}>
+                          {t("nav.admin.dashboard")}
+                        </button>
+                        <button onClick={() => go("/admin?tab=broadcast")}>
+                          {t("nav.admin.broadcast")}
+                        </button>
+                        <button onClick={() => go("/admin?tab=lands")}>
+                          {t("nav.admin.lands")}
+                        </button>
+                      </div>
+                    </>
+                  )}
+
                   <div className="nav-profile-divider" />
-                  <div className="nav-profile-section">
-                    <div className="nav-profile-section-title">
-                      <ShieldCheck size={16} />
-                      {t("nav.admin.section")}
-                    </div>
-                    <button onClick={() => go("/admin?tab=dashboard")}>
-                      {t("nav.admin.dashboard")}
-                    </button>
-                    <button onClick={() => go("/admin?tab=broadcast")}>
-                      {t("nav.admin.broadcast")}
-                    </button>
-                    <button onClick={() => go("/admin?tab=lands")}>
-                      {t("nav.admin.lands")}
-                    </button>
-                  </div>
-                </>
+                  <button className="danger" onClick={logout}>
+                    {t("nav.logout")}
+                  </button>
+                </div>
               )}
+            </div>
+          ) : (
+            <div className="nav-auth">
+              <button
+                className="nav-signin"
+                onClick={() => navigate("/login")}
+              >
+                Sign In
+              </button>
 
-              <div className="nav-profile-divider" />
-              <button className="danger">{t("nav.logout")}</button>
+              <button
+                className="nav-signin"
+                onClick={() => navigate("/login?signup=1")}
+              >
+                Sign up
+              </button>
             </div>
           )}
-        </div>
 
         {/* Cart */}
-        <Link to="/cart" className="cart-btn">
-          <ShoppingCart size={20} />
-          {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-        </Link>
+        {isLoggedIn && (
+          <Link to="/cart" className="cart-btn">
+            <ShoppingCart size={20} />
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+          </Link>
+        )}
 
         {/* Language Switch */}
         <div className="nav-lang-switch">
           <button
-            className={`nav-lang-btn ${currentLang === "th" ? "active" : ""}`}
+            className={`nav-lang-flag ${currentLang === "th" ? "active" : ""}`}
             onClick={() => changeLanguage("th")}
           >
-            TH
+            <img src="/flags/th.png" alt="Thai" />
           </button>
-          <span>|</span>
+
           <button
-            className={`nav-lang-btn ${currentLang === "en" ? "active" : ""}`}
+            className={`nav-lang-flag ${currentLang === "en" ? "active" : ""}`}
             onClick={() => changeLanguage("en")}
           >
-            EN
+            <img src="/flags/en.png" alt="English" />
           </button>
         </div>
       </div>

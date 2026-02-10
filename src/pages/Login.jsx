@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// src/pages/Login.jsx
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import { useTranslation } from "react-i18next";
@@ -14,6 +15,19 @@ export default function Login() {
   const [sellerRole, setSellerRole] = useState(null); // ✅ เพิ่ม agent | landlord
   const [showPassword, setShowPassword] = useState(false);
   const { t } = useTranslation("auth");
+  const {t: tCommon} = useTranslation("common");
+  const handleBackToUserType = () => {
+    setShowSellerRoleModal(false);
+    setShowUserTypeModal(true);
+  };
+  const location = useLocation();
+
+  useEffect(() => {
+    const sp = new URLSearchParams(location.search);
+    if (sp.get("signup") === "1") {
+      setShowUserTypeModal(true);
+    }
+  }, [location.search]);
 
   const navigate = useNavigate();
 
@@ -61,7 +75,7 @@ export default function Login() {
   const handleCancelTerms = () => setShowTermsModal(false);
 
   const handleForgotPassword = () => {
-    alert(t("alert.forgotNotReady"));
+    navigate("/forgot-password");
   };
 
   const getUserTypeLabel = () =>
@@ -151,10 +165,21 @@ export default function Login() {
       {showUserTypeModal && (
         <div className="user-type-backdrop" onClick={() => setShowUserTypeModal(false)}>
           <div className="user-type-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
             <h2 className="user-type-title">{t("userType.title")}</h2>
-            <p className="user-type-subtitle">
-              {t("userType.subtitle")}
-            </p>
+
+            <button
+              className="modal-close"
+              onClick={() => setShowUserTypeModal(false)}
+              aria-label="close"
+            >
+              ×
+            </button>
+          </div>
+
+          <p className="user-type-subtitle">
+            {t("userType.subtitle")}
+          </p>
 
             <div className="user-type-buttons">
               <button className="user-type-card" onClick={() => handleSelectType("general")}>
@@ -188,14 +213,31 @@ export default function Login() {
 
       {/* ✅ MODAL: เลือกบทบาท Seller */}
       {showSellerRoleModal && (
-        <div className="user-type-backdrop" onClick={() => setShowSellerRoleModal(false)}>
-          <div className="user-type-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="user-type-title">{t("sellerRole.title")}</h2>
-            <p className="user-type-subtitle">
-                  {t("userType.subtitle")}
-            </p>
+      <div className="user-type-backdrop" onClick={() => setShowSellerRoleModal(false)}>
+        <div className="user-type-modal" onClick={(e) => e.stopPropagation()}>
 
-            <div className="user-type-buttons">
+          <div className="modal-header">
+            <button
+              className="modal-back"
+              onClick={handleBackToUserType}
+              aria-label="back"
+            >
+              ←
+            </button>
+
+            <h2 className="user-type-title">{t("sellerRole.title")}</h2>
+
+            <button
+              className="modal-close"
+              onClick={() => setShowSellerRoleModal(false)}
+            >
+              ×
+            </button>
+          </div>
+
+          <p className="user-type-subtitle">{t("userType.subtitle")}</p>
+
+          <div className="user-type-buttons">
               <button className="user-type-card" onClick={() => handleSelectSellerRole("agent")}>
                 <div className="user-type-icon-circle">
                   <span className="material-symbols-outlined user-type-icon">support_agent</span>

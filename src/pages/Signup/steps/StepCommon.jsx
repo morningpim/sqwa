@@ -1,5 +1,6 @@
 // src/pages/Signup/steps/StepCommon.jsx
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { useTranslation } from "react-i18next";
 
 export default function StepCommon({
   form,
@@ -9,9 +10,10 @@ export default function StepCommon({
   showConfirmPassword,
   setShowConfirmPassword,
   onNext,
-  onCancel,
-  t,
+  onCancel
 }) {
+  const { t } = useTranslation("signup");
+  const { t: tCommon } = useTranslation("common");
   return (
     <>
       <h1 className="signup-title">{t("title")}</h1>
@@ -19,27 +21,40 @@ export default function StepCommon({
       <form className="signup-form" onSubmit={onNext}>
         <div className="signup-grid">
           <div className="field">
-            <label>{t("field.name")}</label>
-            <input value={form.name} onChange={updateForm("name")} />
+            <label>{t("field.firstName")}</label>
+            <input value={form.firstName} onChange={updateForm("firstName")} />
           </div>
 
           <div className="field">
-            <label>{t("field.lastname")}</label>
-            <input value={form.lastname} onChange={updateForm("lastname")} />
+            <label>{t("field.lastName")}</label>
+            <input value={form.lastName} onChange={updateForm("lastName")} />
           </div>
 
           <div className="field">
             <label>{t("field.phone")}</label>
-            <input value={form.phone} onChange={updateForm("phone")} />
+            <input
+              inputMode="numeric"
+              maxLength={10}
+              value={form.phone}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                updateForm("phone")({ target: { value: digits } });
+              }}
+            />
           </div>
 
           <div className="field">
             <label>{t("field.email")}</label>
-            <input value={form.email} onChange={updateForm("email")} />
+            <input
+              type="email"
+              autoComplete="email"
+              value={form.email}
+              onChange={updateForm("email")}
+            />
           </div>
 
           <div className="field">
-            <label>{t("field.lineId")}</label>
+            <label>{t("field.lineID")}</label>
             <input value={form.lineId} onChange={updateForm("lineId")} />
           </div>
 
@@ -84,7 +99,7 @@ export default function StepCommon({
 
         <div className="signup-actions">
           <button type="button" className="btn-outline" onClick={onCancel}>
-            {t("action.cancel")}
+            {tCommon("action.cancel")}
           </button>
           <button type="submit" className="btn-primary">
             {t("action.next")}

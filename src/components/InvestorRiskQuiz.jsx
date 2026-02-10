@@ -5,10 +5,6 @@ import "../css/Signup.css";
 export default function InvestorRiskQuiz({ value, onChange }) {
   const { t } = useTranslation("signup");
 
-  const score = useMemo(() => {
-    return Object.values(value).reduce((sum, v) => sum + (Number(v) || 0), 0);
-  }, [value]);
-
   const allAnswered = useMemo(() => {
     return Object.values(value).every((v) => v !== null);
   }, [value]);
@@ -86,20 +82,6 @@ export default function InvestorRiskQuiz({ value, onChange }) {
         </label>
         <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
           {t("investor.hint")}
-        </div>
-
-        <div
-          style={{
-            marginTop: 12,
-            padding: "10px 12px",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--r-md)",
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          <span>{t("investor.score")}</span>
-          <strong>{score} / 40</strong>
         </div>
 
         {!allAnswered && (

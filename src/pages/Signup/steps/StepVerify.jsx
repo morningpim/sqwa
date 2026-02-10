@@ -1,4 +1,8 @@
 // src/pages/Signup/steps/StepVerify.jsx
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { formatThaiId } from "../../../utils/thaiId";
+
 export default function StepVerify({
   idFront,
   idBack,
@@ -9,10 +13,27 @@ export default function StepVerify({
   onNext,
   onBack,
   isGeneral,
-  t,
+  form,
+  updateForm
 }) {
+
+  const { t } = useTranslation("signup");
+
   return (
     <form className="signup-form" onSubmit={onNext}>
+      <div className="field verify-input">
+            <label>{t("field.idCard")}</label>
+            <input
+              value={form.idCard}
+              maxLength={17}
+              onChange={(e) =>
+                updateForm("idCard")({
+                  target: { value: formatThaiId(e.target.value) }
+                })
+              }
+            />
+      </div>
+
       <div className="verify-section">
         <p className="verify-heading">{t("verify.idCard")}</p>
 
@@ -20,10 +41,14 @@ export default function StepVerify({
           {["front", "back"].map((type) => (
             <label key={type} className="upload-box">
               {type === "front" && idFront && (
-                <img src={URL.createObjectURL(idFront)} alt="" />
+                <img
+                  className="upload-preview"
+                  src={URL.createObjectURL(idFront)}
+                  alt=""
+                />
               )}
               {type === "back" && idBack && (
-                <img src={URL.createObjectURL(idBack)} alt="" />
+                <img className="upload-preview" src={URL.createObjectURL(idBack)} alt="" />
               )}
               {!((type === "front" && idFront) || (type === "back" && idBack)) && (
                 <>
@@ -44,7 +69,7 @@ export default function StepVerify({
 
         <label className="upload-box">
           {selfie ? (
-            <img src={URL.createObjectURL(selfie)} alt="" />
+            <img className="upload-preview" src={URL.createObjectURL(selfie)} alt="" />  
           ) : (
             <span>{t("verify.selfie")}</span>
           )}

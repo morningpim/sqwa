@@ -6,20 +6,25 @@
   height: 64px;
   z-index: var(--z-nav);
 
-  background: var(--bg-main);
-  border-bottom: 1px solid var(--border);
+  background: linear-gradient(
+    to right,
+    rgba(90,105,125,.85),
+    rgba(180,190,205,.65)
+  );
+  backdrop-filter: blur(6px);
+
+  border-bottom: 1px solid rgba(255,255,255,.25);
 
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 40px;
-  box-sizing: border-box;
 }
 
 .nav-logo{
   font-size: 28px;
   font-weight: 700;
-  color: var(--primary-dark);
+  color:#fff;
   letter-spacing: 1px;
   text-decoration: none;
 }
@@ -41,13 +46,13 @@
   display:flex;
   align-items:center;
   gap: 6px;
-  color: var(--text-main);
+  color: rgba(255,255,255,.9);
   text-decoration:none;
   cursor:pointer;
 }
 
 .nav-item:hover{
-  color: var(--primary-dark);
+  color:#fff;
 }
 
 .nav-caret{
@@ -65,6 +70,87 @@
   color: var(--primary);
   font-weight: 600;
 }
+
+/* Auth buttons */
+.nav-auth{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+/* Sign in = text link (ไม่มีกรอบ) */
+.nav-signin{
+  background: transparent;
+  border: none;
+  padding: 6px 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.nav-signin:hover{
+  text-decoration: underline;
+  color: var(--primary-dark);
+}
+
+/* Register = pill button */
+.nav-register{
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nav-register:hover{
+  background:#e5e7eb;
+}
+
+.nav-auth-link{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:14px;
+  font-weight:500;
+  cursor:pointer;
+  opacity:.9;
+}
+
+.nav-auth-link:hover{
+  opacity:1;
+  text-decoration: underline;
+}
+
+.nav-lang-switch{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.nav-lang-flag{
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  opacity:.6;
+}
+
+.nav-lang-flag img{
+  width:24px;
+  height:16px;
+  object-fit:cover;
+  border-radius:2px;
+}
+
+.nav-lang-flag.active{
+  opacity:1;
+  outline:2px solid #fff;
+  border-radius:3px;
+}
+
 
 .cart-btn {
   position: relative;

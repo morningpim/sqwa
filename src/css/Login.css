@@ -218,6 +218,13 @@
   cursor: pointer;
 }
 
+.forgot-actions{
+  display:flex;
+  flex-direction:column;
+  gap: var(--space-md);   /* ระยะห่าง */
+  margin-top: var(--space-lg);
+}
+
 /* right */
 .login-right {
   flex: 1;
@@ -253,6 +260,68 @@
 .user-type-icon {
   font-size: 34px; /* ปรับได้ */
   line-height: 1;
+}
+
+.modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:12px;
+}
+
+/* title กลางจริง */
+.user-type-title{
+  text-align:center;
+}
+
+/* ปุ่มย้อน */
+.modal-back{
+  position:absolute;
+  left:0;
+  border:none;
+  background:transparent;
+  font-size:20px;
+  cursor:pointer;
+  color:var(--text-muted);
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-back:hover{
+  background:rgba(0,0,0,0.05);
+}
+
+/* ปุ่มปิด */
+.modal-close{
+  position:absolute;
+  right:0;
+  border:none;
+  background:transparent;
+  font-size:20px;
+  cursor:pointer;
+  color:var(--text-muted);
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-close:hover{
+  background:rgba(0,0,0,0.05);
+}
+
+.login-subtitle{
+  font-size:14px;
+  color:var(--text-sub);
+  margin-bottom:var(--space-lg);
+  line-height:1.6;
 }
 
 /* Responsive */
