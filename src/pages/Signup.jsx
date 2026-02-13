@@ -3,7 +3,7 @@ import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import InvestorRiskQuiz from "../components/InvestorRiskQuiz";
-import { addApplicant } from "../utils/applicantsLocal";
+import { ROLE_MAP } from "../constants/roles";
 import { useTranslation } from "react-i18next";
 import "../css/Signup.css";
 
@@ -26,8 +26,8 @@ export default function Signup() {
   const { t } = useTranslation("signup");
 
   // ===== type from query =====
-  const userType = (query.get("type") || "general").toLowerCase(); // general | seller | investor
-  const isGeneral = userType === "general";
+  const userType = (query.get("type") || "buyer").toLowerCase(); // general | seller | investor
+  const isbuyer = userType === "buyer";
   const isSeller = userType === "seller";
   const isInvestor = userType === "investor";
 
@@ -95,9 +95,16 @@ export default function Signup() {
     bankAccount: "",
   });
 
-  const updateForm = (key) => (e) =>
-    setForm((prev) => ({ ...prev, [key]: e.target.value }));
+  const updateForm = (key) => (e) => {
+    let value = e.target.value;
 
+    // ถ้าเป็นช่องชื่อ → อนุญาตเฉพาะตัวอักษร
+    if (key === "firstName" || key === "lastName") {
+      value = value.replace(/[^A-Za-zก-๙\s]/g, "");
+    }
+
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
   // ===== uploads (step 2) =====
   const [idFront, setIdFront] = useState(null);
   const [idBack, setIdBack] = useState(null);
@@ -139,17 +146,42 @@ export default function Signup() {
 
   // ===== validations =====
   const validateStep1 = () => {
-    if (!form.firstName || !form.lastName)
-      return t("error.nameRequired");
 
-    if (!form.email)
-      return t("error.emailRequired");
+    const isEmpty = v => !v || v.trim() === "";
 
-    if (!form.password || !form.confirmPassword)
-      return t("error.passwordRequired");
+    if (isEmpty(form.firstName) || isEmpty(form.lastName))
+      return "กรุณากรอกชื่อและนามสกุล";
+
+    const nameRegex = /^[A-Za-zก-๙\s]+$/;
+    if (!nameRegex.test(form.firstName.trim()))
+      return "ชื่อต้องเป็นตัวอักษรเท่านั้น";
+    if (!nameRegex.test(form.lastName.trim()))
+      return "นามสกุลต้องเป็นตัวอักษรเท่านั้น";
+
+
+    const email = form.email.trim();
+    if (isEmpty(email))
+      return "กรุณากรอกอีเมล";
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email))
+      return "รูปแบบอีเมลไม่ถูกต้อง";
+
+
+    if (!/^[0-9]{10}$/.test(form.phone))
+      return "เบอร์โทรต้อง 10 หลัก";
+
+
+    if (isEmpty(form.password))
+      return "กรุณากรอกรหัสผ่าน";
+
+    const strongPass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!strongPass.test(form.password))
+      return "รหัสผ่านต้องมีตัวเล็ก ตัวใหญ่ และตัวเลข";
+
 
     if (form.password !== form.confirmPassword)
-      return t("error.passwordMismatch");
+      return "รหัสผ่านไม่ตรงกัน";
 
     return null;
   };
@@ -157,7 +189,6 @@ export default function Signup() {
   const validateStep3 = () => {
     if (isSeller) {
       if (!form.shopName) return t("error.shopNameRequired");
-      if (!form.bankAccount) return t("error.bankAccountRequired");
       // ✅ Agent ต้องมี license
       if (isAgent && !form.agentLicense)
         return t("error.agentLicenseRequired");
@@ -174,9 +205,19 @@ export default function Signup() {
   };
 
   const buildPayload = () => {
-    const roleToSave = isSeller
-      ? (role || form.sellerRole || "")
-      : userType;
+
+    let roleKey;
+
+    if (isSeller)
+      roleKey = role || form.sellerRole;
+    else if (isInvestor)
+      roleKey = "investor";
+    else
+      roleKey = "buyer";
+
+    const roleToSave = String(roleKey).trim().toLowerCase();
+
+    console.log("SEND ROLE =", roleToSave);
 
     return {
       role: roleToSave,
@@ -187,11 +228,10 @@ export default function Signup() {
       phone: form.phone,
       line_id: form.lineId,
       address: form.address,
-      number_id_card: form.idCard.replace(/-/g, ""),
-      investorQuiz: isInvestor ? investorQuiz : null,
-      investorScore: isInvestor ? investorScore : null,
+      number_id_card: form.idCard.replace(/-/g, "")
     };
   };
+
 
   // ===== next/back =====
   const goNextFromStep1 = (e) => {
@@ -201,7 +241,7 @@ export default function Signup() {
     setStep(2);
   };
 
-  const goNextFromStep2 = (e) => {
+  const goNextFromStep2 = async (e) => {
     e.preventDefault();
 
     if (!canVerify) {
@@ -209,20 +249,43 @@ export default function Signup() {
       return;
     }
 
-    // General และ Landlord สมัครเสร็จที่ Step2
-    if (isGeneral || isLandlord) {
-      const payload = buildPayload();
-
-      addApplicant(payload);
-      setShowSuccess(true);
+    // ⭐ ถ้าต้องมี Step3 → ไป Step3 ก่อน
+    if (shouldHaveStep3) {
+      setStep(3);
       return;
     }
 
-    // Agent / Investor ไป Step3
-    setStep(3);
+    // ⭐ ถ้าไม่มี Step3 → submit เลย
+    const payload = buildPayload();
+
+    const formData = new FormData();
+    formData.append("payload", JSON.stringify(payload));
+    formData.append("id_card_image_front", idFront);
+    formData.append("id_card_image_back", idBack);
+    formData.append("selfie", selfie);
+
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/signup", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || "Signup failed");
+        return;
+      }
+
+      setShowSuccess(true);
+
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
   };
 
-  const goNextFromStep3 = (e) => {
+  const goNextFromStep3 = async (e) => {
     e.preventDefault();
 
     const err = validateStep3();
@@ -240,10 +303,25 @@ export default function Signup() {
       formData.append("agent_license_image", agentLicenseImage);
     }
 
-    addApplicant(payload);
-    setShowSuccess(true);
-  };
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/signup", {
+        method: "POST",
+        body: formData,
+      });
 
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || "Signup failed");
+        return;
+      }
+
+      setShowSuccess(true);
+    } catch (err) {
+      console.error(err);
+      alert("Upload error");
+    }
+  };
 
   const goBack = () => {
     if (step === 3) return setStep(2);
@@ -314,7 +392,7 @@ export default function Signup() {
             onFileChange={handleFileChange}
             onNext={goNextFromStep2}
             onBack={goBack}
-            isGeneral={isGeneral}
+            isbuyer={isbuyer}
             form={form}
             updateForm={updateForm}
           />

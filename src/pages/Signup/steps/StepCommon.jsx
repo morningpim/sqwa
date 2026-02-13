@@ -22,12 +22,22 @@ export default function StepCommon({
         <div className="signup-grid">
           <div className="field">
             <label>{t("field.firstName")}</label>
-            <input value={form.firstName} onChange={updateForm("firstName")} />
+            <input
+              inputMode="text"
+              autoComplete="given-name"
+              value={form.firstName}
+              onChange={updateForm("firstName")}
+            />
           </div>
 
           <div className="field">
             <label>{t("field.lastName")}</label>
-            <input value={form.lastName} onChange={updateForm("lastName")} />
+            <input
+              inputMode="text"
+              autoComplete="family-name"
+              value={form.lastName}
+              onChange={updateForm("lastName")}
+            />
           </div>
 
           <div className="field">

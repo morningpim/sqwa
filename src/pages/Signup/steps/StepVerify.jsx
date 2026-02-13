@@ -12,7 +12,7 @@ export default function StepVerify({
   onFileChange,
   onNext,
   onBack,
-  isGeneral,
+  isbuyer,
   form,
   updateForm
 }) {
@@ -91,7 +91,7 @@ export default function StepVerify({
           {t("action.back")}
         </button>
         <button type="submit" className="btn-primary" disabled={!canVerify}>
-          {isGeneral ? t("action.submit") : t("action.next")}
+          {isbuyer ? t("action.submit") : t("action.next")}
         </button>
       </div>
     </form>

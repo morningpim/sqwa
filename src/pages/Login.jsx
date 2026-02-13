@@ -61,7 +61,7 @@ export default function Login() {
     setShowTermsModal(false);
 
     // สร้าง query ไปหน้า signup
-    const type = selectedType || "general";
+    const type = selectedType || "buyer";
 
     // ถ้าเป็น seller แนบ role ไปด้วย
     if (type === "seller") {
@@ -79,7 +79,7 @@ export default function Login() {
   };
 
   const getUserTypeLabel = () =>
-  t(`userType.${selectedType || "general"}`);
+  t(`userType.${selectedType || "buyer"}`);
 
   const getSellerRoleLabel = () =>
   sellerRole ? t(`sellerRole.${sellerRole}`) : "-";
@@ -182,13 +182,13 @@ export default function Login() {
           </p>
 
             <div className="user-type-buttons">
-              <button className="user-type-card" onClick={() => handleSelectType("general")}>
+              <button className="user-type-card" onClick={() => handleSelectType("buyer")}>
                 <div className="user-type-icon-circle">
                   <span className="material-symbols-outlined user-type-icon">
                     contacts_product
                   </span>
                 </div>
-                <span className="user-type-label">{t("userType.general")}</span>
+                <span className="user-type-label">{t("userType.buyer")}</span>
               </button>
 
               <button className="user-type-card" onClick={() => handleSelectType("seller")}>
