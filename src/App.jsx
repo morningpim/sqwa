@@ -20,11 +20,12 @@ import ResetPasswordSuccess from "./pages/ResetPasswordSuccess";
 import AdminPage from "./pages/admin/AdminPage";
 import AdminBroadcastPage from "./pages/admin/AdminBroadcastPage";
 
-import { useAuth } from "./auth/AuthProvider";
+import { useAuth } from "./auth/AuthContext";
 
 function AdminRoute({ children }) {
-  const { role } = useAuth();
-  if (role !== "admin") {
+  const { user } = useAuth();
+
+  if (user?.role !== "admin") {
     return (
       <div style={{ padding: 40, fontFamily: "system-ui" }}>
         <h2 style={{ margin: 0 }}>⛔ ไม่มีสิทธิ์เข้าถึง</h2>

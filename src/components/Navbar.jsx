@@ -10,14 +10,11 @@ import { ShoppingCart, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { readFavorites, subscribeFavoritesChanged } from "../utils/favorites";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/AuthContext";
 import { changeLanguage, getCurrentLanguage } from "../i18n/changeLanguage";
 
 const CART_KEY = "sqw_cart_v1";
 const DEFAULT_MODE = "buy";
-
-// mock user
-const MOCK_USER = { name: "Pimpa", avatarUrl: "" };
 
 function readCartCount() {
   try {
@@ -33,9 +30,10 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { user, role, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const role = user?.role;
   const isLoggedIn = !!user;
-  const isAdmin = role === "admin";
+  const isAdmin = useMemo(()=> role === "admin",[role]);
 
   const [cartCount, setCartCount] = useState(readCartCount);
   const [favCount, setFavCount] = useState(() => readFavorites().length);
@@ -68,24 +66,36 @@ export default function Navbar() {
     return unsub;
   }, []);
 
-  // close dropdown on outside click
-  useEffect(() => {
-    const onClick = (e) => {
-      if (!ref.current?.contains(e.target)) setOpen(false);
+  // close dropdowns on outside click (merged)
+  useEffect(()=>{
+    const onClick = e => {
+      if (!e.target) return;
+
+      if (ref.current && !ref.current.contains(e.target))
+        setOpen(false);
+
+      if (modeRef.current && !modeRef.current.contains(e.target))
+        setModeOpen(false);
     };
     document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, []);
+    return ()=> document.removeEventListener("mousedown", onClick);
+  },[]);
 
-  useEffect(() => {
-    const onClick = (e) => {
-      if (!modeRef.current?.contains(e.target)) {
+  useEffect(()=>{
+    setOpen(false);
+    setModeOpen(false);
+  },[location.pathname]);
+
+  useEffect(()=>{
+    const esc = e=>{
+      if(e.key==="Escape"){
+        setOpen(false);
         setModeOpen(false);
       }
     };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, []);
+    window.addEventListener("keydown",esc);
+    return ()=>window.removeEventListener("keydown",esc);
+  },[]);
 
   const go = useCallback(
     (to) => {
@@ -114,7 +124,10 @@ export default function Navbar() {
     return t(`nav.mode.${mode}`);
   }, [isMap, location.search, t]);
 
-  const avatarLetter = (user?.name?.[0] || "U").toUpperCase();
+  const avatarLetter = useMemo(
+    () => (user?.name?.charAt(0) || "U").toUpperCase(),
+    [user?.name]
+  );
 
   const changeMode = (mode) => {
     const sp = new URLSearchParams(location.search || "");
@@ -195,6 +208,7 @@ export default function Navbar() {
             <div className="nav-profile" ref={ref}>
               <button
                 className="nav-avatar"
+                aria-label="User menu"
                 type="button"
                 onClick={() => setOpen(v => !v)}
                 aria-expanded={open}
@@ -239,7 +253,15 @@ export default function Navbar() {
                   )}
 
                   <div className="nav-profile-divider" />
-                  <button className="danger" onClick={logout}>
+                  <button
+                    className="danger"
+                    onClick={()=>{
+                      setOpen(false);
+                      setModeOpen(false);
+                      logout();
+                      navigate("/");
+                    }}
+                  >
                     {t("nav.logout")}
                   </button>
                 </div>

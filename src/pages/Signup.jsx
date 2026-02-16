@@ -3,8 +3,8 @@ import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import InvestorRiskQuiz from "../components/InvestorRiskQuiz";
-import { ROLE_MAP } from "../constants/roles";
 import { useTranslation } from "react-i18next";
+import { mockSignup } from "../mocks/authMock";
 import "../css/Signup.css";
 
 
@@ -265,12 +265,7 @@ export default function Signup() {
     formData.append("selfie", selfie);
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/signup", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
+      const data = await mockSignup(formData);
 
       if (!data.success) {
         alert(data.message || "Signup failed");
@@ -281,7 +276,7 @@ export default function Signup() {
 
     } catch (err) {
       console.error(err);
-      alert("Server error");
+      alert("Mock error");
     }
   };
 
@@ -304,12 +299,7 @@ export default function Signup() {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/signup", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
+      const data = await mockSignup(formData);
 
       if (!data.success) {
         alert(data.message || "Signup failed");
@@ -319,7 +309,7 @@ export default function Signup() {
       setShowSuccess(true);
     } catch (err) {
       console.error(err);
-      alert("Upload error");
+      alert("Mock error");
     }
   };
 

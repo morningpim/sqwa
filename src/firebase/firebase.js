@@ -4,10 +4,17 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  apiKey: "AIzaSyBDdOt1ajdsBOu7tVdcWOm3c_A61yvdytk",
+  authDomain: "chattestproject-42024.firebaseapp.com",
+  projectId: "chattestproject-42024",
+  storageBucket: "chattestproject-42024.firebasestorage.app",
+  messagingSenderId: "828044311671",
+  appId: "1:828044311671:web:c6fe41d320716830591a72",
+  measurementId: "G-6H2BLTSKLW",
+  databaseURL:
+    "https://chattestproject-42024-default-rtdb.asia-southeast1.firebasedatabase.app/",
 };
+
 
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);

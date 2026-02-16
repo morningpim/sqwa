@@ -52,7 +52,7 @@ import { mockLands } from "./lands/mockLands";
 import LandDetailPanel from "./LandDetailPanel";
 import UnlockPickerModal from "./UnlockPickerModal";
 
-import { useAuth } from "../../auth/AuthProvider";
+import { useAuth } from "../../auth/AuthContext";
 import RolePickerModal from "../../auth/RolePickerModal";
 
 // ✅ แยกออกมาเป็น hooks
@@ -233,7 +233,7 @@ export default function MapPage() {
       alert(t("sell.permissionDenied"));
       navigate("/map?mode=sell&intent=investor", { replace: true });
     }
-  }, [mode, intent, role, navigate]);
+  }, [mode, intent, role, navigate, t]);
 
   const handlePickSellIntent = useCallback(
     (picked) => {

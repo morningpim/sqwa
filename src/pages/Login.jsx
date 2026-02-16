@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import { useTranslation } from "react-i18next";
+import { mockLogin } from "../mocks/authService";
 import "../css/Login.css";
 
 export default function Login() {
@@ -21,6 +22,11 @@ export default function Login() {
     setShowUserTypeModal(true);
   };
   const location = useLocation();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(false);
 
   useEffect(() => {
     const sp = new URLSearchParams(location.search);
@@ -30,6 +36,16 @@ export default function Login() {
   }, [location.search]);
 
   const navigate = useNavigate();
+
+  useEffect(()=>{
+    const user =
+      localStorage.getItem("authUser") ||
+      sessionStorage.getItem("authUser");
+
+    if(user){
+      navigate("/map");
+    }
+  },[]);
 
   // เลือกประเภทหลัก
   const handleSelectType = (type) => {
@@ -84,6 +100,36 @@ export default function Login() {
   const getSellerRoleLabel = () =>
   sellerRole ? t(`sellerRole.${sellerRole}`) : "-";
 
+  const handleLogin = async () => {
+    setError("");
+
+    if (!email || !password) {
+      setError("Please fill all fields");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await mockLogin(email, password);
+
+      if (!res.success) {
+        setError(res.message);
+        return;
+      }
+
+      // save session
+      const storage = remember ? localStorage : sessionStorage;
+      storage.setItem("authUser", JSON.stringify(res.user));
+
+      navigate("/map");
+
+    } catch (err) {
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="login-wrapper">
       <div className="login-card">
@@ -91,18 +137,44 @@ export default function Login() {
         <div className="login-left">
           <div className="login-logo">SQW</div>
 
-          <div className="login-form-block">
+          <form
+              className="login-form-block"
+              onSubmit={(e)=>{
+                e.preventDefault();
+                if(!loading) handleLogin();
+              }}
+            >
             <h1 className="login-title">{t("login.title")}</h1>
 
-            <label className="login-label">{t("field.email")}</label>
-            <input type="email" className="login-input" />
+            <label className="login-label" htmlFor="email">
+              {t("field.email")}
+            </label>
+            <input
+              type="email"
+              autoComplete="email"
+              className="login-input"
+              value={email}
+              onChange={(e)=>{
+                setEmail(e.target.value);
+                setError("");
+              }}
+            />
 
-            <label className="login-label">{t("field.password")}</label>
+            <label className="login-label" htmlFor="password">
+              {t("field.password")}
+            </label>
+            {error && <p className="login-error">{error}</p>}
             <div className="password-group">
               <input
                 type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 className="password-input"
                 placeholder={t("field.password")}
+                value={password}
+                onChange={(e)=>{
+                  setPassword(e.target.value);
+                  setError("");
+                }}
               />
               <button
                 className="password-toggle"
@@ -120,7 +192,11 @@ export default function Login() {
 
             <div className="login-row">
               <label className="remember">
-                <input type="checkbox" /> <span>{t("action.remember")}</span>
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e)=>setRemember(e.target.checked)}
+                /> <span>{t("action.remember")}</span>
               </label>
 
               <button type="button" className="forgot" onClick={handleForgotPassword}>
@@ -130,10 +206,10 @@ export default function Login() {
 
             <button
               className="login-btn-secondary"
-              type="button"
-              onClick={() => navigate("/map")}
+              type="submit"
+              disabled={loading || !email || !password}
             >
-              {t("login.submit")}
+              {loading ? "Loading..." : t("login.submit")}
             </button>
 
             <button className="google-btn" type="button">
@@ -152,7 +228,7 @@ export default function Login() {
             >
               {t("login.signup")}
             </button>
-          </div>
+          </form>
         </div>
 
         {/* RIGHT PANEL */}

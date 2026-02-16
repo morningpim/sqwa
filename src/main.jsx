@@ -5,13 +5,11 @@ import "./index.css";
 import App from "./App.jsx";
 import "./i18n";
 
-// ✅ เพิ่ม import
-import { AuthProvider } from "./auth/AuthProvider";
+import { AuthProvider } from "./auth/AuthContext";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      {/* ✅ ครอบ App ด้วย AuthProvider */}
       <AuthProvider>
         <App />
       </AuthProvider>
