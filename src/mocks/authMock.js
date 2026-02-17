@@ -1,54 +1,89 @@
-// src/mocks/signupService.js
-const mockDB = JSON.parse(localStorage.getItem("mockUsers") || "[]");
+const KEY = "mockUsers";
 
-export const mockSignup = async (formData) => {
-  const data = Object.fromEntries(formData);
-  console.log("MOCK PAYLOAD =", data);
+function getUsers(){
+  return JSON.parse(localStorage.getItem(KEY) || "[]");
+}
 
-  await new Promise((res) => setTimeout(res, 800));
+function saveUsers(users){
+  localStorage.setItem(KEY, JSON.stringify(users));
+}
 
-  /* ---------------- VALIDATION ---------------- */
+function hash(p){
+  return btoa(p);
+}
 
-  if (!data.email || !data.password) {
-    return {
-      success: false,
-      message: "Missing required fields",
-    };
-  }
+function delay(ms=500){
+  return new Promise(r=>setTimeout(r,ms));
+}
 
-  if (data.password.length < 6) {
-    return {
-      success: false,
-      message: "Password must be at least 6 characters",
-    };
-  }
 
-  const emailExists = mockDB.find((u) => u.email === data.email);
-  if (emailExists) {
-    return {
-      success: false,
-      message: "Email already registered",
-    };
-  }
+// LOGIN
+export async function mockLogin(email,password){
+  await delay();
 
-  /* ---------------- CREATE USER ---------------- */
+  const users = getUsers();
 
-  const newUser = {
-    id: Date.now(),
-    email: data.email,
-    password: data.password,
-    type: data.type || "buyer",
-    role: data.role || null,
-  };
+  const user = users.find(
+    u => u.email === email && u.password === hash(password)
+  );
 
-  mockDB.push(newUser);
-  localStorage.setItem("mockUsers", JSON.stringify(mockDB));
-
-  /* ---------------- RESPONSE ---------------- */
+  if(!user) throw new Error("Invalid credentials");
 
   return {
-    success: true,
-    message: "Signup success",
-    user: newUser,
+    user,
+    accessToken:"mock-access",
+    refreshToken:"mock-refresh"
   };
-};
+}
+
+
+// SIGNUP
+export async function mockSignup(data){
+  await delay();
+
+  const payload =
+    data instanceof FormData
+      ? Object.fromEntries(data.entries())
+      : data;
+
+  const users = getUsers();
+
+  if(users.some(u=>u.email===payload.email))
+    return { success:false, message:"Email exists" };
+
+  const fullName =
+    payload.name ||
+    `${payload.first_name || ""} ${payload.last_name || ""}`.trim() ||
+    "User";
+
+  const newUser = {
+    uid: crypto.randomUUID(),
+    email: payload.email,
+    password: hash(payload.password),
+
+    // ✅ normalized fields
+    name: fullName,
+    firstName: payload.first_name || "",
+    lastName: payload.last_name || "",
+    phone: payload.phone || "",
+    role: payload.role || "buyer",
+
+    createdAt: new Date().toISOString()
+  };
+
+  saveUsers([...users,newUser]);
+
+  return {
+    success:true,
+    user:newUser,
+    accessToken:"mock-access",
+    refreshToken:"mock-refresh"
+  };
+}
+
+
+// LOGOUT
+export async function mockLogout(){
+  await delay();
+  return true;
+}

@@ -1,0 +1,23 @@
+export const USERS = [
+  {
+    uid:"1",
+    name:"Admin",
+    email:"admin@test.com",
+    password:"1234",
+    role:"admin"
+  },
+  {
+    uid:"2",
+    name:"Buyer",
+    email:"buyer@test.com",
+    password:"1234",
+    role:"buyer"
+  },
+  {
+    uid:"3",
+    name:"Agent",
+    email:"agent@test.com",
+    password:"1234",
+    role:"seller"
+  }
+];

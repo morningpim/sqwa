@@ -1,23 +1,19 @@
-import { mockUsers } from "./users";
+import { USERS } from "./seedUsers";
 
-export function mockLogin(email, password) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const user = mockUsers.find(
-        u => u.email === email && u.password === password
-      );
+export async function mockLogin(email,password){
+  await delay(500);
 
-      if (user) {
-        resolve({
-          success: true,
-          user
-        });
-      } else {
-        reject({
-          success: false,
-          message: "Invalid email or password"
-        });
-      }
-    }, 800); // delay ให้เหมือนเรียก API
-  });
+  const user = USERS.find(
+    u=>u.email===email && u.password===password
+  );
+
+  if(!user){
+    return { success:false, message:"Invalid email or password" };
+  }
+
+  return { success:true, user };
+}
+
+function delay(ms){
+  return new Promise(res=>setTimeout(res,ms));
 }

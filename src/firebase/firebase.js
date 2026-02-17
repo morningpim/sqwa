@@ -4,17 +4,10 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBDdOt1ajdsBOu7tVdcWOm3c_A61yvdytk",
-  authDomain: "chattestproject-42024.firebaseapp.com",
-  projectId: "chattestproject-42024",
-  storageBucket: "chattestproject-42024.firebasestorage.app",
-  messagingSenderId: "828044311671",
-  appId: "1:828044311671:web:c6fe41d320716830591a72",
-  measurementId: "G-6H2BLTSKLW",
-  databaseURL:
-    "https://chattestproject-42024-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  apiKey: "AIzaSyBFRDGM55x_QCG7O6E9RSCvYBdeIIdCxTw",
+  authDomain: "sqwa-58501.firebaseapp.com",
+  projectId: "sqwa-58501",
 };
-
 
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);

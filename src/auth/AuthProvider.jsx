@@ -1,114 +1,162 @@
-// src/auth/AuthProvider.jsx
-import React, {
+import {
   createContext,
   useContext,
-  useEffect,
-  useMemo,
   useState,
+  useEffect,
+  useCallback,
 } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import {
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-} from "firebase/firestore";
-import { auth, db } from "../firebase/firebase.js";
-import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
-const AuthContext = createContext(null);
+import { mockLogin, mockSignup, mockLogout } from "../mocks/mockAuthApi";
+import { saveAuth, clearAuth, getUser, getTokens } from "../mocks/authStorage";
+
+const AuthCtx = createContext(null);
 
 export function AuthProvider({ children }) {
   const [me, setMe] = useState(null);
+  const [tokens, setTokens] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔐 Google Login
-  const login = async () => {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
-  };
-
-  // 🚪 Logout
-  const logout = async () => {
-    await signOut(auth);
-  };
-
-  const updateRole = async (newRole) => {
-    if (!me?.uid) return;
-
-    const ref = doc(db, "users", me.uid);
-
-    await setDoc(
-      ref,
-      {
-        role: newRole,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
-
-    // ✅ สำคัญที่สุด: update local state
-    setMe((prev) => (prev ? { ...prev, role: newRole } : prev));
-  };
-
+  // ==================================================
+  // RESTORE SESSION
+  // ==================================================
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      setLoading(true);
+    try {
+      const user = getUser();
+      const tk = getTokens();
 
-      if (!user) {
-        setMe(null);
-        setLoading(false);
-        return;
-      }
-
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-
-      // 🆕 first login → create user doc
-      if (!snap.exists()) {
-        const newUser = {
-          uid: user.uid,
-          name: user.displayName || "User",
-          email: user.email,
-          photoURL: user.photoURL || "",
-          role: "buyer", // default role
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        };
-        await setDoc(ref, newUser);
-        setMe(newUser);
+      if (user && tk?.access) {
+        setMe(user);
+        setTokens(tk);
       } else {
-        setMe(snap.data());
+        clearAuth();
       }
-
+    } catch (err) {
+      console.error("Auth restore failed:", err);
+      clearAuth();
+    } finally {
       setLoading(false);
-    });
-
-    return () => unsub();
+    }
   }, []);
 
-  const value = useMemo(
-    () => ({
-      me,
-      loading,
-      role: me?.role || "buyer",
-      isLoggedIn: !!me,
-      login,
-      logout,
-      updateRole, 
-    }),
-    [me, loading]
+  // ==================================================
+  // LOGIN
+  // ==================================================
+  const login = useCallback(async (email, password) => {
+    const res = await mockLogin(email, password);
+
+    const payload = {
+      user: res.user,
+      accessToken: res.accessToken,
+      refreshToken: res.refreshToken,
+    };
+
+    saveAuth(payload);
+
+    setMe(payload.user);
+    setTokens({
+      access: payload.accessToken,
+      refresh: payload.refreshToken,
+    });
+
+    return payload;
+  }, []);
+
+  // ==================================================
+  // SIGNUP
+  // ==================================================
+  const signup = useCallback(async (data) => {
+    const res = await mockSignup(data);
+
+    const payload = {
+      user: res.user,
+      accessToken: res.accessToken,
+      refreshToken: res.refreshToken,
+    };
+
+    saveAuth(payload);
+
+    setMe(payload.user);
+    setTokens({
+      access: payload.accessToken,
+      refresh: payload.refreshToken,
+    });
+
+    return payload;
+  }, []);
+
+  // ==================================================
+  // LOGOUT
+  // ==================================================
+  const logout = useCallback(async () => {
+    try {
+      await mockLogout();
+    } finally {
+      clearAuth();
+      setMe(null);
+      setTokens(null);
+    }
+  }, []);
+
+  // ==================================================
+  // UPDATE ROLE
+  // ==================================================
+  const updateRole = useCallback(
+    (newRole) => {
+      setMe((prev) => {
+        if (!prev) return prev;
+
+        const updated = { ...prev, role: newRole };
+
+        saveAuth({
+          user: updated,
+          accessToken: tokens?.access || "",
+          refreshToken: tokens?.refresh || "",
+        });
+
+        return updated;
+      });
+    },
+    [tokens]
   );
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  // ==================================================
+  // PERMISSIONS
+  // ==================================================
+  const role = me?.role || "guest";
+
+  const hasRole = useCallback(
+    (allowed) => allowed.includes(role),
+    [role]
   );
+
+  const value = {
+    me,
+    role,
+    tokens,
+    loading,
+    isLoggedIn: !!me,
+
+    login,
+    signup,
+    logout,
+    updateRole,
+
+    hasRole,
+
+    isAdmin: role === "admin",
+    isSeller: role === "seller",
+    isLandlord: role === "landlord",
+    isAgent: role === "agent",
+  };
+
+  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 
+// ==================================================
+// HOOK
+// ==================================================
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  const ctx = useContext(AuthCtx);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
   return ctx;
 }

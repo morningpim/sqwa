@@ -29,7 +29,7 @@ const EMPTY_FORM = {
   updatedAt: null,
 };
 
-export function useSalePanel({ getPoints, clearDrawing }) {
+export function useSalePanel({ getPoints, clearDrawing, currentUserId }) {
   const [saleOpen, setSaleOpen] = useState(true);
   const [landForm, setLandForm] = useState(EMPTY_FORM);
 
@@ -96,6 +96,7 @@ export function useSalePanel({ getPoints, clearDrawing }) {
       ...landForm,
       id,
       geometry,
+      ownerId: currentUserId,
       location: { lat: points[0].lat, lon: points[0].lon },
 
       size: String(size),

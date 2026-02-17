@@ -10,7 +10,7 @@ import { ShoppingCart, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { readFavorites, subscribeFavoritesChanged } from "../utils/favorites";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/AuthProvider";
 import { changeLanguage, getCurrentLanguage } from "../i18n/changeLanguage";
 
 const CART_KEY = "sqw_cart_v1";
@@ -30,9 +30,9 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { user, logout } = useAuth();
-  const role = user?.role;
-  const isLoggedIn = !!user;
+  const { me, logout } = useAuth();
+  const role = me?.role;
+  const isLoggedIn = !!me;
   const isAdmin = useMemo(()=> role === "admin",[role]);
 
   const [cartCount, setCartCount] = useState(readCartCount);
@@ -125,8 +125,8 @@ export default function Navbar() {
   }, [isMap, location.search, t]);
 
   const avatarLetter = useMemo(
-    () => (user?.name?.charAt(0) || "U").toUpperCase(),
-    [user?.name]
+    () => (me?.name?.charAt(0) || "U").toUpperCase(),
+    [me?.name]
   );
 
   const changeMode = (mode) => {
@@ -213,15 +213,15 @@ export default function Navbar() {
                 onClick={() => setOpen(v => !v)}
                 aria-expanded={open}
               >
-                {user?.avatarUrl
-                  ? <img src={user.avatarUrl} alt="avatar" />
+                {me?.photoURL
+                  ? <img src={me.photoURL} alt="avatar" />
                   : <span>{avatarLetter}</span>
                 }
               </button>
 
               {open && (
                 <div className="nav-profile-menu">
-                  <div className="nav-profile-name">{user?.name}</div>
+                  <div className="nav-profile-name">{me?.name}</div>
 
                   <button onClick={() => go("/profile")}>{t("nav.profile")}</button>
                   <button onClick={() => go("/profile?tab=fav")}>

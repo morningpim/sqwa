@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 
@@ -20,43 +19,26 @@ import ResetPasswordSuccess from "./pages/ResetPasswordSuccess";
 import AdminPage from "./pages/admin/AdminPage";
 import AdminBroadcastPage from "./pages/admin/AdminBroadcastPage";
 
-import { useAuth } from "./auth/AuthContext";
-
-function AdminRoute({ children }) {
-  const { user } = useAuth();
-
-  if (user?.role !== "admin") {
-    return (
-      <div style={{ padding: 40, fontFamily: "system-ui" }}>
-        <h2 style={{ margin: 0 }}>⛔ ไม่มีสิทธิ์เข้าถึง</h2>
-        <p style={{ opacity: 0.8, marginTop: 8 }}>หน้านี้สำหรับ Admin เท่านั้น</p>
-      </div>
-    );
-  }
-  return children;
-}
+// ✅ guards จริง
+import AuthGuard from "./auth/AuthGuard";
+import GuestGuard from "./auth/GuestGuard";
+import RoleGuard from "./auth/RoleGuard";
 
 export default function App() {
   const location = useLocation();
 
-  // ✅ ไม่ซ่อน Navbar ใน /admin แล้ว
-  const hideNavbar =
-  location.pathname === "/login" ||
-  location.pathname === "/signup" ||
-  location.pathname === "/forgot-password" ||
-  location.pathname === "/otp-verification" ||
-  location.pathname === "/reset-password" ||
-  location.pathname === "/reset-password-success";
+  const hideNavbar = [
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/otp-verification",
+    "/reset-password",
+    "/reset-password-success"
+  ].includes(location.pathname);
 
   const hideFooter =
-    location.pathname === "/map" ||
-    location.pathname === "/cart" ||
-    location.pathname === "/login" ||
-    location.pathname === "/signup" ||
-    location.pathname === "/forgot-password" ||
-    location.pathname === "/otp-verification" ||
-    location.pathname === "/reset-password" ||
-    location.pathname === "/reset-password-success" ||
+    ["/map", "/cart"].includes(location.pathname) ||
+    hideNavbar ||
     location.pathname.startsWith("/admin");
 
   return (
@@ -65,34 +47,56 @@ export default function App() {
 
       <main className={`app-main ${hideNavbar ? "" : "pt-16"}`}>
         <Routes>
+
+          {/* public */}
           <Route path="/" element={<><HeroSection /><NewsSection /></>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />  
           <Route path="/map" element={<MapPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/otp-verification" element={<OtpVerification />} />   
+
+          {/* guest only */}
+          <Route path="/login" element={
+            <GuestGuard>
+              <Login />
+            </GuestGuard>
+          } />
+
+          <Route path="/signup" element={
+            <GuestGuard>
+              <Signup />
+            </GuestGuard>
+          } />
+
+          {/* auth required */}
+          <Route path="/cart" element={
+            <AuthGuard>
+              <CartPage />
+            </AuthGuard>
+          } />
+
+          <Route path="/profile" element={
+            <AuthGuard>
+              <ProfilePage />
+            </AuthGuard>
+          } />
+
+          {/* password flow */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/otp-verification" element={<OtpVerification />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/reset-password-success" element={<ResetPasswordSuccess />} />
 
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminPage />
-              </AdminRoute>
-            }
-          />
+          {/* admin only */}
+          <Route path="/admin" element={
+            <RoleGuard allow={["admin"]}>
+              <AdminPage />
+            </RoleGuard>
+          } />
 
-          <Route
-            path="/admin/broadcast"
-            element={
-              <AdminRoute>
-                <AdminBroadcastPage />
-              </AdminRoute>
-            }
-          />
+          <Route path="/admin/broadcast" element={
+            <RoleGuard allow={["admin"]}>
+              <AdminBroadcastPage />
+            </RoleGuard>
+          } />
+
         </Routes>
       </main>
 

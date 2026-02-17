@@ -52,7 +52,8 @@ import { mockLands } from "./lands/mockLands";
 import LandDetailPanel from "./LandDetailPanel";
 import UnlockPickerModal from "./UnlockPickerModal";
 
-import { useAuth } from "../../auth/AuthContext";
+//import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/AuthProvider";
 import RolePickerModal from "../../auth/RolePickerModal";
 
 // ✅ แยกออกมาเป็น hooks
@@ -121,16 +122,17 @@ export default function MapPage() {
   // =========================================================================
   // ✅ Derived values
   // =========================================================================
-  const isMock = !auth.uid && !auth.user?.uid;
+  const isMock = !auth.me?.uid;
 
-  const userProfile = auth.profile || {
+  const userProfile = auth.me || {
     name: mockName,
     photoURL: "",
   };
 
   const currentUid = isMock
     ? mockUid
-    : auth.uid || auth.user?.uid;
+    : auth.me?.uid;
+
   // ✅ เปิด presence (online/offline) ให้ chat
   useChatPresence(currentUid, userProfile);
 
@@ -194,7 +196,10 @@ export default function MapPage() {
   // Permissions
   // =========================================================================
   // วาดได้เฉพาะ landlord,seller,admin
-  const canDraw = role === "landlord" || role === "seller" || role === "admin";
+  const canDraw =
+    role === "landlord" ||
+    role === "agent" ||
+    role === "admin";
   const canUseBuy = role === "seller" || role === "landlord" || role === "admin";
 
   // ✅ intent=investor ให้เข้าได้ทุก role
@@ -379,11 +384,6 @@ export default function MapPage() {
   }, [drawingEnabled, clearDrawing]);
 
   // ✅ draw เฉพาะ sell ที่เป็น seller intent (กัน investor)
-  useEffect(() => {
-    if (mode === "sell" && drawingEnabled && intent !== "investor") {
-      setCurrentMode("draw");
-    }
-  }, [mode, drawingEnabled, intent]);
 
   // =========================================================================
   // Sale panel + state (hook)
@@ -404,7 +404,11 @@ export default function MapPage() {
     setLandForm,
     handleSaveLand,
     handleDeleteLand,
-  } = useSalePanel({ getPoints, clearDrawing });
+  } = useSalePanel({
+    getPoints,
+    clearDrawing,
+    currentUserId: auth.me?.uid
+  });
 
   // =========================================================================
   // Popup
@@ -607,13 +611,6 @@ export default function MapPage() {
         }
       />
 
-      <RolePickerModal
-        open={roleOpen}
-        onClose={() => setRoleOpen(false)}
-        initialRole={role}
-        onSave={(r) => updateRole?.(r)}
-      />
-
       <FilterPanel
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
@@ -625,6 +622,7 @@ export default function MapPage() {
 
       {!!mapObj && (
         <LandMarkers
+          key={landsForMap.length}
           map={mapObj}
           lands={isEia(mode) ? eiaAsLandLike : landsForMap}
           favoriteIds={isEia(mode) ? undefined : favoriteIds}
@@ -636,11 +634,18 @@ export default function MapPage() {
         pageMode={mode}
         currentRole={role}
         onOpenRolePicker={() => setRoleOpen(true)}
-        drawingEnabled={drawingEnabled && intent !== "investor"} // ✅ กัน investor
+        drawingEnabled={drawingEnabled} // ✅ กัน investor
         drawMode={drawMode}
         currentMode={currentMode}
         onSetMode={setCurrentMode}
-        onStartDrawing={startDrawing}
+        onStartDrawing={() => {
+          if (!mapObj) {
+            console.warn("map not ready");
+            return;
+          }
+          setCurrentMode("draw");
+          setTimeout(() => startDrawing(), 0);
+        }}
         onFinishDrawing={finishDrawing}
         onClearDrawing={clearDrawing}
         onSearch={handleSearch}
@@ -719,7 +724,7 @@ export default function MapPage() {
           role={role}
           allowed={showSalePanel}
           mode={mode}
-          drawingEnabled={drawingEnabled && intent !== "investor"} // ✅ กัน investor ให้ชัวร์
+          drawingEnabled={drawingEnabled} // ✅ กัน investor ให้ชัวร์
           landData={landForm}
           setLandData={setLandForm}
           savedLands={myLands}
@@ -825,7 +830,7 @@ export default function MapPage() {
 
       {/* ✅ ตัวช่วย: เปลี่ยนชื่อ mock user (ถ้ายังไม่มี auth profile)
           ลบออกได้ตามต้องการ */}
-      {!auth.profile?.name && (
+      {!auth.me?.name && (
         <div
           style={{
             position: "fixed",

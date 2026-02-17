@@ -5,6 +5,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import InvestorRiskQuiz from "../components/InvestorRiskQuiz";
 import { useTranslation } from "react-i18next";
 import { mockSignup } from "../mocks/authMock";
+import { saveAuth } from "../mocks/authStorage";
 import "../css/Signup.css";
 
 
@@ -259,7 +260,9 @@ export default function Signup() {
     const payload = buildPayload();
 
     const formData = new FormData();
-    formData.append("payload", JSON.stringify(payload));
+    Object.entries(payload).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
     formData.append("id_card_image_front", idFront);
     formData.append("id_card_image_back", idBack);
     formData.append("selfie", selfie);
@@ -273,11 +276,22 @@ export default function Signup() {
       }
 
       setShowSuccess(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
 
     } catch (err) {
       console.error(err);
       alert("Mock error");
     }
+
+    if (!data.success) return;
+
+    saveAuth({
+      user:data.user,
+      accessToken:"mock-access"
+    });
+
   };
 
   const goNextFromStep3 = async (e) => {
@@ -289,7 +303,11 @@ export default function Signup() {
     const payload = buildPayload();
 
     const formData = new FormData();
-    formData.append("payload", JSON.stringify(payload));
+
+    Object.entries(payload).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    
     formData.append("id_card_image_front", idFront);
     formData.append("id_card_image_back", idBack);
     formData.append("selfie", selfie);
@@ -307,10 +325,20 @@ export default function Signup() {
       }
 
       setShowSuccess(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (err) {
       console.error(err);
       alert("Mock error");
     }
+
+    if (!data.success) return;
+
+    saveAuth({
+      user:data.user,
+      accessToken:"mock-access"
+    });
   };
 
   const goBack = () => {

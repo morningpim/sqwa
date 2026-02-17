@@ -4,7 +4,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import { useTranslation } from "react-i18next";
-import { mockLogin } from "../mocks/authService";
+import { mockLogin } from "../mocks/mockAuthApi";
+import { useAuth } from "../auth/AuthProvider";
 import "../css/Login.css";
 
 export default function Login() {
@@ -27,6 +28,8 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [remember, setRemember] = useState(false);
+  const { login } = useAuth();
+
 
   useEffect(() => {
     const sp = new URLSearchParams(location.search);
@@ -111,18 +114,9 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const res = await mockLogin(email, password);
+      await login(email, password); // ใช้ context login อย่างเดียว
 
-      if (!res.success) {
-        setError(res.message);
-        return;
-      }
-
-      // save session
-      const storage = remember ? localStorage : sessionStorage;
-      storage.setItem("authUser", JSON.stringify(res.user));
-
-      navigate("/map");
+      navigate("/");
 
     } catch (err) {
       setError(err.message || "Login failed");
@@ -130,6 +124,8 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+
   return (
     <div className="login-wrapper">
       <div className="login-card">

@@ -6,11 +6,20 @@ import "../css/profile.css";
 import { readFavorites, removeFavorite, subscribeFavoritesChanged } from "../utils/favorites";
 import { readPurchases, removePurchase, subscribePurchasesChanged } from "../utils/purchases";
 import { readAllLands, removeLand, subscribeLandsChanged } from "../utils/landsLocal";
+import { useAuth } from "../auth/AuthProvider";
+
+/* ---------------- QUERY ---------------- */
 
 function useQuery() {
   const { search } = useLocation();
   return useMemo(() => new URLSearchParams(search || ""), [search]);
 }
+
+/* ---------------- TABS ---------------- */
+
+const VALID_TABS = ["info", "fav", "purchase", "posts", "settings"];
+
+/* ========================================================= */
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -18,323 +27,350 @@ export default function ProfilePage() {
   const q = useQuery();
   const tab = (q.get("tab") || "info").toLowerCase();
 
-  const [favorites, setFavorites] = useState(() => readFavorites());
-  const [purchases, setPurchases] = useState(() => readPurchases());
-  const [posts, setPosts] = useState(() => readAllLands());
+  const { me, loading } = useAuth();
+
+  const [favorites, setFavorites] = useState([]);
+  const [purchases, setPurchases] = useState([]);
+  const [posts, setPosts] = useState([]);
+
+  /* ---------------- AUTH GUARD ---------------- */
+
+  useEffect(() => {
+    if (!loading && !me) navigate("/login");
+  }, [loading, me, navigate]);
+
+  /* ---------------- TAB GUARD ---------------- */
+
+  useEffect(() => {
+    if (!VALID_TABS.includes(tab)) {
+      navigate("/profile?tab=info", { replace: true });
+    }
+  }, [tab, navigate]);
+
+  /* ---------------- DATA LOADERS ---------------- */
 
   useEffect(() => {
     setFavorites(readFavorites());
-    const unsub = subscribeFavoritesChanged(() => setFavorites(readFavorites()));
-    return unsub;
+    return subscribeFavoritesChanged(() => {
+      setFavorites(readFavorites());
+    });
   }, []);
 
   useEffect(() => {
     setPurchases(readPurchases());
-    const unsub = subscribePurchasesChanged(() => setPurchases(readPurchases()));
-    return unsub;
+    return subscribePurchasesChanged(() => {
+      setPurchases(readPurchases());
+    });
   }, []);
 
   useEffect(() => {
-    setPosts(readAllLands());
-    const unsub = subscribeLandsChanged(() => setPosts(readAllLands()));
-    return unsub;
-  }, []);
+    const load = () =>
+      setPosts(readAllLands().filter(p => p.ownerId === me?.uid));
 
-  const goTab = (tname) => navigate(`/profile?tab=${tname}`);
+    load();
+    return subscribeLandsChanged(load);
+  }, [me]);
 
-  const onDeletePost = (id) => {
-    if (!id) return;
+  /* ---------------- NAV ---------------- */
+
+  const goTab = (name) => navigate(`/profile?tab=${name}`);
+
+  /* ---------------- DELETE ---------------- */
+
+  const deletePost = (id) => {
     if (!window.confirm(t("posts.confirmDelete"))) return;
     removeLand(id);
   };
 
+  /* ---------------- LOADING ---------------- */
+
+  if (loading)
+    return <div className="center-screen">Loading...</div>;
+
+  /* ========================================================= */
+
   return (
     <div className="profile-page">
       <div className="profile-container">
-        {/* header */}
-        <div className="profile-header">
-          <div className="profile-avatar">P</div>
-          <div className="profile-meta">
-            <div className="profile-name">Pimpa Naree</div>
-            <div className="profile-sub">{t("header.member")}</div>
-          </div>
-          <button className="ds-btn ds-btn-outline" type="button">
-            {t("header.editProfile")}
-          </button>
-        </div>
 
-        {/* stats */}
-        <div className="profile-stats">
-          <div className="stat-card">
-            <div className="stat-num">{posts.length}</div>
-            <div className="stat-label">{t("stats.posts")}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-num">{favorites.length}</div>
-            <div className="stat-label">{t("stats.favorites")}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-num">{purchases.length}</div>
-            <div className="stat-label">{t("stats.purchases")}</div>
-          </div>
-        </div>
+        <ProfileHeader me={me} navigate={navigate} t={t} />
 
-        {/* layout */}
+        <Stats posts={posts} favorites={favorites} purchases={purchases} t={t} />
+
         <div className="profile-grid">
-          {/* left menu */}
-          <aside className="profile-side">
-            <div className="side-title">{t("menu.title")}</div>
 
-            <button className={`side-item ${tab === "info" ? "active" : ""}`} onClick={() => goTab("info")}>
-              {t("menu.info")}
-            </button>
+          <Sidebar tab={tab} goTab={goTab} t={t} />
 
-            <button className={`side-item ${tab === "fav" ? "active" : ""}`} onClick={() => goTab("fav")}>
-              {t("menu.favorites")}
-            </button>
+          <Content
+            tab={tab}
+            posts={posts}
+            favorites={favorites}
+            purchases={purchases}
+            deletePost={deletePost}
+            navigate={navigate}
+            removeFavorite={removeFavorite}
+            removePurchase={removePurchase}
+            t={t}
+            me={me}
+          />
 
-            <button className={`side-item ${tab === "purchase" ? "active" : ""}`} onClick={() => goTab("purchase")}>
-              {t("menu.purchases")}
-            </button>
-
-            <button className={`side-item ${tab === "posts" ? "active" : ""}`} onClick={() => goTab("posts")}>
-              {t("menu.posts")}
-            </button>
-
-            <button className={`side-item ${tab === "settings" ? "active" : ""}`} onClick={() => goTab("settings")}>
-              {t("menu.settings")}
-            </button>
-          </aside>
-
-          {/* right content */}
-          <section className="profile-content">
-            {tab === "posts" ? (
-              <>
-                <div className="content-head">
-                  <div>
-                    <div className="content-title">{t("posts.title")}</div>
-                    <div className="content-sub">{t("posts.subtitle")}</div>
-                  </div>
-                  <div className="content-pill">{posts.length}</div>
-                </div>
-
-                {posts.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-title">{t("posts.emptyTitle")}</div>
-                    <div className="empty-sub">{t("posts.emptySub")}</div>
-                    <button className="outline-btn" onClick={() => navigate(`/map?mode=buy`)}>
-                      {t("posts.goMapSell")}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="purchase-grid">
-                    {posts.map((p) => (
-                      <div key={p.id} className="purchase-card">
-                        <div className="purchase-top">
-                          <div className="purchase-title">
-                            {p.owner || p.agent || t("common.unknown")}
-                          </div>
-                          <span className="purchase-status paid">
-                            {p.updatedAt
-                              ? t("posts.updated", { date: p.updatedAt })
-                              : t("stats.posts")}
-                          </span>
-                        </div>
-
-                        <div className="fav-row">
-                          <span className="muted">{t("posts.size")}</span>
-                          <b>{Number(p.size || 0).toLocaleString("th-TH")}</b>
-                        </div>
-
-                        <div className="fav-row">
-                          <span className="muted">{t("posts.price")}</span>
-                          <b>{Number(p.totalPrice || 0).toLocaleString("th-TH")}</b>
-                        </div>
-
-                        <div className="fav-row">
-                          <span className="muted">{t("posts.phone")}</span>
-                          <b>{p.phone || "-"}</b>
-                        </div>
-
-                        <div className="fav-actions fav-actions--row fav-actions--lg">
-                          <button className="ds-btn ds-btn-outline ds-btn-block" onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}>
-                            {t("posts.viewMap")}
-                          </button>
-                          <button className="ds-btn ds-btn-primary ds-btn-block" onClick={() => navigate(`/map?mode=buy&focus=${p.id}`)}>
-                            {t("posts.edit")}
-                          </button>
-                          <button className="danger-btn" onClick={() => onDeletePost(p.id)}>
-                            {t("posts.delete")}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : tab === "fav" ? (
-              <>
-                <div className="content-head">
-                  <div>
-                    <div className="content-title">{t("favorites.title")}</div>
-                    <div className="content-sub">{t("favorites.subtitle")}</div>
-                  </div>
-                  <div className="content-pill">{favorites.length}</div>
-                </div>
-
-                {favorites.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-title">{t("favorites.emptyTitle")}</div>
-                    <div className="empty-sub">{t("favorites.emptySub")}</div>
-                    <button className="outline-btn" onClick={() => navigate(`/map?mode=buy`)}>
-                      {t("favorites.openMap")}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="fav-grid">
-                    {favorites.map((f) => (
-                      <div key={f.id} className="fav-card">
-                        <div className="fav-top">
-                          <div className="fav-owner">{f.owner || "—"}</div>
-
-                          <button
-                            className="fav-delete-icon"
-                            title={t("favorites.removeTitle")}
-                            onClick={() => {
-                              if (window.confirm(t("favorites.confirmRemove"))) {
-                                removeFavorite(f.id);
-                              }
-                            }}
-                          >
-                            ✕
-                          </button>
-                        </div>
-
-                        <div className="fav-body">
-                          <div className="fav-row">
-                            <span className="muted">{t("favorites.date")}</span>
-                            <b>{f.updatedAt || "-"}</b>
-                          </div>
-
-                          <div className="fav-row">
-                            <span className="muted">{t("favorites.area")}</span>
-                            <b>{f.area || "-"}</b>
-                          </div>
-
-                          <div className="fav-row">
-                            <span className="muted">{t("favorites.price")}</span>
-                            <b>{f.totalPrice || "-"}</b>
-                          </div>
-
-                          <div className="fav-actions fav-actions--row fav-actions--lg">
-                            <button className="ds-btn ds-btn-primary">
-                              💬 {t("favorites.chat")}
-                            </button>
-                            <button className="ds-btn ds-btn-outline">
-                              🗺️ {t("favorites.openMap")}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : tab === "purchase" ? (
-              <>
-                <div className="content-head">
-                  <div>
-                    <div className="content-title">{t("purchases.title")}</div>
-                    <div className="content-sub">{t("purchases.subtitle")}</div>
-                  </div>
-                  <div className="content-pill">{purchases.length}</div>
-                </div>
-
-                {purchases.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-title">{t("purchases.emptyTitle")}</div>
-                    <div className="empty-sub">{t("purchases.emptySub")}</div>
-                  </div>
-                ) : (
-                  <div className="purchase-grid">
-                    {purchases.map((p) => (
-                      <div key={p.id} className="purchase-card">
-                        <div className="purchase-top">
-                          <div className="purchase-title">{p.title || "-"}</div>
-                          <span className={`purchase-status ${p.status || "paid"}`}>
-                            {t(`purchases.status.${p.status || "paid"}`)}
-                          </span>
-                        </div>
-
-                        <div className="fav-row">
-                          <span className="muted">{t("purchases.seller")}</span>
-                          <b>{p.seller || "-"}</b>
-                        </div>
-
-                        <div className="fav-row">
-                          <span className="muted">{t("purchases.paidAt")}</span>
-                          <b>{p.paidAt || "-"}</b>
-                        </div>
-
-                        <div className="fav-row">
-                          <span className="muted">{t("purchases.total")}</span>
-                          <b>{p.totalPrice || "-"}</b>
-                        </div>
-
-                        <div className="fav-actions fav-actions--row fav-actions--lg">
-                          <button className="ds-btn ds-btn-primary" onClick={() => navigate(`/map?mode=buy`)}>
-                            {t("purchases.viewLand")}
-                          </button>
-                          <button className="ds-btn ds-btn-outline" onClick={() => removePurchase(p.id)}>
-                            {t("purchases.delete")}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : tab === "info" ? (
-              <>
-                <div className="content-head">
-                  <div>
-                    <div className="content-title">{t("info.title")}</div>
-                    <div className="content-sub">{t("info.subtitle")}</div>
-                  </div>
-                </div>
-
-                <div className="info-card">
-                  <div className="info-row">
-                    <div className="k">{t("info.name")}</div>
-                    <div className="v">Pimpa Naree</div>
-                  </div>
-                  <div className="info-row">
-                    <div className="k">{t("info.phone")}</div>
-                    <div className="v">081-234-5678</div>
-                  </div>
-                  <div className="info-row">
-                    <div className="k">{t("info.line")}</div>
-                    <div className="v">bee.land</div>
-                  </div>
-                  <div className="info-row">
-                    <div className="k">{t("info.status")}</div>
-                    <div className="v">
-                      <span className="badge">{t("header.member")}</span>
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="empty-state">
-                  <div className="empty-title">{t("common.notReady")}</div>
-                  <div className="empty-sub">{t("common.comingSoon")}</div>
-                </div>
-              </>
-            )}
-          </section>
         </div>
       </div>
     </div>
   );
 }
+
+/* ========================================================= */
+/* ===================== COMPONENTS ======================== */
+/* ========================================================= */
+
+function ProfileHeader({ me, navigate, t }) {
+  return (
+    <div className="profile-header">
+      <div className="profile-avatar">
+        {(me?.name?.[0] || me?.email?.[0] || "U").toUpperCase()}
+      </div>
+
+      <div className="profile-meta">
+        <div className="profile-name">{me?.name || "Guest"}</div>
+        <div className="profile-sub">{t("header.member")}</div>
+      </div>
+
+      <button
+        className="ds-btn ds-btn-outline"
+        onClick={() => navigate("/profile/edit")}
+      >
+        {t("header.editProfile")}
+      </button>
+    </div>
+  );
+}
+
+/* ---------------- STATS ---------------- */
+
+function Stats({ posts, favorites, purchases, t }) {
+  return (
+    <div className="profile-stats">
+      <Stat value={posts.length} label={t("stats.posts")} />
+      <Stat value={favorites.length} label={t("stats.favorites")} />
+      <Stat value={purchases.length} label={t("stats.purchases")} />
+    </div>
+  );
+}
+
+const Stat = ({ value, label }) => (
+  <div className="stat-card">
+    <div className="stat-num">{value}</div>
+    <div className="stat-label">{label}</div>
+  </div>
+);
+
+/* ---------------- SIDEBAR ---------------- */
+
+function Sidebar({ tab, goTab, t }) {
+  const items = [
+    ["info", t("menu.info")],
+    ["fav", t("menu.favorites")],
+    ["purchase", t("menu.purchases")],
+    ["posts", t("menu.posts")],
+    ["settings", t("menu.settings")]
+  ];
+
+  return (
+    <aside className="profile-side">
+      <div className="side-title">{t("menu.title")}</div>
+
+      {items.map(([key, label]) => (
+        <button
+          key={key}
+          className={`side-item ${tab === key ? "active" : ""}`}
+          onClick={() => goTab(key)}
+        >
+          {label}
+        </button>
+      ))}
+    </aside>
+  );
+}
+
+/* ---------------- CONTENT SWITCH ---------------- */
+
+function Content(props) {
+  switch (props.tab) {
+    case "posts":
+      return <PostsTab {...props} />;
+    case "fav":
+      return <FavoritesTab {...props} />;
+    case "purchase":
+      return <PurchasesTab {...props} />;
+    case "info":
+      return <InfoTab {...props} />;
+    default:
+      return <ComingSoon t={props.t} />;
+  }
+}
+
+/* ========================================================= */
+/* ======================= TABS ============================ */
+/* ========================================================= */
+
+function PostsTab({ posts, t, deletePost, navigate }) {
+  return (
+    <section className="profile-content">
+      <Header title={t("posts.title")} sub={t("posts.subtitle")} count={posts.length} />
+
+      {posts.length === 0 ? (
+        <Empty
+          title={t("posts.emptyTitle")}
+          sub={t("posts.emptySub")}
+          btn={t("posts.goMapSell")}
+          onClick={() => navigate("/map?mode=buy")}
+        />
+      ) : (
+        <div className="purchase-grid">
+          {posts.map(p => (
+            <div key={p.id} className="purchase-card">
+
+              <div className="purchase-top">
+                <div className="purchase-title">
+                  {p.owner || p.agent || t("common.unknown")}
+                </div>
+              </div>
+
+              <Row label={t("posts.size")} value={Number(p.size || 0).toLocaleString()} />
+              <Row label={t("posts.price")} value={Number(p.totalPrice || 0).toLocaleString()} />
+              <Row label={t("posts.phone")} value={p.phone || "-"} />
+
+              <div className="fav-actions fav-actions--row fav-actions--lg">
+                <button className="ds-btn ds-btn-outline" onClick={()=>navigate(`/map?focus=${p.id}`)}>
+                  {t("posts.viewMap")}
+                </button>
+
+                <button className="danger-btn" onClick={()=>deletePost(p.id)}>
+                  {t("posts.delete")}
+                </button>
+              </div>
+
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* ---------------- FAVORITES ---------------- */
+
+function FavoritesTab({ favorites, removeFavorite, t }) {
+  return (
+    <section className="profile-content">
+      <Header title={t("favorites.title")} sub={t("favorites.subtitle")} count={favorites.length} />
+
+      {favorites.map(f => (
+        <div key={f.id} className="fav-card">
+          <div className="fav-top">
+            <div>{f.owner}</div>
+
+            <button
+              className="fav-delete-icon"
+              onClick={() => {
+                if (window.confirm(t("favorites.confirmRemove")))
+                  removeFavorite(f.id);
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+/* ---------------- PURCHASES ---------------- */
+
+function PurchasesTab({ purchases, removePurchase, t }) {
+  return (
+    <section className="profile-content">
+      <Header title={t("purchases.title")} sub={t("purchases.subtitle")} count={purchases.length} />
+
+      {purchases.map(p => (
+        <div key={p.id} className="purchase-card">
+          <Row label={t("purchases.seller")} value={p.seller} />
+          <Row label={t("purchases.total")} value={p.totalPrice} />
+
+          <button
+            className="ds-btn ds-btn-outline"
+            onClick={()=>{
+              if(window.confirm("Delete purchase?"))
+                removePurchase(p.id);
+            }}
+          >
+            {t("purchases.delete")}
+          </button>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+/* ---------------- INFO ---------------- */
+
+function InfoTab({ me, t }) {
+  const fields = [
+    ["Name", me?.name],
+    ["Email", me?.email],
+    ["Phone", me?.phone],
+    ["Role", me?.role],
+    ["UID", me?.uid],
+    ["Joined", me?.createdAt && new Date(me.createdAt).toLocaleDateString()]
+  ];
+
+  return (
+    <section className="profile-content">
+      <Header title={t("info.title")} sub={t("info.subtitle")} />
+
+      <div className="info-card">
+        {fields.map(([label,value])=>(
+          <Row key={label} label={label} value={value}/>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+
+/* ========================================================= */
+/* ================= SHARED UI ============================= */
+/* ========================================================= */
+
+const Header = ({ title, sub, count }) => (
+  <div className="content-head">
+    <div>
+      <div className="content-title">{title}</div>
+      <div className="content-sub">{sub}</div>
+    </div>
+    {count !== undefined && <div className="content-pill">{count}</div>}
+  </div>
+);
+
+const Row = ({ label, value }) => (
+  <div className="fav-row">
+    <span className="muted">{label}</span>
+    <b>{value || "-"}</b>
+  </div>
+);
+
+const Empty = ({ title, sub, btn, onClick }) => (
+  <div className="empty-state">
+    <div className="empty-title">{title}</div>
+    <div className="empty-sub">{sub}</div>
+    {btn && <button className="outline-btn" onClick={onClick}>{btn}</button>}
+  </div>
+);
+
+const ComingSoon = ({ t }) => (
+  <section className="profile-content">
+    <Empty title={t("common.notReady")} sub={t("common.comingSoon")} />
+  </section>
+);
