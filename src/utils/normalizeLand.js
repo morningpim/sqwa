@@ -75,9 +75,9 @@ export function normalizeLand(input = {}) {
       pick(input.rnw, input.raiNganWah) ??
       sqwToRNW(pick(input.area, input.size)) ??
       "-",
-    frontage: fmt(pick(input.frontage, input.frontWidth)) ?? "-",
-    roadWidth: fmt(pick(input.roadWidth, input.road)) ?? "-",
-    pricePerWa: fmt(pick(input.pricePerWa, input.pricePerSqw), 2) ?? "-",
+    frontage: fmt(pick(input.frontage, input.frontWidth, input.width)) ?? "-",
+    roadWidth: fmt(pick(input.roadWidth, input.road, input.roadSize)) ?? "-",
+    pricePerWa: fmt(pick(input.pricePerWa, input.pricePerSqw, input.price), 2) ?? "-",
     totalPrice: fmt(pick(input.totalPrice, input.total)) ?? "-",
 
     contactOwner: pick(input.contactOwner, input.ownerContact, ""),
@@ -89,5 +89,11 @@ export function normalizeLand(input = {}) {
 
     lat: pick(input.lat, input.latitude),
     lng: pick(input.lng, input.longitude),
+
+    images: Array.isArray(input.images)
+    ? input.images
+    : Array.isArray(input.image)
+    ? input.image
+    : [],
   };
 }

@@ -649,8 +649,8 @@ export default function MapPage() {
         onFinishDrawing={finishDrawing}
         onClearDrawing={clearDrawing}
         onSearch={handleSearch}
-        openLayerMenu={openLayerMenu}
-        setOpenLayerMenu={setOpenLayerMenu}
+        //openLayerMenu={openLayerMenu}
+        //setOpenLayerMenu={setOpenLayerMenu}
         isSatellite={isSatellite}
         setIsSatellite={setIsSatellite}
         isTraffic={isTraffic}

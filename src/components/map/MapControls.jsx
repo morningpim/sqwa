@@ -6,9 +6,6 @@ import SearchPanel from "../Panels/SearchPanel";
 import MapToolsMenu from "./MapToolsMenu";
 
 export default function MapControls({
-  openLayerMenu,
-  setOpenLayerMenu,
-
   isSatellite,
   setIsSatellite,
   isTraffic,
@@ -28,17 +25,14 @@ export default function MapControls({
   onOpenTools,
   onSearch,
 
-  // ✅ role picker
   onOpenRolePicker,
   currentRole,
 
-  // ✅ mode ของหน้า
-  pageMode = "buy", // "buy" | "sell" | "eia"
+  pageMode = "buy",
 
-  /* =================== Drawing / EIA =================== */
   drawingEnabled = true,
   drawMode = false,
-  currentMode = "normal", // "normal" | "eia"
+  currentMode = "normal",
   onSetMode,
   onStartDrawing,
   onFinishDrawing,
@@ -46,49 +40,25 @@ export default function MapControls({
 }) {
   const rootRef = useRef(null);
 
-  // ===== local UI states =====
-  const [layersOpen, setLayersOpen] = useState(false);
-  const [plan, setPlan] = useState("bkk2556");
-  const [baseOpacity, setBaseOpacity] = useState(1);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [toolsOpen, setToolsOpen] = useState(false);
+  /* ================= STATE ================= */
+  const [activePanel, setActivePanel] = useState(null);
   const { t } = useTranslation("map");
 
-  const layerLabel = useMemo(
-    () => (isSatellite ? t("layer.satellite") : t("layer.map")),
-    [isSatellite, t]
-  );
+  const searchOpen = activePanel === "search";
+  const toolsOpen = activePanel === "tools";
+  const layersOpen = activePanel === "layers";
+  const layerMenuOpen = activePanel === "layer";
 
-  // ✅ Drawing visibility rules
-  const showDrawing = useMemo(() => {
-    const modeOk = pageMode === "buy" || pageMode === "sell" || pageMode === "eia";
-    return !!drawingEnabled && modeOk;
-  }, [drawingEnabled, pageMode]);
+  /* ================= HELPERS ================= */
+  const openPanel = useCallback((name) => {
+    setActivePanel((prev) => (prev === name ? null : name));
+  }, []);
 
-  const showEiaToggle = useMemo(() => pageMode === "eia", [pageMode]);
-
-  // =========================
-  // ✅ Core: Close/Open manager
-  // =========================
   const closeAll = useCallback(() => {
-    setOpenLayerMenu?.(false);
-    setSearchOpen(false);
-    setToolsOpen(false);
-    setLayersOpen(false);
-  }, [setOpenLayerMenu]);
+    setActivePanel(null);
+  }, []);
 
-  const openOnly = useCallback(
-    (name) => {
-      closeAll();
-      if (name === "layer") setOpenLayerMenu?.(true);
-      if (name === "search") setSearchOpen(true);
-      if (name === "tools") setToolsOpen(true);
-      if (name === "layersPanel") setLayersOpen(true);
-    },
-    [closeAll, setOpenLayerMenu]
-  );
-
-  // ===== close dropdown when click outside =====
+  /* ================= CLOSE ON OUTSIDE CLICK ================= */
   useEffect(() => {
     const onDocClick = (e) => {
       if (!rootRef.current) return;
@@ -98,54 +68,61 @@ export default function MapControls({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [closeAll]);
 
-  // =========================
-  // ✅ Safe handlers
-  // =========================
-  const safeToggleDrawMode = useCallback(() => {
-    if (!showEiaToggle) return;
-    if (!onSetMode) return;
-    onSetMode(currentMode === "eia" ? "normal" : "eia");
-  }, [showEiaToggle, onSetMode, currentMode]);
+  /* ================= LABEL ================= */
+  const layerLabel = useMemo(
+    () => (isSatellite ? t("layer.satellite") : t("layer.map")),
+    [isSatellite, t]
+  );
 
-  const safeStartDrawing = useCallback(() => {
+  /* ================= DRAWING ================= */
+  const showDrawing = useMemo(() => {
+    return drawingEnabled && ["buy", "sell", "eia"].includes(pageMode);
+  }, [drawingEnabled, pageMode]);
+
+  const showEiaToggle = pageMode === "eia";
+
+  const safeToggleDrawMode = () => {
+    if (!showEiaToggle || !onSetMode) return;
+    onSetMode(currentMode === "eia" ? "normal" : "eia");
+  };
+
+  const safeStartDrawing = () => {
     if (!showDrawing) return;
     onStartDrawing?.();
     closeAll();
-  }, [showDrawing, onStartDrawing, closeAll]);
+  };
 
-  const safeFinishDrawing = useCallback(() => {
+  const safeFinishDrawing = () => {
     if (!showDrawing) return;
     onFinishDrawing?.();
     closeAll();
-  }, [showDrawing, onFinishDrawing, closeAll]);
+  };
 
-  const safeClearDrawing = useCallback(() => {
+  const safeClearDrawing = () => {
     if (!showDrawing) return;
     onClearDrawing?.();
     closeAll();
-  }, [showDrawing, onClearDrawing, closeAll]);
+  };
+
+  /* ============================================================ */
 
   return (
     <div className="map-right-stack" ref={rootRef}>
-      {/* ================= Layer dropdown (เล็ก) ================= */}
+      {/* ================= Layer dropdown ================= */}
       <div className="map-layer-menu">
         <button
           className="map-layer-trigger"
-          type="button"
-          onClick={() => (openLayerMenu ? closeAll() : openOnly("layer"))}
-          aria-haspopup="menu"
-          aria-expanded={openLayerMenu ? "true" : "false"}
+          onClick={() => openPanel("layer")}
         >
           {layerLabel} ▾
         </button>
 
-        {openLayerMenu && (
-          <div className="map-layer-dropdown" role="menu">
+        {layerMenuOpen && (
+          <div className="map-layer-dropdown">
             <button
               className={`map-layer-item ${!isSatellite ? "active" : ""}`}
-              type="button"
               onClick={() => {
-                setIsSatellite?.(false);
+                setIsSatellite(false);
                 closeAll();
               }}
             >
@@ -154,9 +131,8 @@ export default function MapControls({
 
             <button
               className={`map-layer-item ${isSatellite ? "active" : ""}`}
-              type="button"
               onClick={() => {
-                setIsSatellite?.(true);
+                setIsSatellite(true);
                 closeAll();
               }}
             >
@@ -165,9 +141,8 @@ export default function MapControls({
 
             <button
               className={`map-layer-item ${isTraffic ? "active" : ""}`}
-              type="button"
               onClick={() => {
-                setIsTraffic?.((v) => !v);
+                setIsTraffic((v) => !v);
                 closeAll();
               }}
             >
@@ -177,104 +152,70 @@ export default function MapControls({
         )}
       </div>
 
-      {/* ================= Layers Panel (ใหญ่) ================= */}
+      {/* ================= Layers Panel ================= */}
       <LayersPanel
         open={layersOpen}
-        onClose={() => setLayersOpen(false)}
-        plan={plan}
-        setPlan={setPlan}
-        baseOpacity={baseOpacity}
-        setBaseOpacity={setBaseOpacity}
+        onClose={closeAll}
         dolEnabled={dolEnabled}
         setDolEnabled={setDolEnabled}
         dolOpacity={dolOpacity}
         setDolOpacity={setDolOpacity}
       />
 
-      {/* ================= FAB buttons ================= */}
+      {/* ================= FAB ================= */}
       <div className="map-fab-stack">
-        {/* ===== Search ===== */}
+        {/* SEARCH */}
         <div className={`search-pop-wrap ${searchOpen ? "open" : ""}`}>
-          <button
-            className="map-fab"
-            type="button"
-            title={t("common.search")}
-            onClick={() => (searchOpen ? closeAll() : openOnly("search"))}
-          >
-            <span className="material-icon" aria-hidden="true">
-              search
-            </span>
+          <button className="map-fab" onClick={() => openPanel("search")}>
+            <span className="material-symbols-outlined">search</span>
           </button>
 
           <SearchPanel
             open={searchOpen}
-            onClose={() => setSearchOpen(false)}
-            onSearch={(text) => {
-              onSearch?.(text);
+            onClose={closeAll}
+            onSearch={(txt) => {
+              onSearch?.(txt);
               closeAll();
             }}
           />
         </div>
 
-        <button
-          className="map-fab"
-          type="button"
-          title={t("layers")}
-          onClick={() => openOnly("layersPanel")}
-        >
-          <span className="material-icon" aria-hidden="true">
-            layers
-          </span>
+        {/* LAYERS */}
+        <button className="map-fab" onClick={() => openPanel("layers")}>
+          <span className="material-symbols-outlined">layers</span>
         </button>
 
+        {/* FILTER */}
         <button
           className="map-fab"
-          type="button"
-          title={t("filter")}
           onClick={() => {
             closeAll();
             onOpenFilter?.();
           }}
         >
-          <span className="material-icon" aria-hidden="true">
-            filter_alt
-          </span>
+          <span className="material-symbols-outlined">filter_alt</span>
         </button>
 
+        {/* CHAT */}
         <button
           className="map-fab"
-          type="button"
-          title={t("chat.open")}
           onClick={() => {
             closeAll();
             onOpenChat?.();
           }}
         >
-          <span className="material-icon" aria-hidden="true">
-            chat
-          </span>
+          <span className="material-symbols-outlined">chat</span>
         </button>
 
-        {/* ===== Tools ===== */}
+        {/* TOOLS */}
         <div className="tools-pop-wrap">
-          <button
-            className="map-fab"
-            type="button"
-            title={t("tools")}
-            onClick={() => (toolsOpen ? closeAll() : openOnly("tools"))}
-          >
-            <span className="material-icon" aria-hidden="true">
-              build
-            </span>
+          <button className="map-fab" onClick={() => openPanel("tools")}>
+            <span className="material-symbols-outlined">build</span>
           </button>
 
           <MapToolsMenu
             open={toolsOpen}
-            onClose={() => setToolsOpen(false)}
-            onOpenTools={() => {
-              closeAll();
-              onOpenTools?.();
-            }}
+            onClose={closeAll}
             showDrawing={showDrawing}
             showEiaToggle={showEiaToggle}
             currentMode={currentMode}
@@ -295,41 +236,21 @@ export default function MapControls({
         </div>
       </div>
 
-      {/* ================= Zoom controls ================= */}
+      {/* ================= ZOOM ================= */}
       <div className="map-zoom-box">
-        <button
-          className="map-zoom-btn"
-          type="button"
-          title={t("zoomIn")}
-          onClick={onZoomIn}
-        >
-          <span className="material-icon" aria-hidden="true">
-            add
-          </span>
+        <button className="map-zoom-btn" onClick={onZoomIn}>
+          <span className="material-symbols-outlined">add</span>
         </button>
 
-        <button
-          className="map-zoom-btn"
-          type="button"
-          title={t("zoomOut")}
-          onClick={onZoomOut}
-        >
-          <span className="material-icon" aria-hidden="true">
-            remove
-          </span>
+        <button className="map-zoom-btn" onClick={onZoomOut}>
+          <span className="material-symbols-outlined">remove</span>
         </button>
       </div>
 
-
-      {/* ================= Locate ================= */}
+      {/* ================= LOCATE ================= */}
       <div className="map-locate-row">
-        <button className="map-target-btn" 
-          type="button" 
-          title={t("locate")} 
-          onClick={onLocate}>
-          <span className="material-icon" aria-hidden="true">
-            my_location
-          </span>
+        <button className="map-target-btn" onClick={onLocate}>
+          <span className="material-symbols-outlined">my_location</span>
         </button>
       </div>
     </div>

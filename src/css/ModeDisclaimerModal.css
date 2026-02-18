@@ -1,181 +1,180 @@
 /* =========================================================
    Overlay
-   ========================================================= */
-.modal-overlay {
+========================================================= */
+.modal-overlay{
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(15,23,42,.45);
   backdrop-filter: blur(3px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:5000;
 }
 
 /* =========================================================
    Modal Box
-   ========================================================= */
-.modal-box {
-  width: 420px;
-  max-width: 90%;
-  background: var(--surface);
-  border-radius: var(--r-lg);
-  padding: var(--space-xl);
-  text-align: center;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border);
-
-  animation: modalFadeIn 0.18s ease-out;
+========================================================= */
+.modal-box{
+  width:420px;
+  max-width:90%;
+  background:var(--surface);
+  border-radius:var(--r-lg);
+  padding:var(--space-xl);
+  text-align:center;
+  box-shadow:var(--shadow-lg);
+  border:1px solid var(--border);
+  animation: modalFadeIn .18s ease-out;
 }
 
 /* =========================================================
    Icon
-   ========================================================= */
-.modal-icon {
-  font-size: 42px;
-  margin-bottom: var(--space-sm);
+========================================================= */
+.modal-icon{
+  font-size:42px;
+  margin-bottom:var(--space-sm);
 }
 
 /* =========================================================
    Text
-   ========================================================= */
-.modal-text {
-  font-family: var(--font-th);
-  font-size: 15px;
-  margin-bottom: var(--space-lg);
-  line-height: 1.6;
+========================================================= */
+.modal-text{
+  font-family:var(--font-th);
+  font-size:15px;
+  margin-bottom:var(--space-lg);
+  line-height:1.6;
 }
 
-/* step: normal disclaimer */
-.modal-text.normal {
-  color: #374151; /* gray-700 */
+.modal-text.normal{ color:#374151; }
+.modal-text.warning{ color:#b22222; }
+
+/* =========================================================
+   Buttons Base
+========================================================= */
+.btn{
+  padding:10px 22px;
+  border-radius:var(--r-md);
+  cursor:pointer;
+  border:none;
+  font-family:var(--font-th);
+  font-size:14px;
+  font-weight:600;
+  transition: transform .06s ease;
+  outline:none;
+  box-shadow:none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* step: PDPA warning */
-.modal-text.warning {
-  color: #b22222; /* firebrick */
+/* press feedback (no color change) */
+.btn:active{
+  transform:scale(.96);
 }
 
 /* =========================================================
-   Buttons
-   ========================================================= */
-.btn {
-  padding: 10px 22px;
-  border-radius: var(--r-md);
-  cursor: pointer;
-  border: none;
-  font-family: var(--font-th);
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.15s ease;
+   Primary Button
+========================================================= */
+.btn-primary{
+  background:var(--primary);
+  color:var(--bg-main);
 }
 
-/* Primary */
-.btn-primary {
-  background: var(--primary);
-  color: var(--bg-main);
-}
-
-.btn-primary:hover {
-  background: var(--primary-700);
-}
-
-/* Secondary (Cancel) */
-.btn-secondary {
-  background: #e5e7eb; /* gray-200 */
-  color: #374151;
-}
-
-.btn-secondary:hover {
-  background: #d1d5db;
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus,
+.btn-primary:focus-visible{
+  background:var(--primary);
+  color:var(--bg-main);
 }
 
 /* =========================================================
-   Button Layout (2 buttons)
-   ========================================================= */
-.modal-actions {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-sm);
+   Secondary Button
+========================================================= */
+.btn-secondary{
+  background:#e5e7eb;
+  color:#374151;
+}
+
+.btn-secondary:hover,
+.btn-secondary:active,
+.btn-secondary:focus,
+.btn-secondary:focus-visible{
+  background:#e5e7eb;
+  color:#374151;
 }
 
 /* =========================================================
-   Step Indicator (Optional)
-   ========================================================= */
-.modal-step {
-  font-size: 12px;
-  font-family: var(--font-th);
-  color: #6b7280;
-  margin-bottom: var(--space-xs);
+   Button Layout
+========================================================= */
+.modal-actions{
+  display:flex;
+  justify-content:center;
+  gap:var(--space-sm);
+}
+
+/* =========================================================
+   Step Indicator
+========================================================= */
+.modal-step{
+  font-size:12px;
+  font-family:var(--font-th);
+  color:#6b7280;
+  margin-bottom:var(--space-xs);
 }
 
 /* =========================================================
    Animation
-   ========================================================= */
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
+========================================================= */
+@keyframes modalFadeIn{
+  from{
+    opacity:0;
+    transform:scale(.96);
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
+  to{
+    opacity:1;
+    transform:scale(1);
   }
 }
 
 /* =========================================================
    Responsive
-   ========================================================= */
-@media (max-width: 480px) {
-  .modal-box {
-    padding: var(--space-lg);
-  }
-
-  .modal-icon {
-    font-size: 36px;
-  }
-
-  .modal-text {
-    font-size: 14px;
-  }
-}
-
-/* =========================
-   Modal Mobile UX
-========================= */
-
-@media (max-width: 640px){
+========================================================= */
+@media (max-width:640px){
 
   .modal-overlay{
-    padding: 16px;
-    align-items: flex-end; /* mobile = slide-up feel */
+    padding:16px;
+    align-items:flex-end;
   }
 
   .modal-box{
-    width: 100%;
-    max-width: 100%;
-    border-radius: 18px 18px 12px 12px;
-    padding: var(--space-lg);
+    width:100%;
+    max-width:100%;
+    border-radius:18px 18px 12px 12px;
+    padding:var(--space-lg);
   }
 
   .modal-actions{
-    flex-direction: column;
-    gap: var(--space-xs);
+    flex-direction:column;
+    gap:var(--space-xs);
   }
 
   .modal-actions .btn{
-    width: 100%;
+    width:100%;
   }
 }
 
-/* small phones */
-@media (max-width: 420px){
+@media (max-width:420px){
 
-  .modal-icon{
-    font-size: 32px;
-  }
+  .modal-icon{ font-size:32px; }
+  .modal-text{ font-size:13px; }
 
-  .modal-text{
-    font-size: 13px;
-  }
+}
+
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus,
+.btn-primary:focus-visible{
+  background: var(--primary) !important;
+  color: var(--bg-main) !important;
+  border: none !important;
 }

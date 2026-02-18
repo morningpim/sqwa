@@ -15,44 +15,47 @@ export default function MapToolsMenu({
   onFinishDrawing,
   onClearDrawing,
 }) {
+  const { t } = useTranslation("map");
+
   if (!open) return null;
 
-  const { t } = useTranslation("map");
-  const { t: tCommon } = useTranslation("common");
+  const safe = fn => () => {
+    fn?.();
+    onClose?.();
+  };
 
   return (
-    <div className="mtm-pop">
+    <div className="mtm-pop" role="dialog">
+
       <div className="mtm-drawCard">
 
+        {/* header */}
         <div className="mtm-drawHeader">
-          <div className="mtm-title">
-            <span className="mtm-titleText">{t("draw")}</span>
-          </div>
+          <span className="mtm-titleText">{t("draw")}</span>
 
           <button className="mtm-x" onClick={onClose}>
             ✕
           </button>
         </div>
 
+        {/* toggle mode */}
         {showEiaToggle && (
           <button
             className={`mtm-chip ${currentMode === "eia" ? "is-eia" : ""}`}
-            onClick={() => onToggleDrawMode?.()}
+            onClick={onToggleDrawMode}
           >
-            <span className="material-icon">swap_horiz</span>
+            <span className="material-symbols-outlined">swap_horiz</span>
             {currentMode === "eia" ? t("eiaMode") : t("normalMode")}
           </button>
         )}
 
+        {/* drawing actions */}
         {showDrawing && (
           <div className="mtm-actionsCol">
 
             <button
               className="mtm-btn mtm-btn--soft"
-              onClick={()=>{
-                onStartDrawing?.();
-                onClose?.();
-              }}
+              onClick={safe(onStartDrawing)}
             >
               ▶ {t("drawStart")}
             </button>
@@ -71,10 +74,7 @@ export default function MapToolsMenu({
 
             <button
               className="mtm-btn mtm-btn--red"
-              onClick={()=>{
-                onClearDrawing?.();
-                onClose?.();
-              }}
+              onClick={safe(onClearDrawing)}
             >
               🧍 {t("drawClear")}
             </button>
@@ -83,9 +83,13 @@ export default function MapToolsMenu({
         )}
       </div>
 
+      {/* footer */}
       <div className="mtm-list">
-        <button className="mtm-item" onClick={()=>onOpenTools?.()}>
-          <span className="material-icon">build</span>
+        <button
+          className="mtm-item"
+          onClick={safe(onOpenTools)}
+        >
+          <span className="material-symbols-outlined">build</span>
           <span className="mtm-itemText">{t("tools")}</span>
         </button>
       </div>

@@ -1,9 +1,6 @@
 const KEY = "mockUsers";
 
-/* -------------------------------------------------- */
 /* STORAGE */
-/* -------------------------------------------------- */
-
 function getUsers(){
   try{
     return JSON.parse(localStorage.getItem(KEY) || "[]");
@@ -16,23 +13,16 @@ function saveUsers(users){
   localStorage.setItem(KEY, JSON.stringify(users));
 }
 
-/* -------------------------------------------------- */
 /* UTILS */
-/* -------------------------------------------------- */
-
-function hash(p){
-  return btoa(p);
-}
-
-function delay(ms=400){
-  return new Promise(r=>setTimeout(r,ms));
-}
+const hash = p => btoa(p);
+const delay = (ms=400)=>new Promise(r=>setTimeout(r,ms));
 
 function normalizeUser(u){
   return {
     uid: u.uid,
     email: u.email,
     role: u.role || "buyer",
+
     name:
       u.name ||
       `${u.firstName || ""} ${u.lastName || ""}`.trim() ||
@@ -48,31 +38,24 @@ function normalizeUser(u){
   };
 }
 
-/* -------------------------------------------------- */
 /* LOGIN */
-/* -------------------------------------------------- */
-
 export async function mockLogin(email,password){
   await delay();
 
-  const users = getUsers();
-
-  const user = users.find(
-    u => u.email === email && u.password === hash(password)
+  const user = getUsers().find(
+    u => u.email===email && u.password===hash(password)
   );
 
-  if(!user)
-    throw new Error("Invalid credentials");
+  if(!user) throw new Error("Invalid credentials");
 
   return {
-    user: normalizeUser(user)
+    user: normalizeUser(user),
+    accessToken:"mock-access",
+    refreshToken:"mock-refresh"
   };
 }
 
-/* -------------------------------------------------- */
 /* SIGNUP */
-/* -------------------------------------------------- */
-
 export async function mockSignup(data){
   await delay();
 
@@ -83,32 +66,15 @@ export async function mockSignup(data){
 
   const users = getUsers();
 
-  if(users.some(u=>u.email===payload.email)){
-    return {
-      success:false,
-      message:"Email already exists"
-    };
-  }
-
-  if(!payload.email || !payload.password){
-    return {
-      success:false,
-      message:"Missing required fields"
-    };
-  }
+  if(users.some(u=>u.email===payload.email))
+    return { success:false, message:"Email exists" };
 
   const newUser = {
     uid: crypto.randomUUID(),
-
     email: payload.email,
     password: hash(payload.password),
 
     role: payload.role || "buyer",
-
-    name:
-      payload.name ||
-      `${payload.first_name || ""} ${payload.last_name || ""}`.trim() ||
-      "User",
 
     firstName: payload.first_name || "",
     lastName: payload.last_name || "",
@@ -123,40 +89,29 @@ export async function mockSignup(data){
 
   return {
     success:true,
-    user: normalizeUser(newUser)
+    user: normalizeUser(newUser),
+    accessToken:"mock-access",
+    refreshToken:"mock-refresh"
   };
 }
 
-/* -------------------------------------------------- */
 /* LOGOUT */
-/* -------------------------------------------------- */
-
 export async function mockLogout(){
   await delay();
   return true;
 }
 
-/* -------------------------------------------------- */
 /* UPDATE PROFILE */
-/* -------------------------------------------------- */
-
 export async function mockUpdateProfile(uid, patch){
   await delay();
 
   const users = getUsers();
 
-  const next = users.map(u=>{
-    if(u.uid !== uid) return u;
-
-    return {
-      ...u,
-      ...patch
-    };
-  });
+  const next = users.map(u=>
+    u.uid===uid ? {...u,...patch} : u
+  );
 
   saveUsers(next);
 
-  const updated = next.find(u=>u.uid===uid);
-
-  return normalizeUser(updated);
+  return normalizeUser(next.find(u=>u.uid===uid));
 }

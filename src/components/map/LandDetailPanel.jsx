@@ -33,6 +33,7 @@ export default function LandDetailPanel({
   onChatSeller,
   isFavorite,
   onToggleFavorite,
+  images,
 }) {
   // ✅ main namespace ของ component
   const { t } = useTranslation("land");
@@ -126,6 +127,11 @@ export default function LandDetailPanel({
           🕒 {t("postedDate", { date: postedDate })}
         </div>
 
+        {/* ---------- IMAGE ---------- */}
+        {L.images?.length > 0 && (
+          <ImageSlider images={L.images}/>
+        )}
+
         {/* ---------- BASIC INFO ---------- */}
         <div className="sqw-grid">
           <InfoBox
@@ -138,7 +144,7 @@ export default function LandDetailPanel({
           />
           <InfoBox
             label={t("field.frontage")}
-            value={`${L.frontage} ${t("unit.meter")}`}
+            value={`${L.frontage ?? L.width ?? "-"} ${t("unit.meter")}`}
           />
           <InfoBox
             label={t("field.roadWidth")}
@@ -152,7 +158,7 @@ export default function LandDetailPanel({
         <div className="sqw-row">
           <span>{t("price.perSqw")}</span>
           <span className="sqw-row-v">
-            {L.pricePerWa} {tCommon("unit.baht")}
+            {L.pricePerWa ?? L.price} {tCommon("unit.baht")}
           </span>
         </div>
         <div className="sqw-row">
@@ -206,3 +212,72 @@ function InfoBox({ label, value }) {
     </div>
   );
 }
+
+function ImageSlider({ images = [] }) {
+  const [i, setI] = useState(0)
+  const [startX, setStartX] = useState(null)
+  const [fullscreen, setFullscreen] = useState(false)
+
+  if (!images.length) return null
+
+  const prev = () => setI(v => v === 0 ? images.length - 1 : v - 1)
+  const next = () => setI(v => v === images.length - 1 ? 0 : v + 1)
+
+  // swipe support
+  const onTouchStart = e => setStartX(e.touches[0].clientX)
+
+  const onTouchEnd = e => {
+    if (startX == null) return
+    const diff = startX - e.changedTouches[0].clientX
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? next() : prev()
+    }
+    setStartX(null)
+  }
+
+  // keyboard support
+  useEffect(()=>{
+    const key = e=>{
+      if(e.key==="ArrowRight") next()
+      if(e.key==="ArrowLeft") prev()
+      if(e.key==="Escape") setFullscreen(false)
+    }
+    window.addEventListener("keydown",key)
+    return ()=>window.removeEventListener("keydown",key)
+  },[])
+
+  return (
+    <>
+      <div
+        className="sqw-slider"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        <img
+          src={images[i]}
+          className="sqw-slide-img"
+          onClick={()=>setFullscreen(true)}
+        />
+
+        {images.length > 1 && (
+          <>
+            <button className="sqw-arrow left" onClick={prev}>‹</button>
+            <button className="sqw-arrow right" onClick={next}>›</button>
+          </>
+        )}
+
+        {/* index */}
+        <div className="sqw-index">
+          {i+1} / {images.length}
+        </div>
+      </div>
+      {/* fullscreen modal */}
+      {fullscreen && (
+        <div className="sqw-full" onClick={()=>setFullscreen(false)}>
+          <img src={images[i]}/>
+        </div>
+      )}
+    </>
+  )
+}
+

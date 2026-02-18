@@ -81,6 +81,9 @@
   display: inline-block !important;
   width: fit-content !important;
   height: fit-content !important;
+  transform-origin: bottom center;
+  transform: scale(.7);
+  
 }
 
 /* =========================
@@ -101,6 +104,8 @@
   /* ✅ หดตามเนื้อหา */
   height: auto !important;
   min-height: 0 !important;
+  transform:none;
+  transform-origin: bottom center;
 }
 
 /* header */
@@ -418,3 +423,67 @@
   }
 }
 
+/* =========================
+   IMAGE BLOCK
+   ========================= */
+
+/* slider */
+.sqw-slider{
+  position:relative;
+  width:100%;
+  height:220px;
+  overflow:hidden;
+  border-radius:14px;
+}
+
+.sqw-slide-img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  cursor:zoom-in;
+}
+
+.sqw-arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  background:#0008;
+  border:none;
+  color:white;
+  font-size:22px;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  cursor:pointer;
+}
+
+.sqw-arrow.left{ left:10px }
+.sqw-arrow.right{ right:10px }
+
+.sqw-index{
+  position:absolute;
+  bottom:8px;
+  right:12px;
+  background:#0007;
+  color:#fff;
+  padding:2px 8px;
+  border-radius:8px;
+  font-size:12px;
+}
+
+/* fullscreen */
+.sqw-full{
+  position:fixed;
+  inset:0;
+  background:#000c;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.sqw-full img{
+  max-width:95%;
+  max-height:95%;
+  object-fit:contain;
+}
