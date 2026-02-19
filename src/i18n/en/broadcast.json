@@ -1,38 +1,38 @@
 {
-  "selectLandFirst": "Please select land before creating a broadcast",
-  "fabLabel": "Broadcast",
-  "title": "Create Broadcast",
+  "selectLandFirst": "Please select a land plot before creating a broadcast",
+  "fabLabel": "News & Announcements",
+  "title": "Create Announcement",
   "quick": {
-    "adminTitle": "Admin Broadcast / LINE Ads",
-    "adminLabel": "Admin Broadcast",
-    "consignorTitle": "Broadcast 100 THB (Consignment)",
-    "consignorLabel": "Broadcast 100 THB"
+    "adminTitle": "Admin - News & LINE Ads",
+    "adminLabel": "Admin Announcements",
+    "consignorTitle": "Consignment Announcement 100 THB",
+    "consignorLabel": "Announcement 100฿"
   },
   "news": {
-    "title": "Broadcast News",
-    "round": "Broadcast round",
+    "title": "News & Announcements",
+    "round": "Broadcast Round",
     "today": "Today",
-    "empty": "No published broadcasts"
+    "empty": "No published news available"
   },
   "badge": {
     "consignment": "Consignment",
-    "buySell": "Buy / Sell",
+    "buySell": "Buy/Sell",
     "featured": "Featured",
     "lineAds": "LINE Ads"
   },
   "field": {
     "agent": "Agent",
     "size": "Size",
-    "totalPrice": "Total price"
+    "totalPrice": "Total Price"
   },
   "unit": {
     "baht": "THB"
   },
   "action": {
-    "viewMap": "View on map",
-    "copyLineAdsLink": "Copy Ads link",
-    "copyLink": "Copy link",
-    "copyText": "Copy text"
+    "viewMap": "View on Map",
+    "copyLineAdsLink": "Copy Ads Link",
+    "copyLink": "Copy Link",
+    "copyText": "Copy Text"
   },
   "alert": {
     "copyLineLink": "LINE Ads link copied ✅",
@@ -41,7 +41,7 @@
   },
   "queue": {
     "title": "LINE Ads Queue",
-    "subtitle": "Campaigns prepared for LINE Ads Platform",
-    "empty": "Queue is empty"
+    "subtitle": "List of items created for the LINE Ads Platform",
+    "empty": "No items in queue"
   }
 }

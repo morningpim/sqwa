@@ -1,11 +1,11 @@
 {
   "panel": {
     "title": "Recommended Land Listings",
-    "subtitle": "{{count}} listings match your investor profile",
-    "empty": "No recommendations found"
+    "subtitle": "Found {{count}} plots matching your investor profile",
+    "empty": "No recommendations found yet"
   },
   "item": {
-    "unknown": "Unnamed",
+    "unknown": "Unnamed Plot",
     "agentSuffix": "(Agent)"
   },
   "field": {
@@ -17,37 +17,37 @@
     "baht": "THB"
   },
   "action": {
-    "focus": "View on map"
+    "focus": "View on Map"
   },
   "profile": {
-    "title": "Investor Assessment",
+    "title": "Investor Profile Assessment",
     "subtitle": "(SQW Investor Profile)",
     "question": {
-      "goal": "1) What is your expected profit strategy?",
-      "gis": "2) Which GIS factor is most important to you?",
-      "budget": "3) What is your investment budget plan?"
+      "goal": "Q1: What is your expected profit strategy?",
+      "gis": "Q2: Which Spatial Factor (GIS) do you prioritize most?",
+      "budget": "Q3: What is your investment budget plan?"
     },
     "goal": {
-      "flipping": "Short-term flipping",
-      "capital_gain": "Long-term capital gain",
-      "passive_income": "Passive income"
+      "flipping": "Short-term Speculation (Flipping)",
+      "capital_gain": "Long-term Holding (Capital Gain)",
+      "passive_income": "Steady Cash Flow (Passive Income)"
     },
     "gis": {
-      "infra": "Infrastructure (Transit / Expressway)",
-      "zoning": "Zoning & regulations",
-      "price_history": "Historical price analysis"
+      "infra": "Infrastructure: Near Skytrain/Expressway",
+      "zoning": "City Planning/Zoning Regulations (SQW GIS)",
+      "price_history": "Price History: Historical Transaction Analysis"
     },
     "budget": {
-      "low": "Small investor: under 5M THB",
-      "mid": "Mid-level: 5–30M THB",
-      "high": "Institutional: 50M+ THB"
+      "low": "Retail: Under 5 Million THB",
+      "mid": "Mid-tier: 5 – 30 Million THB",
+      "high": "Institutional: 50 Million THB and above"
     },
     "action": {
-      "reset": "Reset saved answers",
-      "submit": "View results"
+      "reset": "Reset to Saved Profile",
+      "submit": "View Results"
     },
     "aria": {
-      "close": "Close dialog"
+      "close": "Close Window"
     }
   }
 }

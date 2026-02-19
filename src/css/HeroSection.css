@@ -17,11 +17,11 @@
 .hero-content {
   position: relative;
   z-index: 10;
-  height: 100%;
+  height: 100%; /* จะเป็น 100% ของพื้นที่หลังหัก Navbar ออกไปแล้ว */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: center; /* จัดกึ่งกลางแนวตั้ง */
   text-align: center;
 }
 
@@ -50,6 +50,7 @@
   margin-top: 30px;
   display: flex;
   justify-content: center;
+  align-items: flex-start; /* ให้ปุ่มเรียงแถวบนตรงกัน แม้ข้อความด้านล่างจะยาวไม่เท่ากัน */
   gap: 80px;
 }
 
@@ -94,6 +95,14 @@
   font-family: "Mitr", sans-serif;
   margin-top: 12px;
   color: #000000;
+  text-align: center;
+  display: block;
+}
+
+.label-multiline {
+  max-width: 260px;       /* บีบความกว้างเพื่อให้ "EIA base map" ตกบรรทัดใหม่ */
+  line-height: 1.2;      /* ลดระยะห่างระหว่างบรรทัด */
+  word-wrap: break-word;
 }
 
 .hero-img-eia {

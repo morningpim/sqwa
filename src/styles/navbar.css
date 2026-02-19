@@ -323,7 +323,7 @@
 .nav-mode {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-200%);
   z-index: 60;
 }
 

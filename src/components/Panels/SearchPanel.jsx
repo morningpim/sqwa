@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function SearchPanel({ open, onClose, onSearch }) {
+  const { t } = useTranslation("common");
   const [q, setQ] = useState("");
   const inputRef = useRef(null);
 
@@ -17,10 +19,23 @@ export default function SearchPanel({ open, onClose, onSearch }) {
   };
 
   return (
-    <div className="search-pop" onMouseDown={(e) => e.stopPropagation()}>
+    <div
+      className="search-pop"
+      role="dialog"
+      aria-label={t("search.title")}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       <div className="search-pop-head">
-        <div className="search-pop-title">ค้นหา</div>
-        <button className="search-pop-close" type="button" onClick={onClose}>×</button>
+        <div className="search-pop-title">{t("search.title")}</div>
+
+        <button
+          className="search-pop-close"
+          type="button"
+          onClick={onClose}
+          aria-label={t("close")}
+        >
+          ×
+        </button>
       </div>
 
       <div className="search-pop-body">
@@ -28,7 +43,7 @@ export default function SearchPanel({ open, onClose, onSearch }) {
           <input
             ref={inputRef}
             className="search-pop-input"
-            placeholder="พิมพ์ชื่อสถานที่ หรือ 13.7563, 100.5018"
+            placeholder={t("search.placeholder")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => {
@@ -36,12 +51,18 @@ export default function SearchPanel({ open, onClose, onSearch }) {
               if (e.key === "Escape") onClose?.();
             }}
           />
-          <button className="search-pop-btn" type="button" onClick={handleSubmit}>
-            ค้นหา
+
+          <button
+            className="search-pop-btn"
+            type="button"
+            onClick={handleSubmit}
+          >
+            {t("search.button")}
           </button>
         </div>
 
         <div className="search-pop-hint">
+          {t("search.hint")}
         </div>
       </div>
     </div>

@@ -70,7 +70,8 @@ export default function HeroSection() {
                 className="hero-img-icon hero-img-eia"
               />
             </button>
-            <span className="hero-btn-label">
+            {/* เพิ่ม className พิเศษเฉพาะปุ่มที่มีข้อความยาว */}
+            <span className="hero-btn-label label-multiline">
               {t("hero.eia")}
             </span>
           </div>

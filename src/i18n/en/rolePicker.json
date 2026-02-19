@@ -4,7 +4,7 @@
   "roles": {
     "buyer": "Buyer",
     "seller": "Seller",
-    "landlord": "Landowner",
+    "landlord": "Landlord",
     "staff": "Staff",
     "admin": "Administrator"
   },

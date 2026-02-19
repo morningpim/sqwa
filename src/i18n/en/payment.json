@@ -1,15 +1,15 @@
 {
-  "title": "Unlock Payment",
+  "title": "Payment to Unlock Information",
   "landId": "Land ID: {{id}}",
   "section": {
-    "items": "Unlock items",
-    "paymentMethod": "Select payment method"
+    "items": "Items to Unlock",
+    "paymentMethod": "Select Payment Method"
   },
   "empty": {
     "items": "No items selected"
   },
   "total": {
-    "label": "Total amount",
+    "label": "Total Amount",
     "unit": "THB"
   },
   "method": {
@@ -18,63 +18,63 @@
     "bank": "Bank Transfer"
   },
   "note": {
-    "promptpay": "* PromptPay shows QR on this page",
-    "redirect": "* Card / Bank redirects to payment page"
+    "promptpay": "* PromptPay = QR Code will be displayed on this page",
+    "redirect": "* Card / Bank = Redirect to payment gateway"
   },
   "action": {
     "cancel": "Cancel",
-    "pay": "Proceed to payment",
-    "generateQr": "Generate QR",
-    "confirmPaid": "Confirm payment",
+    "pay": "Proceed to Payment",
+    "generateQr": "Generate QR for Payment",
+    "confirmPaid": "I have already paid",
     "close": "Close"
   },
   "status": {
-    "pending": "Pending",
-    "paid": "Paid",
-    "failed": "Failed"
+    "pending": "Awaiting Payment",
+    "paid": "Payment Successful",
+    "failed": "Payment Failed"
   },
   "alert": {
     "selectMethod": "Please select a payment method",
-    "notReady": "Payment system not ready (Mock mode)",
-    "paymentFail": "Payment failed"
+    "notReady": "System is currently unavailable (Mock Mode)",
+    "paymentFail": "Payment could not be processed"
   },
   "footer": {
-    "mock": "* Payment gateway not connected (Mock Mode)"
+    "mock": "* Payment gateway is not yet connected (Mock Mode)"
   },
   "placeholder": {
-    "selectMethod": "— Select payment method —",
-    "selectMethodHint": "Choose payment method before proceeding"
+    "selectMethod": "— Please select a payment method —",
+    "selectMethodHint": "Select a payment channel before proceeding"
   },
   "promptpay": {
     "title": "Scan to Pay (PromptPay)",
     "order": "Order",
     "amountUnit": "THB",
     "status": {
-      "paid": "Payment successful ✅ Processing...",
-      "failed": "Payment failed ❌",
-      "pending": "Open banking app → Scan QR → Await confirmation"
+      "paid": "Payment Successful ✅ Processing...",
+      "failed": "Payment Unsuccessful ❌ (Please try again or choose another method)",
+      "pending": "Open Banking App → Scan QR → Wait for system confirmation"
     }
   },
   "cart": {
-    "title": "Selected Unlock Items",
-    "subtitle": "PromptPay QR available on this page",
+    "title": "Selected Items to Unlock",
+    "subtitle": "PromptPay displays QR Code on this page",
     "empty": {
-      "title": "Cart is empty",
-      "subtitle": "Go to map and select data to unlock"
+      "title": "Your cart is empty",
+      "subtitle": "Go to the map to select the information you need"
     },
     "summary": {
-      "title": "Summary",
-      "total": "Grand total"
+      "title": "Order Summary",
+      "total": "Grand Total"
     },
     "action": {
-      "goMap": "Go to map",
-      "pay": "Proceed to payment",
-      "generateQr": "Generate QR",
-      "mockPay": "Instant unlock (mock)",
-      "back": "Back"
+      "goMap": "Back to Map",
+      "pay": "Proceed to Payment",
+      "generateQr": "Generate QR for Payment",
+      "mockPay": "Test Instant Unlock (Legacy Mock)",
+      "back": "Add More Items"
     }
   },
   "hint": {
-    "postPaid": "In production, backend/IPN confirms and unlocks data"
+    "postPaid": "Production: After payment, backend/IPN will verify and unlock the data automatically."
   }
 }

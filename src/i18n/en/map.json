@@ -1,0 +1,19 @@
+{
+  "layer": {
+    "map": "Map",
+    "satellite": "Satellite",
+    "traffic": "Traffic"
+  },
+  "layers": "Layers",
+  "filter": "Filter",
+  "tools": "Tools",
+  "zoomIn": "Zoom In",
+  "zoomOut": "Zoom Out",
+  "locate": "Locate Me",
+  "draw": "Draw Boundary",
+  "drawStart": "Start Drawing",
+  "drawFinish": "Finish",
+  "drawClear": "Clear Lines",
+  "eiaMode": "EIA Mode",
+  "normalMode": "Normal Mode"
+}

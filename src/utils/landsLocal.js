@@ -33,6 +33,7 @@ export function addLand(land) {
     ...land,
     createdAt: land?.createdAt || t,
     updatedAt: land?.updatedAt || t,
+    approved: land?.approved ?? false, 
   };
 
   writeAllLands([normalized, ...all]);
@@ -73,4 +74,22 @@ export function subscribeLandsChanged(cb) {
     window.removeEventListener(EVT, handler);
     window.removeEventListener("storage", handler);
   };
+}
+
+export function updateLandApproval(id, approved = true) {
+  const all = readAllLands();
+  const t = nowISO();
+
+  const next = all.map(x => {
+    if (String(x.id) !== String(id)) return x;
+
+    return {
+      ...x,
+      approved,
+      approvedAt: approved ? t : null,
+      updatedAt: t
+    };
+  });
+
+  writeAllLands(next);
 }

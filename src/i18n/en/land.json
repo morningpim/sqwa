@@ -1,15 +1,15 @@
 {
   "postedDate": "Posted on {{date}}",
   "favorite": {
-    "on": "Liked",
-    "off": "Unliked"
+    "on": "Add to Favorites",
+    "off": "Remove from Favorites"
   },
   "ownerFallback": "Owner not specified",
   "field": {
-    "size": "Land size",
-    "rnw": "Rai–Ngan–Wah",
-    "frontage": "Road frontage",
-    "roadWidth": "Road width"
+    "size": "Land Size",
+    "rnw": "Rai-Ngan-Sq.Wah",
+    "frontage": "Road Frontage",
+    "roadWidth": "Road Width"
   },
   "unit": {
     "sqw": "Sq.Wah",
@@ -17,15 +17,15 @@
   },
   "price": {
     "perSqw": "Price per Sq.Wah",
-    "total": "Total price"
+    "total": "Total Price"
   },
   "section": {
-    "contact": "Contact information",
-    "member": "Membership access"
+    "contact": "Contact Information",
+    "member": "Member Privileges"
   },
   "action": {
-    "chatSeller": "Chat with seller",
+    "chatSeller": "Chat with Seller",
     "unlock": "Click to unlock information",
-    "unlockAll": "Unlock all information (1 credit)"
+    "unlockAll": "View all information (Use 1 credit)"
   }
 }

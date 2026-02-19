@@ -2,11 +2,11 @@
   "header": {
     "title": "Admin Control Panel",
     "subtitle": "Administrator",
-    "manageBroadcast": "Manage Broadcast"
+    "manageBroadcast": "Manage Broadcasts"
   },
   "stats": {
-    "lands": "Total listings",
-    "pendingApplicants": "Pending applicants",
+    "lands": "Total Listings",
+    "pendingApplicants": "Pending Approval",
     "transactions": "Transactions"
   },
   "menu": {
@@ -16,19 +16,118 @@
     "lands": "Manage Listings",
     "applicants": "Approve Applicants",
     "payments": "Transactions / Payments",
-    "settings": "System Settings"
-  },
-  "dashboard": {
-    "title": "System Dashboard",
-    "subtitle": "System overview (MVP from localStorage)",
-    "lands": "Total listings",
-    "pendingApplicants": "Pending applicants",
-    "transactions": "Transactions"
+    "settings": "System Settings",
+    "news": "Manage News"
   },
   "fallback": {
     "notReady": {
-      "title": "Not available",
-      "subtitle": "This feature will be implemented in the next phase"
+      "title": "Not Yet Available",
+      "subtitle": "This feature will be developed in the next phase"
     }
+  },
+  "broadcast": {
+    "title": "Manage Broadcasts",
+    "subtitle": "Send messages to all users via LINE Notify",
+    "description": "Send messages to all users via LINE Notify",
+    "count": "{{count}} items found",
+    "fallbackTitle": "No Broadcast Name",
+    "messageLabel": "Message to send",
+    "sendButton": "Send Broadcast",
+    "success": "Broadcast sent successfully!",
+    "error": "Error occurred while sending broadcast",
+    "confirmDelete": "Are you sure you want to delete this broadcast?",
+    "action": {
+      "viewed": "View Details",
+      "viewEdit": "View / Edit",
+      "delete": "Delete Broadcast"
+    },
+    "field": {
+      "id": "ID",
+      "message": "Message",
+      "sentAt": "Sent at",
+      "status": "Status",
+      "mode": "Mode"
+    }
+  },
+  "lands": {
+    "title": "Manage Listings",
+    "subtitle": "View and manage all listings in the system",
+    "count": "Total {{count}} items",
+    "ownerFallback": "Owner not specified",
+    "confirmDelete": "Are you sure you want to delete this listing?",
+    "field": {
+      "size": "Size",
+      "unitSqw": "Sq.Wah",
+      "owner": "Owner",
+      "price": "Price",
+      "status": "Status",
+      "location": "Coordinates"
+    },
+    "action": {
+      "viewMap": "View on Map",
+      "broadcast": "Broadcast",
+      "delete": "Delete",
+      "viewDetails": "View Details",
+      "approve": "Approve",
+      "reject": "Reject",
+      "edit": "Edit"
+    },
+    "common": {
+      "close": "Close"
+    },
+    "detail": {
+      "title": "Land Information",
+      "subtitle": "Land listing details"
+    }
+  },
+  "applicants": {
+    "title": "Approve Applicants",
+    "subtitle": "Review and manage all applicants",
+    "seed": "Generate Sample Data",
+    "summary": "Total {{total}} | Pending {{pending}}",
+    "confirm": {
+      "approve": "Approve this applicant?",
+      "rejectPrompt": "Enter rejection reason",
+      "delete": "Delete this applicant?"
+    },
+    "field": {
+      "type": "Type",
+      "status": "Status",
+      "license": "License Number",
+      "riskScore": "Risk Score",
+      "reason": "Reason"
+    },
+    "type": {
+      "general": "General",
+      "seller": "Seller",
+      "investor": "Investor"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "action": {
+      "view": "View Info",
+      "approve": "Approve",
+      "reject": "Reject",
+      "delete": "Delete"
+    },
+    "tooltip": {
+      "approved": "This applicant has been approved",
+      "rejected": "This applicant has been rejected"
+    },
+    "empty": {
+      "title": "No Applicants Yet",
+      "subtitle": "When there are new applicants, they will appear here"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome to the Admin Control Panel",
+    "title": "Statistics & Key Data",
+    "subtitle": "System overview and recent activities",
+    "lands": "Total Listings",
+    "pendingApplicants": "Pending Approval",
+    "transactions": "Recent Transactions"
   }
 }

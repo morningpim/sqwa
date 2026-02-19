@@ -1,8 +1,8 @@
 {
-  "permissionDenied": "Only Seller, Landlord, or Admin can access Sell mode",
+  "permissionDenied": "You must be a Seller, Landlord, or Admin to use Sell Mode.",
   "pick": {
-    "title": "Select usage type",
-    "subtitle": "Land consignment mode",
+    "title": "Select User Category",
+    "subtitle": "Land Consignment Mode",
     "seller": "Consignor",
     "investor": "Investor"
   }

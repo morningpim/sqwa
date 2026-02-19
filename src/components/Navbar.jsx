@@ -186,7 +186,7 @@ export default function Navbar() {
       <div className="nav-right">
         <nav className="nav-menu">
           <Link to="/" className="nav-item">{t("nav.home")}</Link>
-          <a href="#news" className="nav-item">{t("nav.news")}</a>
+          <a href="/news" className="nav-item">{t("nav.news")}</a>
           <a href="#guide" className="nav-item">{t("nav.guide")}</a>
           <a href="#contact" className="nav-item">{t("nav.contact")}</a>
 

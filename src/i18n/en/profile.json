@@ -1,78 +1,85 @@
 {
   "header": {
-    "editProfile": "Edit profile",
+    "editProfile": "Edit Profile",
     "member": "Member"
   },
+
   "stats": {
     "posts": "Listings",
     "favorites": "Favorites",
-    "purchases": "Purchase history"
+    "purchases": "Purchases"
   },
+
   "menu": {
     "title": "Profile Menu",
-    "info": "Personal information",
+    "info": "Personal Info",
     "favorites": "Favorites",
-    "purchases": "Purchase history",
-    "posts": "My listings",
+    "purchases": "Purchase History",
+    "posts": "My Listings",
     "settings": "Settings"
   },
+
   "posts": {
-    "title": "My listings",
-    "subtitle": "Listings created and saved from the map",
-    "emptyTitle": "No listings yet",
-    "emptySub": "Go to the map and draw + save to create listings",
-    "goMapSell": "Go to map (Sell mode)",
-    "confirmDelete": "Delete this listing?",
+    "title": "My Listings",
+    "subtitle": "Land parcels you have drawn and saved from the map",
+    "emptyTitle": "No Listings Yet",
+    "emptySub": "Go to the map, then draw and save to create a listing",
+    "goMapSell": "Go to Map (Seller Mode)",
+    "confirmDelete": "Are you sure you want to delete this listing?",
     "updated": "Updated {{date}}",
     "size": "Size",
-    "price": "Total price",
-    "phone": "Phone",
-    "viewMap": "View on map",
-    "edit": "Edit listing",
-    "delete": "Delete listing"
+    "price": "Total Price",
+    "phone": "Call",
+    "viewMap": "View on Map",
+    "edit": "Edit Listing",
+    "delete": "Delete Listing"
   },
+
   "favorites": {
     "title": "Favorites",
-    "subtitle": "Land listings you liked from the map",
-    "emptyTitle": "No favorites yet",
-    "emptySub": "Go to the map and like land listings",
-    "openMap": "Open map",
+    "subtitle": "Listings you have bookmarked from the map",
+    "emptyTitle": "No Favorites Yet",
+    "emptySub": "Go to the map and tap the heart icon on land plots you're interested in",
+    "openMap": "Open Map",
     "remove": "Remove",
-    "removeTitle": "Remove from favorites",
+    "removeTitle": "Remove from Favorites",
     "owner": "Owner",
     "area": "Size",
-    "price": "Total price",
-    "date": "Posted date",
-    "chat": "Chat seller",
-    "confirmRemove": "Remove this land from favorites?"
+    "price": "Total Price",
+    "date": "Posted Date",
+    "chat": "Chat with Seller",
+    "confirmRemove": "Remove this plot from your favorites?"
   },
+
   "purchases": {
-    "title": "Purchase history",
-    "subtitle": "Your completed payment records",
-    "emptyTitle": "No purchase history",
-    "emptySub": "Successful payments will appear here",
+    "title": "Purchase History",
+    "subtitle": "Transactions you have successfully completed",
+    "emptyTitle": "No Purchase History",
+    "emptySub": "Successfully paid items will be recorded here",
     "seller": "Seller",
-    "paidAt": "Paid on",
-    "total": "Total",
-    "viewLand": "View land",
-    "delete": "Delete record",
+    "paidAt": "Payment Date",
+    "total": "Total Amount",
+    "viewLand": "View Plot",
+    "delete": "Delete History",
     "status": {
-      "pending": "Pending",
+      "pending": "Awaiting Payment",
       "paid": "Paid",
       "cancelled": "Cancelled",
       "refunded": "Refunded"
     }
   },
+
   "info": {
-    "title": "Personal information",
-    "subtitle": "Manage your profile information",
+    "title": "Personal Info",
+    "subtitle": "Manage your personal profile details",
     "name": "Name",
-    "phone": "Phone",
+    "phone": "Phone Number",
     "line": "LINE ID",
     "status": "Status"
   },
+
   "common": {
-    "notReady": "Not available",
+    "notReady": "Feature not ready",
     "comingSoon": "Coming soon"
   }
 }

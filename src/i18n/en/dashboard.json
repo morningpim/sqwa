@@ -1,7 +1,7 @@
 {
-  "totalLand": "Total Lands",
+  "totalLand": "Total Listings",
   "totalArea": "Total Area",
-  "totalValue": "Total Land Value",
+  "totalValue": "Total Asset Value",
   "unit": {
     "listing": "Listings",
     "rai": "Rai",

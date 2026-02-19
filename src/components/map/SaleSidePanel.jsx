@@ -120,7 +120,11 @@
 
     // ✅ Gate เฉพาะตอนแก้ไข: ต้องครบ 14 วันจาก createdAt
     const editGate = useMemo(() => getEditGateInfo(landData, 14), [landData]);
-    const canEditCurrentLand = !isEditing ? true : editGate.canEdit;
+    const canEditCurrentLand =
+      !isEditing
+        ? true
+        : editGate.canEdit && landData?.approved;
+
 
     useEffect(() => {
       const sizeSqw = toNumberSafe(landData?.size);
@@ -645,7 +649,8 @@
                           </span>
 
                           <span className={`status-badge ${land.approved ? "ok":"pending"}`}>
-                            {land.approved ? "อนุมัติแล้ว" : "รออนุมัติ"}
+                            {land.approved ? t("status.approved") : t("status.pending")}
+
                           </span>
                         </div>
 

@@ -16,12 +16,118 @@
     "lands": "จัดการประกาศ",
     "applicants": "อนุมัติผู้สมัคร",
     "payments": "ธุรกรรม / การชำระเงิน",
-    "settings": "ตั้งค่าระบบ"
+    "settings": "ตั้งค่าระบบ",
+    "news": "จัดการข่าวสาร"
   },
   "fallback": {
     "notReady": {
       "title": "ยังไม่พร้อมใช้งาน",
       "subtitle": "ฟีเจอร์นี้จะพัฒนาในเฟสถัดไป"
     }
+  },
+  "broadcast": {
+    "title": "จัดการ Broadcast",
+    "subtitle": "ส่งข้อความไปยังผู้ใช้ทั้งหมดผ่าน LINE Notify",
+    "description": "ส่งข้อความไปยังผู้ใช้ทั้งหมดผ่าน LINE Notify",
+    "count": "จำนวน {{count}} รายการ",
+    "fallbackTitle": "ไม่มีชื่อ Broadcast",
+    "messageLabel": "ข้อความที่ต้องการส่ง",
+    "sendButton": "ส่ง Broadcast",
+    "success": "ส่ง Broadcast สำเร็จ!",
+    "error": "เกิดข้อผิดพลาดในการส่ง Broadcast",
+    "confirmDelete": "คุณแน่ใจหรือไม่ว่าต้องการลบ Broadcast นี้?",
+    "action": {
+      "viewed": "ดูรายละเอียด",
+      "viewEdit": "ดู / แก้ไข",
+      "delete": "ลบ Broadcast"
+    },
+    "field": {
+      "id": "ID",
+      "message": "ข้อความ",
+      "sentAt": "ส่งเมื่อ",
+      "status": "สถานะ",
+      "mode": "โหมด"
+    }
+  },
+  "lands": {
+    "title": "จัดการประกาศ",
+    "subtitle": "ดูและจัดการประกาศทั้งหมดในระบบ",
+    "count": "ทั้งหมด {{count}} รายการ",
+    "ownerFallback": "ไม่ระบุเจ้าของ",
+    "confirmDelete": "คุณแน่ใจหรือไม่ว่าต้องการลบประกาศนี้?",
+    "field": {
+      "size": "ขนาด",
+      "unitSqw": "ตร.ว.",
+      "owner": "เจ้าของ",
+      "price": "ราคา",
+      "status": "สถานะ",
+      "location": "พิกัด"
+    },
+    "action": {
+      "viewMap": "ดูบนแผนที่",
+      "broadcast": "Broadcast",
+      "delete": "ลบ",
+      "viewDetails": "ดูรายละเอียด",
+      "approve": "อนุมัติ",
+      "reject": "ปฏิเสธ",
+      "edit": "แก้ไข"
+    },
+    "common": {
+      "close": "ปิด"
+    },
+      "detail": {
+        "title": "ข้อมูลที่ดิน",
+        "subtitle": "รายละเอียดของประกาศที่ดิน"
+      }
+  },
+  "applicants": {
+    "title": "อนุมัติผู้สมัคร",
+    "subtitle": "ตรวจสอบและจัดการผู้สมัครทั้งหมด",
+    "seed": "สร้างข้อมูลตัวอย่าง",
+    "summary": "ทั้งหมด {{total}} | รออนุมัติ {{pending}}",
+    "confirm": {
+      "approve": "อนุมัติผู้สมัครนี้?",
+      "rejectPrompt": "กรอกเหตุผลที่ปฏิเสธ",
+      "delete": "ลบผู้สมัครนี้?"
+    },
+    "field": {
+      "type": "ประเภท",
+      "status": "สถานะ",
+      "license": "เลขใบอนุญาต",
+      "riskScore": "คะแนนความเสี่ยง",
+      "reason": "เหตุผล"
+    },
+    "type": {
+      "general": "ทั่วไป",
+      "seller": "ผู้ขาย",
+      "investor": "นักลงทุน"
+    },
+    "status": {
+      "pending": "รออนุมัติ",
+      "approved": "อนุมัติแล้ว",
+      "rejected": "ถูกปฏิเสธ"
+    },
+    "action": {
+      "view": "ดูข้อมูล",
+      "approve": "อนุมัติ",
+      "reject": "ปฏิเสธ",
+      "delete": "ลบ"
+    },
+    "tooltip": {
+      "approved": "ผู้สมัครนี้ได้รับการอนุมัติแล้ว",
+      "rejected": "ผู้สมัครนี้ถูกปฏิเสธแล้ว"
+    },
+    "empty": {
+      "title": "ยังไม่มีผู้สมัคร",
+      "subtitle": "เมื่อมีผู้สมัคร ระบบจะแสดงรายการที่นี่"
+    }
+  },
+  "dashboard": {
+    "welcome": "ยินดีต้อนรับสู่แผงควบคุมผู้ดูแลระบบ",
+    "title": "สถิติและข้อมูลสำคัญ",
+    "subtitle": "ภาพรวมของระบบและกิจกรรมล่าสุด",
+    "lands": "ประกาศทั้งหมด",
+    "pendingApplicants": "ผู้สมัครรออนุมัติ",
+    "transactions": "ธุรกรรมล่าสุด"
   }
 }

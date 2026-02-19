@@ -1,6 +1,11 @@
 /* src/css/admin-broadcast.css */
-.admin-shell{
-  padding: var(--space-2xl);
+.admin-shell {
+  /* ปรับระยะให้เท่ากับหรือมากกว่าความสูงของ Navbar ของคุณ */
+  padding-top: calc(var(--space-2xl) + 80px); 
+  
+  padding-left: var(--space-2xl);
+  padding-right: var(--space-2xl);
+  padding-bottom: var(--space-2xl);
   background: var(--bg-soft);
   min-height: 100vh;
 }
@@ -271,9 +276,9 @@
 /* mobile */
 @media (max-width: 640px){
 
-  .admin-shell{
-    padding: var(--space-md);
-  }
+  .admin-shell {
+    padding-top: calc(var(--space-md) + 60px); /* Navbar มือถือมักจะเตี้ยกว่า */
+  } 
 
   .admin-title{
     font-size: var(--fs-body);

@@ -6,6 +6,7 @@ import InvestorRiskQuiz from "../components/InvestorRiskQuiz";
 import { useTranslation } from "react-i18next";
 import { mockSignup } from "../mocks/authMock";
 import { saveAuth } from "../mocks/authStorage";
+import { addApplicant } from "../utils/applicantsLocal";
 import "../css/Signup.css";
 
 
@@ -95,6 +96,26 @@ export default function Signup() {
     bankName: "",
     bankAccount: "",
   });
+
+    const buildApplicant = () => ({
+    type: isSeller ? "seller" : isInvestor ? "investor" : "general",
+    role: isSeller ? role || form.sellerRole : undefined,
+
+    name: form.firstName,
+    lastname: form.lastName,
+    email: form.email,
+    phone: form.phone,
+    lineId: form.lineId,
+    address: form.address,
+
+    shopName: form.shopName,
+    agentLicense: form.agentLicense,
+    bankAccount: form.bankAccount,
+
+    investorScore: isInvestor ? investorScore : undefined,
+    investorQuiz: isInvestor ? investorQuiz : undefined,
+  });
+
 
   const updateForm = (key) => (e) => {
     let value = e.target.value;
@@ -268,22 +289,27 @@ export default function Signup() {
     formData.append("selfie", selfie);
 
     try {
-      const data = await mockSignup(formData);
+    const data = await mockSignup(formData);
 
-      if (!data.success) {
-        alert(data.message || "Signup failed");
-        return;
-      }
-
-      setShowSuccess(true);
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-
-    } catch (err) {
-      console.error(err);
-      alert("Mock error");
+    if (!data.success) {
+      alert(data.message || "Signup failed");
+      return;
     }
+
+    addApplicant(buildApplicant()); // ✅
+
+    setShowSuccess(true);
+    setTimeout(()=> navigate("/login"),2000);
+
+    saveAuth({
+      user:data.user,
+      accessToken:"mock-access"
+    });
+
+  } catch(err){
+    console.error(err);
+    alert("Mock error");
+  }
 
     if (!data.success) return;
 
@@ -317,21 +343,27 @@ export default function Signup() {
     }
 
     try {
-      const data = await mockSignup(formData);
+    const data = await mockSignup(formData);
 
-      if (!data.success) {
-        alert(data.message || "Signup failed");
-        return;
-      }
-
-      setShowSuccess(true);
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-    } catch (err) {
-      console.error(err);
-      alert("Mock error");
+    if (!data.success) {
+      alert(data.message || "Signup failed");
+      return;
     }
+
+    addApplicant(buildApplicant()); // ✅
+
+    setShowSuccess(true);
+    setTimeout(()=> navigate("/login"),2000);
+
+    saveAuth({
+      user:data.user,
+      accessToken:"mock-access"
+    });
+
+  } catch(err){
+    console.error(err);
+    alert("Mock error");
+  }
 
     if (!data.success) return;
 

@@ -1,41 +1,45 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import "../../css/LayersPanel.css";
 
 export default function LayersPanel({
   open,
   onClose,
-
   plan,
   setPlan,
-
   baseOpacity,
   setBaseOpacity,
-
-  // DOL
   dolEnabled,
   setDolEnabled,
   dolOpacity,
   setDolOpacity,
 }) {
+  const { t } = useTranslation("common");
+
   if (!open) return null;
 
   const plans = [
-    { key: "bkk2556", label: "ผังเมือง กทม.\n2556" },
-    { key: "bkk2570", label: "ผังเมือง กทม. 2570\n(ล่าง)" },
-    { key: "sub", label: "ซ้อนผังเมือง" },
+    { key: "bkk2556", label: t("layers.plans.bkk2556") },
+    { key: "bkk2570", label: t("layers.plans.bkk2570") },
+    { key: "sub", label: t("layers.plans.sub") },
   ];
 
   return (
-    <div className="layers-panel" role="dialog" aria-label="Layers">
+    <div
+      className="layers-panel"
+      role="dialog"
+      aria-label={t("layers.title")}
+    >
       {/* ===== Base / Plan ===== */}
       <div className="layers-card">
         <div className="layers-header">
-          <div className="layers-title">Layers</div>
+          <div className="layers-title">{t("layers.title")}</div>
+
           <button
             className="layers-close"
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("close")}
           >
             ×
           </button>
@@ -55,7 +59,8 @@ export default function LayersPanel({
         </div>
 
         <div className="layers-row">
-          <div className="layers-label">Opacity</div>
+          <div className="layers-label">{t("layers.opacity")}</div>
+
           <input
             className="layers-range"
             type="range"
@@ -65,11 +70,14 @@ export default function LayersPanel({
             value={baseOpacity}
             onChange={(e) => setBaseOpacity(parseFloat(e.target.value))}
           />
-          <div className="layers-value">{Number(baseOpacity).toFixed(2)}</div>
+
+          <div className="layers-value">
+            {Number(baseOpacity).toFixed(2)}
+          </div>
         </div>
       </div>
 
-      {/* ===== DOL (WMS) ===== */}
+      {/* ===== DOL Layer ===== */}
       <div className="layers-card">
         <div className="layers-row layers-row-top">
           <label className="layers-check">
@@ -80,13 +88,14 @@ export default function LayersPanel({
             />
             <span className="layers-checkmark" />
             <span className="layers-checktext">
-              เส้นระวางกรมที่ดิน (DOL)
+              {t("layers.dol_label")}
             </span>
           </label>
         </div>
 
         <div className="layers-row">
-          <div className="layers-label">Opacity</div>
+          <div className="layers-label">{t("layers.opacity")}</div>
+
           <input
             className="layers-range"
             type="range"
@@ -97,7 +106,10 @@ export default function LayersPanel({
             disabled={!dolEnabled}
             onChange={(e) => setDolOpacity(parseFloat(e.target.value))}
           />
-          <div className="layers-value">{Number(dolOpacity).toFixed(2)}</div>
+
+          <div className="layers-value">
+            {Number(dolOpacity).toFixed(2)}
+          </div>
         </div>
       </div>
     </div>

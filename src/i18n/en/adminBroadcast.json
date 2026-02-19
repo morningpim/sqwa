@@ -1,38 +1,22 @@
 {
   "pageTitle": "Broadcast & LINE Ads",
-  "subtitle": "All broadcast campaigns",
-  "noPermission": "Access denied",
-  "search": "Search",
-  "listTitle": "{{count}} campaigns",
+  "subtitle": "All broadcast campaign listings",
+  "noPermission": "Access Denied",
+  "search": "Search...",
+  "listTitle": "{{count}} Campaigns",
+  "landCount": "{{count}} Plots",
   "filter": {
-    "statusAll": "All statuses",
-    "modeAll": "All modes",
-    "channelAll": "All channels"
+    "statusAll": "All Statuses",
+    "modeAll": "All Modes",
+    "channelAll": "All Channels"
   },
   "table": {
-    "name": "Campaign name",
+    "name": "Campaign Name",
     "mode": "Mode",
     "channel": "Channel",
     "schedule": "Schedule",
     "status": "Status",
-    "action": "Manage"
-  },
-  "mode": {
-    "buy_sell": "Buy / Sell",
-    "consignment": "Consignment"
-  },
-  "channel": {
-    "SQW_WEB": "SQW Website",
-    "LINE_ADS": "LINE Ads"
-  },
-  "day": {
-    "MON": "Monday",
-    "TUE": "Tuesday",
-    "WED": "Wednesday",
-    "THU": "Thursday",
-    "FRI": "Friday",
-    "SAT": "Saturday",
-    "SUN": "Sunday"
+    "action": "Actions"
   },
   "status": {
     "draft": "Draft",
@@ -40,29 +24,46 @@
     "sent": "Sent",
     "disabled": "Disabled"
   },
+  "mode": {
+    "buy_sell": "Buy-Sell",
+    "consignment": "Consignment"
+  },
+  "channel": {
+    "SQW_WEB": "Website",
+    "LINE_ADS": "LINE Ads"
+  },
+  "day": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
   "action": {
-    "create": "Create campaign",
+    "create": "Create Campaign",
     "view": "View",
     "disable": "Disable",
     "enable": "Enable",
-    "markSent": "Mark as sent",
+    "markSent": "Mark as Sent",
     "delete": "Delete",
-    "copy": "Copy"
-  },
-  "confirm": {
-    "disable": "Disable this campaign?",
-    "delete": "Delete this campaign?"
+    "copy": "Copy Message"
   },
   "preview": {
-    "title": "Message preview",
-    "subtitle": "Content to be sent"
+    "title": "Message Preview",
+    "subtitle": "How the message will appear to users"
   },
   "empty": {
-    "campaign": "No campaigns",
-    "preview": "Select a campaign to preview"
+    "campaign": "No campaigns found",
+    "preview": "Select a campaign to see the preview"
   },
   "fallback": {
-    "noTitle": "Untitled campaign"
+    "noTitle": "(No Campaign Name)"
   },
-  "landCount": "{{count}} lands"
+  "confirm": {
+    "disable": "Are you sure you want to disable this campaign?",
+    "delete": "Are you sure you want to delete this campaign? (This action cannot be undone)",
+    "markSent": "Confirm marking as sent?"
+  }
 }

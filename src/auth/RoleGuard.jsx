@@ -1,10 +1,17 @@
-import { useAuth } from "../auth/AuthProvider";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "./AuthProvider";
 
-export default function RoleGuard({ allow, children }) {
-  const { me } = useAuth();
+export default function AdminGuard({ children }) {
+  const { me, loading } = useAuth();
+  const location = useLocation();
 
-  if (!me || !allow.includes(me.role))
-    return <div>Permission denied</div>;
+  if (loading) return null;
+
+  if (!me)
+    return <Navigate to="/login" state={{ from: location }} replace />;
+
+  if (me.role !== "admin")
+    return <Navigate to="/" replace />;
 
   return children;
 }

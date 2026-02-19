@@ -4,6 +4,8 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import NewsSection from "./components/NewsSection";
+import NewsDetail from "./pages/NewsDetail";
+import NewsList from "./pages/NewsList";
 import FooterSection from "./components/FooterSection";
 import MapPage from "./components/map/MapPage";
 
@@ -51,6 +53,8 @@ export default function App() {
           {/* public */}
           <Route path="/" element={<><HeroSection /><NewsSection /></>} />
           <Route path="/map" element={<MapPage />} />
+          <Route path="/news/:id" element={<NewsDetail />} />
+          <Route path="/news" element={<NewsList/>}/>
 
           {/* guest only */}
           <Route path="/login" element={

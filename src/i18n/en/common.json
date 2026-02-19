@@ -1,50 +1,58 @@
 {
   "close": "Close",
-  "search": "Search",
   "loading": "Loading...",
-  "comingSoon": "This feature is coming soon",
+  "comingSoon": "This feature is under development",
   "unknown": "Unknown",
+
   "unit": {
-    "baht": "THB"
+    "baht": "THB",
+    "meter": "m"
   },
+
   "field": {
     "owner": "Owner",
     "agent": "Agent",
     "phone": "Phone",
     "lineId": "LINE ID",
-    "landFrame": "Land boundary",
-    "deed": "Deed / Parcel info",
+    "landFrame": "Land Parcel Frame",
+    "deed": "Title Deed / Cadastral Map",
     "selected": "Selected:"
   },
+
   "date": {
     "added": "Added on"
   },
+
   "action": {
     "cancel": "Cancel",
     "save": "Save",
     "edit": "Edit",
     "delete": "Delete",
     "confirm": "Confirm",
-    "view": "View details",
+    "view": "View Details",
     "copy": "Copy"
   },
+
   "nav": {
     "home": "Home",
     "news": "News",
     "guide": "User Guide",
-    "contact": "Contact",
+    "contact": "Contact Us",
 
     "login": "Login",
     "logout": "Logout",
     "profile": "Profile",
     "favorites": "Favorites",
     "purchases": "Purchase History",
+    "signin": "Sign In",
+    "signup": "Sign Up",
 
     "mode": {
-      "buy": "Land Trading Mode",
-      "sell": "Land Consignment Mode",
+      "buy": "Buy/Sell Mode",
+      "sell": "Consignment Mode",
       "eia": "Future Project & EIA Base Map"
     },
+
     "admin": {
       "go": "Go to Admin",
       "section": "Admin Tools",
@@ -53,30 +61,79 @@
       "lands": "Manage Listings"
     }
   },
+
   "hero": {
     "title": "SQW Land Management Platform",
-    "subtitle": "Please select land information to explore",
-    "sell": "Sell Land",
-    "buy": "Buy & Sell Land",
+    "subtitle": "Please select land information to view",
+    "sell": "List Land for Sale",
+    "buy": "Buy/Sell Land",
     "eia": "Future Project & EIA Base Map"
   },
+
   "footer": {
     "subtitle": "SQW - Land Management Platform",
-    "description": "A smart land management platform\nDesigned for landowners, investors, and general users\nTo store, analyze, and explore land data efficiently"
+    "description": "Smart Land Management Platform designed to assist landowners, investors, and general users in storing, analyzing, and searching land data conveniently and efficiently."
   },
+
   "disclaimer": {
     "mode": {
-      "line1": "This information is provided for displaying land plot locations",
-      "line2": "and for reference with Google Maps only.",
-      "line3": "It is not a legal document or legal evidence.",
+      "line1": "This information is provided to show land locations",
+      "line2": "and parcel classification via Google Maps only.",
+      "line3": "It cannot be used as legal evidence.",
       "confirm": "Acknowledge"
     },
     "pdpa": {
-      "line1": "Warning: You are about to process personal data.",
-      "line2": "You are responsible under the Personal Data Protection Act (PDPA).",
-      "line3": "If you do not wish to proceed, please click “Cancel”.",
+      "line1": "Warning: You are entering a personal data processing command.",
+      "line2": "You are responsible for compliance with the Personal Data Protection Act (PDPA) B.E. 2562.",
+      "line3": "If you do not wish to proceed, please click 'Cancel'.",
       "cancel": "Cancel",
       "confirm": "Confirm"
     }
+  },
+
+  "layers": {
+    "title": "Layers",
+    "opacity": "Opacity",
+    "dol_label": "DOL Cadastral Map (DOL)",
+    "plans": {
+      "bkk2556": "BKK Zoning 2013",
+      "bkk2570": "BKK Zoning 2027 (Draft)",
+      "sub": "Overlay Zoning"
+    }
+  },
+
+  "filter": {
+    "title": "Filters",
+    "all": "All",
+    "province": "Province",
+    "landType": "Land Type",
+    "roadSize": "Road Width",
+    "areaSqw": "Area (Sq.Wah)",
+    "areaRai": "Area (Rai)",
+    "priceSqw": "Price Range (THB : Sq.Wah)",
+    "totalPrice": "Total Price Range",
+    "frontWidth": "Land Frontage (m)",
+    "min": "Min",
+    "max": "Max",
+    "clear": "Clear",
+    "apply": "Apply Filters"
+  },
+
+  "province": {
+    "bangkok": "Bangkok",
+    "chiangmai": "Chiang Mai",
+    "chonburi": "Chonburi",
+    "phuket": "Phuket"
+  },
+
+  "landType": {
+    "chanote": "Chanote (Title Deed)",
+    "norSor3": "Nor Sor 3 / 3 Kor"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Enter location name or 13.7563, 100.5018",
+    "button": "Search",
+    "hint": ""
   }
 }

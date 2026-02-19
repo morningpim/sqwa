@@ -125,7 +125,10 @@ export function AuthProvider({ children }) {
   const role = me?.role || "guest";
 
   const hasRole = useCallback(
-    (allowed) => allowed.includes(role),
+    (allowed) => {
+      if (Array.isArray(allowed)) return allowed.includes(role);
+      return allowed === role;
+    },
     [role]
   );
 
