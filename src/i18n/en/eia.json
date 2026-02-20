@@ -3,21 +3,31 @@
   "projectFallback": "EIA Project",
   "field": {
     "projectValue": "Project Value",
-    "area": "Land Area",
+    "investment": "Investment",
+    "projectType": "Project Type",
+    "usableArea": "Usable Area",
+    "landArea": "Land Area",
     "status": "Status",
-    "owner": "Developer/Owner",
-    "location": "Coordinates"
+    "endDate": "End Date",
+    "region": "Region",
+    "province": "Province",
+    "district": "District",
+    "subdistrict": "Sub-district",
+    "location": "Coordinates",
+    "owner": "Owner"
   },
   "unit": {
-    "millionBaht": "Million THB"
+    "baht": "Baht",
+    "millionBaht": "Million Baht"
   },
   "status": {
     "approved": "EIA Approved",
-    "unknown": "Not Specified"
+    "pending": "Pending",
+    "unknown": "Unknown"
   },
   "action": {
     "news": "News Link",
-    "detail": "EIA Report Link"
+    "detail": "EIA Details"
   },
   "dashboard": {
     "total": "Total Projects",

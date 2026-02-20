@@ -28,6 +28,13 @@
   bottom: 0;
   background: transparent;
   overflow: hidden;
+  z-index: 1;
+}
+
+.map-right-stack,
+.map-topbar,
+.map-stats{
+  z-index: 2000;
 }
 
 /* ✅ แผนที่ Longdo เกาะเต็มพื้นที่ */
@@ -100,12 +107,11 @@
 }
 
 /* dropdown layer */
-.map-layer-menu {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
+.map-layer-dropdown{
+  position: fixed;
+  top: calc(var(--nav-h) + 60px);
+  right: 14px;
+  z-index: 99999;
 }
 
 .map-layer-trigger {

@@ -3,21 +3,31 @@
   "projectFallback": "โครงการ EIA",
   "field": {
     "projectValue": "มูลค่าโครงการ",
-    "area": "ขนาดที่ดิน",
+    "investment": "เงินลงทุน",
+    "projectType": "ประเภทโครงการ",
+    "usableArea": "พื้นที่ใช้สอย",
+    "landArea": "ขนาดที่ดิน",
     "status": "สถานะ",
-    "owner": "เจ้าของ",
-    "location": "พิกัด"
+    "endDate": "วันที่สิ้นสุด",
+    "region": "ภูมิภาค",
+    "province": "จังหวัด",
+    "district": "อำเภอ/เขต",
+    "subdistrict": "ตำบล/แขวง",
+    "location": "พิกัด",
+    "owner": "เจ้าของ"
   },
   "unit": {
+    "baht": "บาท",
     "millionBaht": "ล้านบาท"
   },
   "status": {
     "approved": "ผ่าน EIA",
+    "pending": "รอพิจารณา",
     "unknown": "ไม่ระบุ"
   },
   "action": {
     "news": "ลิงก์ข่าวสาร",
-    "detail": "ลิงก์ EIA"
+    "detail": "รายละเอียด EIA"
   },
   "dashboard": {
     "total": "โครงการทั้งหมด",
