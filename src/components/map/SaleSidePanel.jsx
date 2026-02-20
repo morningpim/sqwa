@@ -91,6 +91,49 @@
     return { canEdit: daysPassed >= days, baseDate: base, daysPassed, daysLeft };
   }
 
+  function SummaryBlock({ mode, data, t }) {
+
+    if (mode === "eia") {
+      return (
+        <div className="summary">
+          <div>
+            <span className="muted">โครงการ</span>
+            <b>{data.projectName || "-"}</b>
+          </div>
+
+          <div>
+            <span className="muted">มูลค่าโครงการ</span>
+            <b>{formatNumber(data.projectValue) || "-"} บาท</b>
+          </div>
+
+          <div>
+            <span className="muted">สถานะ</span>
+            <b>{data.projectStatus || "-"}</b>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="summary">
+        <div>
+          <span className="muted">{t("summary.size")}</span>
+          <b>{formatDecimal(data?.size, 0) || "-"} {t("summary.unitSqw")}</b>
+        </div>
+
+        <div>
+          <span className="muted">{t("summary.perSqw")}</span>
+          <b>{formatNumber(data?.price) || "-"} {t("unit.baht")}</b>
+        </div>
+
+        <div>
+          <span className="muted">{t("summary.total")}</span>
+          <b>{formatNumber(data?.totalPrice) || "-"} {t("unit.baht")}</b>
+        </div>
+      </div>
+    );
+  }
+
   export default function SaleSidePanel({
     open,
     onToggle,
@@ -116,12 +159,17 @@
     const [wahModel, setWahModel] = useState("");
 
     const isEditing = !!landData?.id;
+    const isEiaMode = mode === "eia";
+    const isAdmin = role === "admin";
+    const canEditEia = isEiaMode && isAdmin;
     const { t } = useTranslation("sale");
 
     // ✅ Gate เฉพาะตอนแก้ไข: ต้องครบ 14 วันจาก createdAt
     const editGate = useMemo(() => getEditGateInfo(landData, 14), [landData]);
     const canEditCurrentLand =
       !isEditing
+      ? true
+      : isAdmin
         ? true
         : editGate.canEdit && landData?.approved;
 
@@ -275,6 +323,21 @@
         createdAt: null,
         updatedAt: null,
         approved: false,
+        projectName: "",
+        projectValue: "",
+        investment: "",
+        projectType: "",
+        usableArea: "",
+        landAreaText: "",
+        projectStatus: "",
+        endDate: "",
+        region: "",
+        province: "",
+        district: "",
+        subdistrict: "",
+        newsLink: "",
+        eiaLink: "",
+        reviewLink: "",
       });
     };
 
@@ -319,7 +382,7 @@
               {isFormOpen ? "▲" : "▼"} {t("section.form")}
             </button>
 
-            {isFormOpen && (
+            {isFormOpen && !isEiaMode && (
               <>
                 <div className="sec-sub">{t("section.formSub")}</div>
 
@@ -524,8 +587,167 @@
                     placeholder={t("field.deed")}
                   />
                 </div>
+              </>
+            )}
+          </div>
 
-                <div className="field">
+          {/* ================= EIA FORM ================= */}
+                {isEiaMode && (
+                  <div className="eia-section">
+                    <div className="sec-sub">ข้อมูล EIA (Admin เท่านั้น)</div>
+
+                    <div className="field">
+                      <label>ชื่อโครงการ</label>
+                      <input
+                        value={landData?.projectName ?? ""}
+                        disabled={!canEditEia}
+                        onChange={e=>patchLand({ projectName:e.target.value })}
+                      />
+                    </div>
+
+                    <div className="row2">
+                      <div className="field">
+                        <label>Project Value (บาท)</label>
+                        <input
+                          value={landData?.projectValue ?? ""}
+                          disabled={!canEditEia}
+                          onChange={e=>patchLand({ projectValue:sanitizeDecimal(e.target.value) })}
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label>เงินลงทุน (บาท)</label>
+                        <input
+                          value={landData?.investment ?? ""}
+                          disabled={!canEditEia}
+                          onChange={e=>patchLand({ investment:sanitizeDecimal(e.target.value) })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="field">
+                      <label>Project Type</label>
+                      <input
+                        value={landData?.projectType ?? ""}
+                        disabled={!canEditEia}
+                        onChange={e=>patchLand({ projectType:e.target.value })}
+                      />
+                    </div>
+
+                    <div className="row2">
+                      <div className="field">
+                        <label>พื้นที่ใช้สอย (ตร.ม.)</label>
+                        <input
+                          value={landData?.usableArea ?? ""}
+                          disabled={!canEditEia}
+                          onChange={e=>patchLand({ usableArea:sanitizeDecimal(e.target.value) })}
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label>ขนาดที่ดิน</label>
+                        <input
+                          value={landData?.landAreaText ?? ""}
+                          disabled={!canEditEia}
+                          onChange={e=>patchLand({ landAreaText:e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="row2">
+                      <div className="field">
+                        <label>สถานภาพโครงการ</label>
+                        <input
+                          value={landData?.projectStatus ?? ""}
+                          disabled={!canEditEia}
+                          onChange={e=>patchLand({ projectStatus:e.target.value })}
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label>วันที่สิ้นสุด</label>
+                        <input
+                          type="date"
+                          value={landData?.endDate ?? ""}
+                          disabled={!canEditEia}
+                          onChange={e=>patchLand({ endDate:e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="row2">
+                      <div className="field">
+                        <label>ภาค</label>
+                        <input
+                          value={landData?.region ?? ""}
+                          disabled={!canEditEia}
+                          onChange={e=>patchLand({ region:e.target.value })}
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label>จังหวัด</label>
+                        <input
+                          value={landData?.province ?? ""}
+                          disabled={!canEditEia}
+                          onChange={e=>patchLand({ province:e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="row2">
+                      <div className="field">
+                        <label>เขต/อำเภอ</label>
+                        <input
+                          value={landData?.district ?? ""}
+                          disabled={!canEditEia}
+                          onChange={e=>patchLand({ district:e.target.value })}
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label>แขวง/ตำบล</label>
+                        <input
+                          value={landData?.subdistrict ?? ""}
+                          disabled={!canEditEia}
+                          onChange={e=>patchLand({ subdistrict:e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="field">
+                      <label>Link ข่าวสาร</label>
+                      <input
+                        value={landData?.newsLink ?? ""}
+                        disabled={!canEditEia}
+                        onChange={e=>patchLand({ newsLink:e.target.value })}
+                      />
+                    </div>
+
+                    <div className="field">
+                      <label>Link EIA</label>
+                      <input
+                        value={landData?.eiaLink ?? ""}
+                        disabled={!canEditEia}
+                        onChange={e=>patchLand({ eiaLink:e.target.value })}
+                      />
+                    </div>
+
+                    <div className="field">
+                      <label>Link รีวิว</label>
+                      <input
+                        value={landData?.reviewLink ?? ""}
+                        disabled={!canEditEia}
+                        onChange={e=>patchLand({ reviewLink:e.target.value })}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {isFormOpen && (
+                  <>
+
+                  <div className="field">
                   <label>รูปภาพ (สูงสุด 5 รูป)</label>
 
                   <div className="ig-grid">
@@ -554,64 +776,53 @@
 
                   </div>
                 </div>
+                    <SummaryBlock mode={mode} data={landData} t={t} />
 
-                <div className="summary">
-                  <div>
-                    <span className="muted">{t("summary.size")}</span> 
-                    <b>{formatDecimal(landData?.size, 0) || "-"} {t("summary.unitSqw")}</b>
+                    
+
+                  <div className="actions">
+                    <button
+                      className="sale-btn primary"
+                      type="button"
+                      onClick={onSave}
+                      disabled={
+                        !drawingEnabled ||
+                        (isEditing && !canEditCurrentLand) ||
+                        (isEiaMode && !isAdmin)
+                      }
+                      title={isEditing && !canEditCurrentLand ? `แก้ไขได้เมื่อครบ 14 วัน (เหลือ ${editGate.daysLeft} วัน)` : ""}
+                    >
+                      {isEditing ? t("action.saveEdit") : t("action.saveNew")}
+                    </button>
+
+                    <button className="sale-btn" type="button" onClick={clearForm}>
+                      {t("action.clear")}
+                    </button>
+
+                    <button
+                      className="sale-btn danger"
+                      type="button"
+                      onClick={() => onDelete?.(landData?.id)}
+                      disabled={!landData?.id}
+                      title={t("action.delete")}
+                    >
+                      {t("action.delete")}
+                    </button>
                   </div>
-                  <div>
-                    <span className="muted">{t("summary.perSqw")}</span> 
-                    <b>{formatNumber(landData?.price) || "-"} {t("unit.baht")}</b>
-                  </div>
-                  <div>
-                    <span className="muted">{t("summary.total")}</span> <b>{formatNumber(landData?.totalPrice) || "-"} {t("unit.baht")}</b>
-                  </div>
-                </div>
 
-                <div className="actions">
-                  <button
-                    className="sale-btn primary"
-                    type="button"
-                    onClick={onSave}
-                    disabled={
-                      !drawingEnabled ||
-                      (isEditing && !canEditCurrentLand) 
-                    }
-                    title={isEditing && !canEditCurrentLand ? `แก้ไขได้เมื่อครบ 14 วัน (เหลือ ${editGate.daysLeft} วัน)` : ""}
-                  >
-                    {isEditing ? t("action.saveEdit") : t("action.saveNew")}
-                  </button>
+                  {!drawingEnabled && (
+                    <div className="hint">
+                      * {t("hint.notDrawable")}
+                    </div>
+                  )}
 
-                  <button className="sale-btn" type="button" onClick={clearForm}>
-                    {t("action.clear")}
-                  </button>
-
-                  <button
-                    className="sale-btn danger"
-                    type="button"
-                    onClick={() => onDelete?.(landData?.id)}
-                    disabled={!landData?.id}
-                    title={t("action.delete")}
-                  >
-                    {t("action.delete")}
-                  </button>
-                </div>
-
-                {!drawingEnabled && (
-                  <div className="hint">
-                    * {t("hint.notDrawable")}
-                  </div>
+                  {isEditing && !canEditCurrentLand && (
+                    <div className="hint">
+                      * {t("hint.editLocked", { days: editGate.daysLeft })}
+                    </div>
+                  )}
+                  </>
                 )}
-
-                {isEditing && !canEditCurrentLand && (
-                  <div className="hint">
-                    * {t("hint.editLocked", { days: editGate.daysLeft })}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
 
           <div className="divider" />
 
@@ -624,62 +835,83 @@
             {isListOpen && (
               <div className="list">
                 {Array.isArray(savedLands) && savedLands.length > 0 ? (
-                  savedLands.map((land) => {
+                  savedLands
+                    .filter(land => {
+                      if (role === "admin") return true
+                      return land.ownerId === user?.id
+                    })
+                    .map((land) => {
                     const gate = getEditGateInfo(land, 14);
-                    const canEditThisLand = gate.canEdit;
+                    const canEditThisLand =
+                      role === "admin"
+                        ? true
+                        : gate.canEdit && land.approved;
+
+                    const isEiaItem = !!land.projectName;
 
                     return (
                       <div key={land.id} className={`item ${String(landData?.id) === String(land.id) ? "active" : ""}`}>
+
+                        {/* title */}
                         <div
                           className="item-title"
                           onClick={() => (canEditThisLand ? onClickEdit(land) : onFocusLand?.(land))}
-                          role="button"
-                          tabIndex={0}
-                          title={!canEditThisLand ? t("list.editLocked", { days: gate.daysLeft }) : t("list.clickToEdit")}
                         >
                           <b>
-                            {land.owner ||
-                              (land.agent ? `${land.agent} (${t("list.agent")})` : "") ||
-                              t("list.unknown")}
+                            {isEiaItem
+                              ? land.projectName
+                              : land.owner ||
+                                (land.agent ? `${land.agent} (${t("list.agent")})` : "") ||
+                                t("list.unknown")}
                           </b>
-
-                          <span className="mini">
-                            {land.updatedAt ? t("list.updated", { date: land.updatedAt }) : ""}
-                            {!canEditThisLand ? ` • ${t("list.locked", { days: gate.daysLeft })}` : ""}
-                          </span>
 
                           <span className={`status-badge ${land.approved ? "ok":"pending"}`}>
                             {land.approved ? t("status.approved") : t("status.pending")}
-
                           </span>
                         </div>
 
-                        <div className="item-row">
-                          <span className="muted">{t("list.size")}</span>
-                          {formatDecimal(land.size, 0) || "-"} {t("list.unitSqw")}
-                        </div>
+                        {/* content */}
+                        {isEiaItem ? (
+                          <>
+                            <div className="item-row">
+                              <span className="muted">มูลค่า</span>
+                              <b>{formatNumber(land.projectValue) || "-"} บาท</b>
+                            </div>
 
-                        <div className="item-row">
-                          <span className="muted">{t("summary.total")}</span>
-                          <b>{formatNumber(land.totalPrice) || "-"} {t("unit.baht")}</b>
-                        </div>
+                            <div className="item-row">
+                              <span className="muted">สถานะ</span>
+                              <b>{land.projectStatus || "-"}</b>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="item-row">
+                              <span className="muted">{t("list.size")}</span>
+                              {formatDecimal(land.size, 0) || "-"} {t("list.unitSqw")}
+                            </div>
 
+                            <div className="item-row">
+                              <span className="muted">{t("summary.total")}</span>
+                              <b>{formatNumber(land.totalPrice) || "-"} {t("unit.baht")}</b>
+                            </div>
+                          </>
+                        )}
+
+                        {/* buttons */}
                         <div className="item-actions">
-                          <button className="sale-btn" type="button" onClick={() => onFocusLand?.(land)}>
+                          <button className="sale-btn" onClick={() => onFocusLand?.(land)}>
                             {t("list.focus")}
                           </button>
 
                           <button
                             className="sale-btn"
-                            type="button"
                             onClick={() => onClickEdit(land)}
                             disabled={!canEditThisLand}
-                            title={!canEditThisLand ? t("list.editLocked", { days: gate.daysLeft }) : t("list.clickToEdit")}
                           >
                             {t("list.edit")}
                           </button>
 
-                          <button className="sale-btn danger" type="button" onClick={() => onDelete?.(land.id)}>
+                          <button className="sale-btn danger" onClick={() => onDelete?.(land.id)}>
                             {t("list.delete")}
                           </button>
                         </div>
@@ -691,6 +923,7 @@
                 )}
               </div>
             )}
+
           </div>
         </div>
       </aside>

@@ -67,6 +67,18 @@ import EiaDetailPanel from "./eia/EiaDetailPanel";
 import { mockEias } from "./eia/mockEias";
 import EiaDashboardStats from "./eia/EiaDashboardStats";
 
+function safeNum(v){
+  if(v == null) return null
+  if(typeof v === "number") return v
+
+  const cleaned = String(v)
+    .replace(/[^\d.-]/g,"") // ลบ symbol
+    .replace(",",".")       // comma → dot
+
+  const n = Number(cleaned)
+  return Number.isFinite(n) ? n : null
+}
+
 export default function MapPage() {
   // =========================================================================
   // Router
@@ -211,7 +223,9 @@ export default function MapPage() {
       ? true
       : role === "seller" || role === "admin" || role === "landlord";
 
-  const drawingEnabled = canDraw && mode !== MAP_MODE.EIA;
+  const drawingEnabled =
+  (role === "admin") ||
+  (canDraw && mode !== MAP_MODE.EIA);
 
   const [currentMode, setCurrentMode] = useState("normal"); // normal | eia | draw
 
@@ -338,18 +352,43 @@ export default function MapPage() {
 
   // eia data (ใหม่)
   const eiaAsLandLike = useMemo(() => {
-    if (!isEia(mode)) return [];
 
-    return mockEias.map((eia) => ({
-      id: `eia-${eia.id}`,   // ❗ ต้องไม่ชน land
-      __type: "eia",         // ใช้แยก popup
-      location: eia.location,
-      geometry: eia.geometry,
-      raw: eia,              // ข้อมูลจริง
-    }));
-  }, [mode]);
+  const localEia = myLands.filter(l => l.__type === "eia");
+
+    const list = [
+      ...mockEias.map(eia => ({
+        id:`eia-${eia.id}`,
+        __type:"eia",
+          location:{
+            lat: safeNum(
+              eia.location?.lat ??
+              eia.location?.latitude ??
+              eia.lat ??
+              eia.y
+            ),
+            lon: safeNum(
+              eia.location?.lon ??
+              eia.location?.lng ??
+              eia.location?.longitude ??
+              eia.lon ??
+              eia.x
+            )
+          },
+        geometry:eia.geometry,
+        raw:eia
+      })),
+      ...localEia
+    ];
+
+    return list;
+
+  }, [myLands]);
 
 
+
+  console.log(
+ eiaAsLandLike.map(e => e.location)
+)
   // =========================================================================
   // Favorites
   // =========================================================================
@@ -363,6 +402,10 @@ export default function MapPage() {
     const unsub = subscribeFavoritesChanged(sync);
     return unsub;
   }, []);
+
+  useEffect(()=>{
+  console.log("EIA", eiaAsLandLike)
+  },[eiaAsLandLike])
 
   // =========================================================================
   // Access / Cart
@@ -394,9 +437,14 @@ export default function MapPage() {
     role === "seller" || role === "landlord" || role === "admin";
 
   // ✅ กัน SaleSidePanel ใน investor result
+  const isLandMode =
+    mode === "buy" ||
+    mode === "sell" ||
+    mode === "eia";
+
   const showSalePanel =
     canSeeSalePanel &&
-    (mode === "buy" || mode === "sell") &&
+    isLandMode &&
     !(mode === "sell" && intent === "investor");
 
   const {
@@ -409,7 +457,8 @@ export default function MapPage() {
   } = useSalePanel({
     getPoints,
     clearDrawing,
-    currentUserId: auth.me?.uid
+    currentUserId: auth.me?.uid,
+    mode,
   });
 
   // =========================================================================
@@ -582,12 +631,18 @@ export default function MapPage() {
   const landForBroadcast = createLand || selectedLand; // ✅ ใช้ snapshot ก่อน
 
   // ================= LAYER REGISTRY =================
-  const EIA_LAYERS = useMemo(() => ({
-    bkk: new longdo.Layer("EIA_BKK"),
-    metro: new longdo.Layer("EIA_METRO"),
-    phuket: new longdo.Layer("EIA_PHUKET"),
-    eec: new longdo.Layer("EIA_EEC"),
-  }), []);
+  const EIA_LAYERS = useMemo(() => {
+    if (!mapObj || !window.longdo) return null;
+
+    const L = window.longdo;
+
+    return {
+      bkk: new L.Layer("EIA_BKK"),
+      metro: new L.Layer("EIA_METRO"),
+      phuket: new L.Layer("EIA_PHUKET"),
+      eec: new L.Layer("EIA_EEC"),
+    };
+  }, [mapObj]);
 
   const EIA_VIEWPORT = {
     bkk: { lon: 100.5018, lat: 13.7563, zoom: 10 },
@@ -601,9 +656,7 @@ export default function MapPage() {
     if (!mapObj) return;
 
     // remove old
-    Object.values(EIA_LAYERS).forEach(layer => {
-      try { mapObj.Layers.remove(layer); } catch {}
-    });
+    if (!EIA_LAYERS) return;
 
     // add new
     const layer = EIA_LAYERS[cat];
@@ -670,13 +723,13 @@ export default function MapPage() {
         onClear={resetFilter}
       />
 
-      {!!mapObj && (
+      {mapObj && (
         <LandMarkers
-          key={(isEia(mode) ? eiaAsLandLike : landsForMap).length}
           map={mapObj}
           lands={isEia(mode) ? eiaAsLandLike : landsForMap}
           favoriteIds={isEia(mode) ? undefined : favoriteIds}
           onSelect={handleSelectOverlay}
+          mode={mode}
         />
       )}
 
@@ -734,7 +787,7 @@ export default function MapPage() {
         <MapPopup {...popupApi}>
           {isEia(mode) ? (
             <EiaDetailPanel
-              data={selectedEia}
+              data={selectedEia ?? landForm}
               onClose={() => {
                 setSelectedEia(null);
                 popupApi.closePopup();

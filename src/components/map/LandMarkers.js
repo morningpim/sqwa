@@ -114,7 +114,8 @@ function isFavId(favoriteIds, id) {
   return false;
 }
 
-export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) {
+
+export default function LandMarkers({ map, lands = [], favoriteIds, onSelect, mode }) {
   const markerMapRef = useRef(new Map()); // id -> marker overlay
   const polygonMapRef = useRef(new Map()); // id -> polygon overlay
 
@@ -234,7 +235,7 @@ export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) 
         markerMapRef.current.clear();
       }
     };
-  }, [map, lands, favoriteIds, onSelect]);
+  }, [map, lands, favoriteIds, onSelect, mode]);
 
   // -------------------------
   // Polygons (optional)
@@ -356,7 +357,7 @@ export default function LandMarkers({ map, lands = [], favoriteIds, onSelect }) 
         polygonMapRef.current.clear();
       }
     };
-  }, [map, lands, favoriteIds, onSelect]);
+  }, [map, lands, favoriteIds, onSelect, mode]);
 
   return null;
 }
