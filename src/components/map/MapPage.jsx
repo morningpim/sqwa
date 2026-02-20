@@ -90,6 +90,8 @@ export default function MapPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [createRole, setCreateRole] = useState("admin"); // admin|consignor
   const [createLand, setCreateLand] = useState(null);
+  const [plan, setPlan] = useState("bkk2556");
+  const [baseOpacity, setBaseOpacity] = useState(1);
 
   // =========================================================================
   // ✅ Mock Identity for Chat (มาก่อนทุกอย่างที่ใช้มัน)
@@ -564,7 +566,6 @@ export default function MapPage() {
     intent,
     profile,
   ]);
-
   // =========================================================================
   // Search
   // =========================================================================
@@ -579,6 +580,54 @@ export default function MapPage() {
     accessApi.access
   );
   const landForBroadcast = createLand || selectedLand; // ✅ ใช้ snapshot ก่อน
+
+  // ================= LAYER REGISTRY =================
+  const EIA_LAYERS = useMemo(() => ({
+    bkk: new longdo.Layer("EIA_BKK"),
+    metro: new longdo.Layer("EIA_METRO"),
+    phuket: new longdo.Layer("EIA_PHUKET"),
+    eec: new longdo.Layer("EIA_EEC"),
+  }), []);
+
+  const EIA_VIEWPORT = {
+    bkk: { lon: 100.5018, lat: 13.7563, zoom: 10 },
+    metro: { lon: 100.9018, lat: 13.7563, zoom: 9 },
+    phuket: { lon: 98.3381, lat: 7.8804, zoom: 11 },
+    eec: { lon: 101.4500, lat: 13.0000, zoom: 9 },
+  };
+
+  // ================= SWITCH LAYER =================
+  const showLayer = useCallback((cat) => {
+    if (!mapObj) return;
+
+    // remove old
+    Object.values(EIA_LAYERS).forEach(layer => {
+      try { mapObj.Layers.remove(layer); } catch {}
+    });
+
+    // add new
+    const layer = EIA_LAYERS[cat];
+    if (layer) mapObj.Layers.add(layer);
+
+    // ===== move map =====
+    const vp = EIA_VIEWPORT[cat];
+    if (vp) {
+      mapObj.location({ lon: vp.lon, lat: vp.lat });
+      mapObj.zoom(vp.zoom);
+    }
+
+  }, [mapObj, EIA_LAYERS]);
+
+  useEffect(() => {
+    if (!mapObj) return;
+
+    Object.values(EIA_LAYERS).forEach(layer => {
+      try {
+        layer.opacity(baseOpacity);
+      } catch {}
+    });
+
+  }, [baseOpacity, mapObj, EIA_LAYERS]);
 
   // =========================================================================
   // Render
@@ -612,6 +661,7 @@ export default function MapPage() {
       />
 
       <FilterPanel
+        mode={mode}
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
         value={filterValue}
@@ -622,7 +672,7 @@ export default function MapPage() {
 
       {!!mapObj && (
         <LandMarkers
-          key={landsForMap.length}
+          key={(isEia(mode) ? eiaAsLandLike : landsForMap).length}
           map={mapObj}
           lands={isEia(mode) ? eiaAsLandLike : landsForMap}
           favoriteIds={isEia(mode) ? undefined : favoriteIds}
@@ -665,6 +715,11 @@ export default function MapPage() {
         onOpenFilter={() => setFilterOpen(true)}
         onOpenChat={openChat} // ✅ เปิด Mock Chat
         onOpenTools={() => alert(t("common.comingSoon"))}
+        plan={plan}
+        setPlan={setPlan}
+        baseOpacity={baseOpacity}
+        setBaseOpacity={setBaseOpacity}
+        onEiaCategoryChange={showLayer}
       />
 
       {/* ✅ stats ด้านล่าง: ถ้า investor result ให้คิดจากรายการแนะนำ */}

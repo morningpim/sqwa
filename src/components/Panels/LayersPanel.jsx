@@ -4,15 +4,18 @@ import "../../css/LayersPanel.css";
 
 export default function LayersPanel({
   open,
-  onClose,
+  onClose = () => {},
   plan,
-  setPlan,
+  setPlan = () => {},
+  category,
+  setCategory = () => {},
   baseOpacity,
-  setBaseOpacity,
+  setBaseOpacity = () => {},
+  pageMode,
   dolEnabled,
-  setDolEnabled,
+  setDolEnabled = () => {},
   dolOpacity,
-  setDolOpacity,
+  setDolOpacity = () => {},
 }) {
   const { t } = useTranslation("common");
 
@@ -24,11 +27,19 @@ export default function LayersPanel({
     { key: "sub", label: t("layers.plans.sub") },
   ];
 
+  const eiaCategories = [
+    { key: "bkk", label: "กทม" },
+    { key: "metro", label: "ปริมณฑล" },
+    { key: "phuket", label: "ภูเก็ต" },
+    { key: "eec", label: "EEC" },
+  ];
+
   return (
     <div
       className="layers-panel"
       role="dialog"
       aria-label={t("layers.title")}
+      onClick={(e) => e.stopPropagation()}
     >
       {/* ===== Base / Plan ===== */}
       <div className="layers-card">
@@ -45,6 +56,25 @@ export default function LayersPanel({
           </button>
         </div>
 
+        {/* Category Tabs */}
+        {pageMode === "eia" && (
+          <div className="layers-tabs">
+            {eiaCategories.map((c) => (
+              <button
+                key={c.key}
+                type="button"
+                className={`layers-tab ${
+                  category === c.key ? "active" : ""
+                }`}
+                onClick={() => setCategory(c.key)}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Plan Tabs */}
         <div className="layers-tabs">
           {plans.map((p) => (
             <button
@@ -58,6 +88,7 @@ export default function LayersPanel({
           ))}
         </div>
 
+        {/* Base Opacity */}
         <div className="layers-row">
           <div className="layers-label">{t("layers.opacity")}</div>
 
@@ -68,7 +99,9 @@ export default function LayersPanel({
             max="1"
             step="0.01"
             value={baseOpacity}
-            onChange={(e) => setBaseOpacity(parseFloat(e.target.value))}
+            onChange={(e) =>
+              setBaseOpacity(parseFloat(e.target.value))
+            }
           />
 
           <div className="layers-value">
@@ -104,7 +137,9 @@ export default function LayersPanel({
             step="0.01"
             value={dolOpacity}
             disabled={!dolEnabled}
-            onChange={(e) => setDolOpacity(parseFloat(e.target.value))}
+            onChange={(e) =>
+              setDolOpacity(parseFloat(e.target.value))
+            }
           />
 
           <div className="layers-value">

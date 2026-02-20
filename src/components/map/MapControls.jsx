@@ -37,6 +37,11 @@ export default function MapControls({
   onStartDrawing,
   onFinishDrawing,
   onClearDrawing,
+  plan,
+  setPlan,
+  baseOpacity,
+  setBaseOpacity,
+  onEiaCategoryChange,
 }) {
   const rootRef = useRef(null);
 
@@ -48,7 +53,7 @@ export default function MapControls({
   const toolsOpen = activePanel === "tools";
   const layersOpen = activePanel === "layers";
   const layerMenuOpen = activePanel === "layer";
-
+  const [category, setCategory] = useState("bkk");
   /* ================= HELPERS ================= */
   const openPanel = useCallback((name) => {
     setActivePanel((prev) => (prev === name ? null : name));
@@ -68,11 +73,22 @@ export default function MapControls({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [closeAll]);
 
-  /* ================= LABEL ================= */
-  const layerLabel = useMemo(
-    () => (isSatellite ? t("layer.satellite") : t("layer.map")),
-    [isSatellite, t]
-  );
+  useEffect(() => {
+    if (pageMode !== "eia") setCategory(null);
+  }, [pageMode]);
+
+  useEffect(() => {
+    if (pageMode !== "eia") return;
+    if (!category) return;
+
+    onEiaCategoryChange?.(category);
+  }, [category, pageMode, onEiaCategoryChange]);
+
+    /* ================= LABEL ================= */
+    const layerLabel = useMemo(
+      () => (isSatellite ? t("layer.satellite") : t("layer.map")),
+      [isSatellite, t]
+    );
 
   /* ================= DRAWING ================= */
   const showDrawing = useMemo(() => {
@@ -156,6 +172,16 @@ export default function MapControls({
       <LayersPanel
         open={layersOpen}
         onClose={closeAll}
+        pageMode={pageMode}
+
+        plan={plan}
+        setPlan={setPlan}
+
+        category={category}
+        setCategory={setCategory}
+
+        baseOpacity={baseOpacity}
+        setBaseOpacity={setBaseOpacity}
         dolEnabled={dolEnabled}
         setDolEnabled={setDolEnabled}
         dolOpacity={dolOpacity}
